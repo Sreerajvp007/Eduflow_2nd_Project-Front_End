@@ -8,6 +8,9 @@ import { adminRefresh } from "./features/admin/adminAuthSlice";
 import { tutorRefresh } from "./features/tutor/auth/tutorAuthSlice";
 import { parentRefresh } from "./features/parent/auth/parentAuthSlice";
 
+
+
+
 function App() {
   const dispatch = useDispatch();
 
@@ -37,9 +40,11 @@ function App() {
   }
 
   return (
+    
     <BrowserRouter>
       <AppRoutes />
     </BrowserRouter>
+   
   );
 }
 
