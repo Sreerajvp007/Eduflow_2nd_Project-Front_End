@@ -15,9 +15,9 @@ const emptyQualification = {
 
 const QualificationsStep = () => {
   const dispatch = useDispatch();
-  const { loading, tutor } = useSelector(
-    (state) => state.tutorOnboarding
-  );
+  const { loading, tutor, error } = useSelector(
+  (state) => state.tutorOnboarding
+);
 
   const [qualifications, setQualifications] = useState(
     tutor?.qualifications?.length
@@ -44,16 +44,39 @@ const QualificationsStep = () => {
     );
   };
 
-  const handleFileUpload = (index, file) => {
-    if (!file) return;
+const handleFileUpload = (index, file) => {
+  if (!file) return;
 
-    
-    updateQualification(index, "certificateUrl", file.name);
+  const updated = [...qualifications];
+
+  updated[index] = {
+    ...updated[index],
+    certificateFile: file,
+    certificateUrl: file.name,
   };
 
-  const handleSave = async () => {
-    await dispatch(saveQualifications({ qualifications }));
-  };
+  setQualifications(updated);
+}; // ✅ CLOSE IT HERE
+
+
+const handleSave = async () => {
+  const formData = new FormData();
+
+  qualifications.forEach((qual, index) => {
+    formData.append(`qualifications[${index}][title]`, qual.title);
+    formData.append(`qualifications[${index}][institute]`, qual.institute);
+    formData.append(`qualifications[${index}][year]`, qual.year);
+
+    if (qual.certificateFile) {
+      formData.append(
+        `qualifications[${index}][certificate]`,
+        qual.certificateFile
+      );
+    }
+  });
+
+  await dispatch(saveQualifications(formData));
+};
 
   return (
     <div className="max-w-xl mx-auto py-8">
@@ -177,7 +200,11 @@ const QualificationsStep = () => {
         >
           + Add Qualification
         </button>
-
+{error && (
+  <p className="text-red-500 text-sm mb-4">
+    {error}
+  </p>
+)}
         {/* CTA */}
         <div className="pt-4 border-t border-gray-200 flex justify-end">
           <MuiButton

@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../utils/axiosInstance";
 
-
 export const adminLogin = createAsyncThunk(
   "admin/login",
   async (data, thunkAPI) => {
@@ -9,13 +8,16 @@ export const adminLogin = createAsyncThunk(
       const res = await axiosInstance.post("/auth/admin/login", data);
       return res.data;
     } catch (err) {
-      return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Login failed"
-      );
-    }
-  }
-);
+      const backendError = err.response?.data;
 
+      if (backendError?.errors?.length > 0) {
+        return thunkAPI.rejectWithValue(backendError.errors[0].message);
+      }
+
+      return thunkAPI.rejectWithValue(backendError?.message || "Login failed");
+    }
+  },
+);
 
 export const adminRefresh = createAsyncThunk(
   "admin/refresh",
@@ -26,7 +28,7 @@ export const adminRefresh = createAsyncThunk(
     } catch {
       return thunkAPI.rejectWithValue("Session expired");
     }
-  }
+  },
 );
 
 const adminSlice = createSlice({
@@ -40,12 +42,13 @@ const adminSlice = createSlice({
   reducers: {
     adminLogout: (state) => {
       state.accessToken = null;
+      state.authInitialized = true;
       localStorage.removeItem("role");
     },
   },
   extraReducers: (builder) => {
     builder
-     
+
       .addCase(adminLogin.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -62,9 +65,8 @@ const adminSlice = createSlice({
         state.authInitialized = true;
       })
 
-    
       .addCase(adminRefresh.fulfilled, (state, action) => {
-        state.accessToken = action.payload.accessToken;
+        state.accessToken = action.payload.result.accessToken;
         state.authInitialized = true;
       })
       .addCase(adminRefresh.rejected, (state) => {

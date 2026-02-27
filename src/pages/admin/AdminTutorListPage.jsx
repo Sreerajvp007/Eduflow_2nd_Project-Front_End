@@ -1,214 +1,4 @@
-// import {
-//   Avatar,
-//   Badge,
-//   Button,
-//   Card,
-//   Group,
-//   Select,
-//   Stack,
-//   Table,
-//   Text,
-//   TextInput,
-// } from "@mantine/core";
-// import { useEffect, useState } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import {
-//   fetchTutors,
-//   updateTutorStatus,
-// } from "../../features/admin/adminTutorSlice";
-// import { useNavigate } from "react-router-dom";
 
-// export default function AdminTutorListPage() {
-//   const dispatch = useDispatch();
-//   const navigate = useNavigate();
-//   const { list, loading } = useSelector((s) => s.adminTutors);
-
-//   const [filters, setFilters] = useState({
-//     search: "",
-//     status: "",
-//   });
-
-//   useEffect(() => {
-//     dispatch(fetchTutors(filters));
-//   }, [filters, dispatch]);
-
-//   return (
-//     <Stack gap="lg">
-//       {/* ================= HEADER ================= */}
-//       <Group justify="space-between">
-//         <Text fw={700} size="xl">
-//           Tutor Management
-//         </Text>
-
-//         {/* <Button>Add Tutor</Button> */}
-//       </Group>
-
-//       {/* ================= CONTENT CARD ================= */}
-//       <Card radius="lg" p="lg" shadow="sm">
-//         {/* ================= FILTERS ================= */}
-//         <Group justify="space-between" mb="md">
-//           <Group>
-//             <TextInput
-//               w={260}
-//               placeholder="Search by name or subject"
-//               value={filters.search}
-//               onChange={(e) =>
-//                 setFilters((prev) => ({
-//                   ...prev,
-//                   search: e.target.value,
-//                 }))
-//               }
-//             />
-
-//             <Select
-//               w={180}
-//               placeholder="All Statuses"
-//               value={filters.status || "all"}
-//               data={[
-//                 { value: "all", label: "All Statuses" },
-//                 { value: "active", label: "Active" },
-//                 { value: "suspended", label: "Suspended" },
-//                 { value: "blocked", label: "Blocked" },
-//               ]}
-//               onChange={(value) =>
-//                 setFilters((prev) => ({
-//                   ...prev,
-//                   status: value === "all" ? "" : value,
-//                 }))
-//               }
-//             />
-//           </Group>
-//         </Group>
-
-//         {/* ================= TABLE ================= */}
-//         <Table
-//           striped
-//           highlightOnHover
-//           verticalSpacing="md"
-//           horizontalSpacing="md"
-//           mt="sm"
-//         >
-//           <Table.Thead>
-//             <Table.Tr>
-//               <Table.Th w={260}>Tutor</Table.Th>
-//               <Table.Th w={320}>Subjects</Table.Th>
-//               <Table.Th w={140} ta="center">
-//                 Status
-//               </Table.Th>
-//               <Table.Th w={220} ta="right">
-//                 Actions
-//               </Table.Th>
-//             </Table.Tr>
-//           </Table.Thead>
-
-//           <Table.Tbody>
-//             {!loading && list.length === 0 && (
-//               <Table.Tr>
-//                 <Table.Td colSpan={4}>
-//                   <Text c="dimmed" ta="center" py="lg">
-//                     No tutors found
-//                   </Text>
-//                 </Table.Td>
-//               </Table.Tr>
-//             )}
-
-//             {list.map((tutor) => (
-//               <Table.Tr key={tutor._id}>
-//                 {/* ===== Tutor ===== */}
-//                 <Table.Td>
-//                   <Group gap="sm" wrap="nowrap">
-//                     <Avatar
-//                       size={40}
-//                       radius="xl"
-//                       src={tutor.profileImage}
-//                     >
-//                       {tutor.fullName?.charAt(0)}
-//                     </Avatar>
-
-//                     <Text fw={600} size="sm" lineClamp={1}>
-//                       {tutor.fullName}
-//                     </Text>
-//                   </Group>
-//                 </Table.Td>
-
-//                 {/* ===== Subjects ===== */}
-//                 <Table.Td>
-//                   <Group gap={6} wrap="wrap">
-//                     {tutor.subjects?.slice(0, 3).map((subject) => (
-//                       <Badge
-//                         key={subject}
-//                         size="sm"
-//                         radius="sm"
-//                         variant="light"
-//                         color="blue"
-//                       >
-//                         {subject}
-//                       </Badge>
-//                     ))}
-//                   </Group>
-//                 </Table.Td>
-
-//                 {/* ===== Status ===== */}
-//                 <Table.Td ta="center">
-//                   <Badge
-//                     size="sm"
-//                     radius="sm"
-//                     color={
-//                       tutor.status === "active"
-//                         ? "green"
-//                         : tutor.status === "suspended"
-//                         ? "orange"
-//                         : "red"
-//                     }
-//                   >
-//                     {tutor.status.toUpperCase()}
-//                   </Badge>
-//                 </Table.Td>
-
-//                 {/* ===== Actions ===== */}
-//                 <Table.Td ta="right">
-//                   <Group gap="xs" justify="flex-end" wrap="nowrap">
-//                     <Button
-//                       size="xs"
-//                       variant="subtle"
-//                       onClick={() =>
-//                         navigate(`/admin/tutors/${tutor._id}`)
-//                       }
-//                     >
-//                       View
-//                     </Button>
-
-//                     <Button
-//                       size="xs"
-//                       color={
-//                         tutor.status === "active" ? "red" : "green"
-//                       }
-//                       onClick={() =>
-//                         dispatch(
-//                           updateTutorStatus({
-//                             id: tutor._id,
-//                             status:
-//                               tutor.status === "active"
-//                                 ? "suspended"
-//                                 : "active",
-//                           })
-//                         )
-//                       }
-//                     >
-//                       {tutor.status === "active"
-//                         ? "Suspend"
-//                         : "Activate"}
-//                     </Button>
-//                   </Group>
-//                 </Table.Td>
-//               </Table.Tr>
-//             ))}
-//           </Table.Tbody>
-//         </Table>
-//       </Card>
-//     </Stack>
-//   );
-// }
 import {
   Avatar,
   Badge,
@@ -270,7 +60,7 @@ export default function AdminTutorListPage() {
           data={[
             { value: "all", label: "All Statuses" },
             { value: "active", label: "Active" },
-            { value: "suspended", label: "Suspended" },
+            { value: "pending", label: "Pending" },   // ✅ ADDED
             { value: "blocked", label: "Blocked" },
           ]}
           onChange={(value) =>
@@ -339,8 +129,8 @@ export default function AdminTutorListPage() {
                     color={
                       tutor.status === "active"
                         ? "green"
-                        : tutor.status === "suspended"
-                        ? "orange"
+                        : tutor.status === "pending"
+                        ? "yellow"
                         : "red"
                     }
                   >
@@ -394,12 +184,12 @@ export default function AdminTutorListPage() {
                     color={
                       tutor.status === "active"
                         ? "green"
-                        : tutor.status === "suspended"
-                        ? "orange"
+                        : tutor.status === "pending"
+                        ? "yellow"
                         : "red"
                     }
                   >
-                    {tutor.status}
+                    {tutor.status.toUpperCase()}
                   </Badge>
 
                   <Button

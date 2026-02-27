@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../../utils/axiosInstance";
 
-
 export const sendParentSignupOtp = createAsyncThunk(
   "parent/sendSignupOtp",
   async (data, thunkAPI) => {
@@ -10,12 +9,11 @@ export const sendParentSignupOtp = createAsyncThunk(
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to send OTP"
+        err.response?.data?.message || "Failed to send OTP",
       );
     }
-  }
+  },
 );
-
 
 export const verifyParentSignupOtp = createAsyncThunk(
   "parent/verifySignupOtp",
@@ -25,12 +23,11 @@ export const verifyParentSignupOtp = createAsyncThunk(
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "OTP verification failed"
+        err.response?.data?.message || "OTP verification failed",
       );
     }
-  }
+  },
 );
-
 
 export const sendParentLoginOtp = createAsyncThunk(
   "parent/sendLoginOtp",
@@ -40,27 +37,28 @@ export const sendParentLoginOtp = createAsyncThunk(
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to send OTP"
+        err.response?.data?.message || "Failed to send OTP",
       );
     }
-  }
+  },
 );
-
 
 export const verifyParentLoginOtp = createAsyncThunk(
   "parent/verifyLoginOtp",
   async (data, thunkAPI) => {
     try {
-      const res = await axiosInstance.post("/auth/parent/login/verify-otp", data);
+      const res = await axiosInstance.post(
+        "/auth/parent/login/verify-otp",
+        data,
+      );
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "OTP verification failed"
+        err.response?.data?.message || "OTP verification failed",
       );
     }
-  }
+  },
 );
-
 
 export const parentRefresh = createAsyncThunk(
   "parent/refresh",
@@ -71,7 +69,18 @@ export const parentRefresh = createAsyncThunk(
     } catch {
       return thunkAPI.rejectWithValue("Session expired");
     }
-  }
+  },
+);
+export const parentLogoutThunk = createAsyncThunk(
+  "parent/logout",
+  async (_, thunkAPI) => {
+    try {
+      await axiosInstance.post("/auth/parent/logout");
+      return true;
+    } catch (err) {
+      return thunkAPI.rejectWithValue("Logout failed");
+    }
+  },
 );
 
 const parentAuthSlice = createSlice({
@@ -87,11 +96,12 @@ const parentAuthSlice = createSlice({
       state.accessToken = null;
       state.authInitialized = true;
       localStorage.removeItem("role");
+      localStorage.removeItem("activeStudentId");
     },
   },
   extraReducers: (builder) => {
     builder
-     
+
       .addCase(sendParentSignupOtp.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -104,14 +114,13 @@ const parentAuthSlice = createSlice({
         state.error = action.payload;
       })
 
-     
       .addCase(verifyParentSignupOtp.pending, (state) => {
         state.loading = true;
       })
       .addCase(verifyParentSignupOtp.fulfilled, (state, action) => {
         state.loading = false;
         state.accessToken = action.payload.result.accessToken;
-        state.authInitialized = true; 
+        state.authInitialized = true;
         localStorage.setItem("role", "parent");
       })
       .addCase(verifyParentSignupOtp.rejected, (state, action) => {
@@ -120,7 +129,6 @@ const parentAuthSlice = createSlice({
         state.authInitialized = true;
       })
 
-   
       .addCase(sendParentLoginOtp.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -133,16 +141,20 @@ const parentAuthSlice = createSlice({
         state.error = action.payload;
       })
 
-   
       .addCase(verifyParentLoginOtp.fulfilled, (state, action) => {
         state.accessToken = action.payload.result.accessToken;
         state.authInitialized = true;
         localStorage.setItem("role", "parent");
       })
+      .addCase(parentLogoutThunk.fulfilled, (state) => {
+        state.accessToken = null;
+        state.authInitialized = true;
+        localStorage.removeItem("role");
+        localStorage.removeItem("activeStudentId");
+      })
 
-   
       .addCase(parentRefresh.fulfilled, (state, action) => {
-        state.accessToken = action.payload.accessToken;
+        state.accessToken = action.payload.result.accessToken;
         state.authInitialized = true;
       })
       .addCase(parentRefresh.rejected, (state) => {

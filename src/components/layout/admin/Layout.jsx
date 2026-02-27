@@ -33,7 +33,6 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { adminLogout } from "../../../features/admin/adminAuthSlice";
 
-/* ================= NAV CONFIG ================= */
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
   { label: "Tutor Management", icon: GraduationCap, path: "/admin/tutors" },
@@ -45,7 +44,6 @@ const navItems = [
   { label: "Platform Settings", icon: Settings, path: "/admin/settings" },
 ];
 
-/* ================= SIDEBAR CONTENT ================= */
 const SidebarContent = ({
   collapsed,
   onNavigate,
@@ -68,7 +66,6 @@ const SidebarContent = ({
         flexDirection: "column",
       }}
     >
-      {/* ===== SIDEBAR HEADER ===== */}
       <Group justify="space-between" px="md" py="sm">
         {!collapsed && (
           <Text size="xs" fw={700} c="dimmed">
@@ -77,24 +74,18 @@ const SidebarContent = ({
         )}
 
         <Group gap={4}>
-          {/* Collapse toggle (DESKTOP ONLY) */}
           {showCollapseToggle && (
-            <ActionIcon
-              size="sm"
-              variant="subtle"
-              onClick={onToggleCollapse}
-            >
-              {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            <ActionIcon size="sm" variant="subtle" onClick={onToggleCollapse}>
+              {collapsed ? (
+                <ChevronRight size={16} />
+              ) : (
+                <ChevronLeft size={16} />
+              )}
             </ActionIcon>
           )}
 
-          {/* Close button (MOBILE + TABLET) */}
           {showClose && (
-            <ActionIcon
-              size="sm"
-              variant="subtle"
-              onClick={onClose}
-            >
+            <ActionIcon size="sm" variant="subtle" onClick={onClose}>
               <X size={16} />
             </ActionIcon>
           )}
@@ -103,10 +94,8 @@ const SidebarContent = ({
 
       <Divider />
 
-      {/* ===== MENU ===== */}
       <ScrollArea flex={1} px={collapsed ? 0 : "xs"} py="sm">
         {navItems.map((item) => {
-          // const active = location.pathname === item.path;
           const active = location.pathname.startsWith(item.path);
 
           const Icon = item.icon;
@@ -147,7 +136,6 @@ const SidebarContent = ({
   );
 };
 
-/* ================= MAIN LAYOUT ================= */
 const AdminLayout = () => {
   const dispatch = useDispatch();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -157,7 +145,6 @@ const AdminLayout = () => {
 
   return (
     <>
-      {/* ===== MOBILE + TABLET DRAWER ===== */}
       <Drawer
         opened={drawerOpened}
         onClose={drawer.close}
@@ -177,16 +164,11 @@ const AdminLayout = () => {
       <AppShell
         padding="lg"
         header={{ height: 64 }}
-        navbar={
-          isDesktop
-            ? { width: collapsed ? 88 : 280 }
-            : undefined
-        }
+        navbar={isDesktop ? { width: collapsed ? 88 : 280 } : undefined}
         styles={{
           main: { backgroundColor: "#f8fafc" },
         }}
       >
-        {/* ===== HEADER ===== */}
         <AppShell.Header>
           <Group h="100%" px="lg" justify="space-between">
             <Group>
@@ -196,7 +178,7 @@ const AdminLayout = () => {
                 hiddenFrom="lg"
               />
               <Text fw={700} size="lg">
-                TutorAdmin
+                Eduflow
               </Text>
             </Group>
 
@@ -216,7 +198,6 @@ const AdminLayout = () => {
           </Group>
         </AppShell.Header>
 
-        {/* ===== DESKTOP SIDEBAR ===== */}
         {isDesktop && (
           <AppShell.Navbar p="md">
             <SidebarContent
@@ -227,7 +208,6 @@ const AdminLayout = () => {
           </AppShell.Navbar>
         )}
 
-        {/* ===== MAIN CONTENT ===== */}
         <AppShell.Main>
           <Box
             bg="white"

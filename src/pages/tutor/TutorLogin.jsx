@@ -35,15 +35,34 @@ const { tutor, loading, error } = useSelector(
     dispatch(tutorLogin(formData));
   };
 
+  // useEffect(() => {
+  //   if (tutor) {
+  //     if (tutor.onboardingStatus !== "completed") {
+  //       navigate("/tutor/onboarding");
+  //     } else {
+  //       navigate("/tutor/dashboard");
+  //     }
+  //   }
+  // }, [tutor, navigate]);
   useEffect(() => {
-    if (tutor) {
-      if (tutor.onboardingStatus !== "completed") {
-        navigate("/tutor/onboarding");
-      } else {
-        navigate("/tutor/dashboard");
-      }
-    }
-  }, [tutor, navigate]);
+  if (!tutor) return;
+
+  // If admin approved
+  if (tutor.status === "active") {
+    navigate("/tutor/dashboard");
+    return;
+  }
+
+  // If onboarding submitted but not approved yet
+  if (tutor.onboardingStatus === "submitted") {
+    navigate("/tutor/onboarding-completed");
+    return;
+  }
+
+  // Otherwise go to onboarding form
+  navigate("/tutor/onboarding");
+
+}, [tutor, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">

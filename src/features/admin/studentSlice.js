@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/axiosInstance";
 
-/* ================= THUNKS ================= */
+
 
 export const fetchStudents = createAsyncThunk(
   "adminStudents/fetch",
@@ -18,8 +18,18 @@ export const fetchStudentDetails = createAsyncThunk(
     return data.result;
   }
 );
+export const updateStudentStatus = createAsyncThunk(
+  "adminStudents/updateStatus",
+  async ({ id, status }) => {
+    const res = await api.put(
+      `/admin/students/${id}/status`,
+      { status }
+    );
+    return res.data.result;
+  }
+);
 
-/* ================= SLICE ================= */
+
 
 const studentSlice = createSlice({
   name: "adminStudents",
@@ -42,7 +52,10 @@ const studentSlice = createSlice({
       })
       .addCase(fetchStudentDetails.fulfilled, (state, action) => {
         state.details = action.payload;
-      });
+      })
+      .addCase(updateStudentStatus.fulfilled, (state, action) => {
+  state.details = action.payload;
+});
   },
 });
 

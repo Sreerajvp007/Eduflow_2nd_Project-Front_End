@@ -1,3 +1,4 @@
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
@@ -15,14 +16,12 @@ const ParentChildDetails = () => {
 
   const { loading } = useSelector((state) => state.parentAuth);
 
-
-
   const { fullName, email, mobile, otp } = state;
 
   const [child, setChild] = useState({
     name: "",
     grade: "",
-    medium: "English",
+    board: "STATE", // ✅ default board
   });
 
   const handleSubmit = async () => {
@@ -54,54 +53,59 @@ const ParentChildDetails = () => {
 
         {/* TITLE */}
         <h2 className="text-2xl font-semibold text-center mb-1">
-          Child Details<span className="text-2xl">👶</span>
+          Child Details 👶
         </h2>
         <p className="text-sm text-center opacity-90 mb-8">
           You can skip this step and add later
         </p>
 
         {/* FORM */}
-       {/* FORM */}
-<div className="mt-6">
-  <div className="mb-6">
-    <MuiInput
-      label="Child's Name"
-      value={child.name}
-      onChange={(e) =>
-        setChild({ ...child, name: e.target.value })
-      }
-      sx={glassInputSx}
-    />
-  </div>
+        <div className="mt-6">
 
-  <div className="mb-6">
-    <MuiInput
-      label="Class / Grade"
-      value={child.grade}
-      onChange={(e) =>
-        setChild({ ...child, grade: e.target.value })
-      }
-      sx={glassInputSx}
-    />
-  </div>
+          {/* Name */}
+          <div className="mb-6">
+            <MuiInput
+              label="Child's Name"
+              value={child.name}
+              onChange={(e) =>
+                setChild({ ...child, name: e.target.value })
+              }
+              sx={glassInputSx}
+            />
+          </div>
 
-  {/* MEDIUM */}
-  <div className="mt-4">
-    <p className="text-sm mb-3 opacity-90">Medium</p>
+          {/* Grade */}
+          <div className="mb-6">
+            <MuiInput
+              label="Class / Grade"
+              value={child.grade}
+              onChange={(e) =>
+                setChild({ ...child, grade: e.target.value })
+              }
+              sx={glassInputSx}
+            />
+          </div>
 
-    <MuiRadioGroup
-      value={child.medium}
-      onChange={(val) =>
-        setChild({ ...child, medium: val })
-      }
-      options={[
-        { label: "English", value: "English" },
-        { label: "Malayalam", value: "Malayalam" },
-      ]}
-    />
-  </div>
-</div>
+          {/* BOARD (REPLACED MEDIUM) */}
+          <div className="mt-4">
+            <p className="text-sm mb-3 opacity-90">
+              Board
+            </p>
 
+            <MuiRadioGroup
+              value={child.board}
+              onChange={(val) =>
+                setChild({ ...child, board: val })
+              }
+              options={[
+                { label: "STATE", value: "STATE" },
+                { label: "CBSE", value: "CBSE" },
+                { label: "ICSE", value: "ICSE" },
+              ]}
+            />
+          </div>
+
+        </div>
 
         {/* BUTTONS */}
         <div className="mt-10 space-y-4">
@@ -129,6 +133,7 @@ const ParentChildDetails = () => {
             Skip for now
           </button>
         </div>
+
       </div>
     </div>
   );

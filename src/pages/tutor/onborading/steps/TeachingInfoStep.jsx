@@ -1,41 +1,74 @@
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { saveTeachingInfo } from "../../../../features/tutor/onboarding/tutorOnboardingSlice";
+import {
+  saveTeachingInfo,
+  fetchTeachingMeta,
+} from "../../../../features/tutor/onboarding/tutorOnboardingSlice";
 
 import MuiInput from "../../../../components/common/input";
 import MuiButton from "../../../../components/common/button";
 import MuiRadioGroup from "../../../../components/common/Radio";
 import MuiCheckboxGroup from "../../../../components/common/checkboxGroup";
 
-const CLASS_OPTIONS = [
-  { label: "Grade 1-4", value: "Grade 1-4" },
-  { label: "Grade 5-7", value: "Grade 5-7" },
-  { label: "Grade 8-10", value: "Grade 8-10" },
-  { label: "Grade 11-12", value: "Grade 11-12" },
-];
-
-const SUBJECT_OPTIONS = [
-  { label: "English", value: "English" },
-  { label: "Maths", value: "Maths" },
-  { label: "Hindi", value: "Hindi" },
-  { label: "Social", value: "Social" },
-  { label: "Chemistry", value: "Chemistry" },
-];
-
 const TeachingInfoStep = () => {
   const dispatch = useDispatch();
-  const { loading, tutor } = useSelector(
-    (state) => state.tutorOnboarding
-  );
 
+  const { loading, tutor, teachingMeta, error } = useSelector(
+  (state) => state.tutorOnboarding
+);
   const [form, setForm] = useState({
     syllabus: tutor?.syllabus || "STATE",
     classes: tutor?.classes || [],
-    subjects: tutor?.subjects?.map((s) => s.subjectId) || [],
+    subjects: tutor?.subjects || [],
     teachingExperience: tutor?.teachingExperience || "",
     hourlyRate: tutor?.hourlyRate || "",
   });
+
+  /* 🔥 Fetch classes + subjects from DB */
+  useEffect(() => {
+    dispatch(fetchTeachingMeta());
+  }, [dispatch]);
+
+  /* 🔥 Dynamic Class Options */
+const classOptions = useMemo(() => {
+  return teachingMeta.map((c) => ({
+    label: `Grade ${c.classGrade}`,   // 👈 show Grade 5
+    value: c.classGrade,              // 👈 keep Number (5)
+  }));
+}, [teachingMeta]);
+
+  /* 🔥 Dynamic Subject Options based on selected classes + syllabus */
+  const subjectOptions = useMemo(() => {
+    const subjects = teachingMeta
+      .filter((c) => form.classes.includes(c.classGrade))
+      .flatMap(
+        (c) =>
+          c.subjectsByBoard?.[form.syllabus]?.map((s) => ({
+            label: s.name,
+            value: s.name,
+          })) || []
+      );
+
+    // remove duplicates
+    const unique = Array.from(
+      new Map(subjects.map((s) => [s.value, s])).values()
+    );
+
+    return unique;
+  }, [teachingMeta, form.classes, form.syllabus]);
+
+  /* 🔥 Remove subject if class unselected */
+  useEffect(() => {
+    const validSubjects = subjectOptions.map((s) => s.value);
+
+    setForm((prev) => ({
+      ...prev,
+      subjects: prev.subjects.filter((s) =>
+        validSubjects.includes(s)
+      ),
+    }));
+  }, [subjectOptions]);
 
   const handleSave = async () => {
     await dispatch(saveTeachingInfo(form));
@@ -62,19 +95,18 @@ const TeachingInfoStep = () => {
           </p>
 
           <MuiRadioGroup
-  value={form.syllabus}
-  onChange={(val) =>
-    setForm({ ...form, syllabus: val })
-  }
-  options={[
-    { label: "STATE", value: "STATE" },
-    { label: "CBSE", value: "CBSE" },
-    { label: "ICSE", value: "ICSE" },
-  ]}
-  theme="light"
-/>
+            value={form.syllabus}
+            onChange={(val) =>
+              setForm({ ...form, syllabus: val })
+            }
+            options={[
+              { label: "STATE", value: "STATE" },
+              { label: "CBSE", value: "CBSE" },
+              { label: "ICSE", value: "ICSE" },
+            ]}
+            theme="light"
+          />
         </div>
-        
 
         {/* Classes */}
         <div className="mb-6">
@@ -87,7 +119,7 @@ const TeachingInfoStep = () => {
             onChange={(vals) =>
               setForm({ ...form, classes: vals })
             }
-            options={CLASS_OPTIONS}
+            options={classOptions}
           />
         </div>
 
@@ -102,37 +134,46 @@ const TeachingInfoStep = () => {
             onChange={(vals) =>
               setForm({ ...form, subjects: vals })
             }
-            options={SUBJECT_OPTIONS}
+            options={subjectOptions}
           />
         </div>
 
         {/* Experience */}
         <div className="mb-6">
           <MuiInput
-  label="Years of Experience"
-  type="number"
-  value={form.teachingExperience}
-  onChange={(e) =>
-    setForm({ ...form, teachingExperience: e.target.value })
-  }
-  sx={lightInputSx}
-/>
-
+            label="Years of Experience"
+            type="number"
+            value={form.teachingExperience}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                teachingExperience: e.target.value,
+              })
+            }
+            sx={lightInputSx}
+          />
         </div>
 
         {/* Rate */}
         <div className="mb-6">
           <MuiInput
-  label="Payment per hour"
-  type="number"
-  value={form.hourlyRate}
-  onChange={(e) =>
-    setForm({ ...form, hourlyRate: e.target.value })
-  }
-  sx={lightInputSx}
-/>
-
+            label="Payment per hour"
+            type="number"
+            value={form.hourlyRate}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                hourlyRate: e.target.value,
+              })
+            }
+            sx={lightInputSx}
+          />
         </div>
+        {error && (
+  <p className="text-red-500 text-sm mb-4">
+    {error}
+  </p>
+)}
 
         {/* CTA */}
         <div className="pt-4 border-t border-gray-200 flex justify-end">
@@ -140,9 +181,9 @@ const TeachingInfoStep = () => {
             loading={loading}
             onClick={handleSave}
             sx={{
-    backgroundColor: "#000",
-    "&:hover": { backgroundColor: "#000" },
-  }}
+              backgroundColor: "#000",
+              "&:hover": { backgroundColor: "#000" },
+            }}
           >
             Save & Continue
           </MuiButton>
@@ -154,6 +195,7 @@ const TeachingInfoStep = () => {
 };
 
 export default TeachingInfoStep;
+
 const lightInputSx = {
   "& .MuiOutlinedInput-root": {
     height: 48,

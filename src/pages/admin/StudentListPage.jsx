@@ -1,156 +1,4 @@
-// import {
-//   Table,
-//   Group,
-//   Text,
-//   Badge,
-//   Button,
-//   Stack,
-//   TextInput,
-//   Select,
-//   Avatar,
-//   Card,
-// } from "@mantine/core";
-// import { useEffect, useState } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { fetchStudents } from "../../features/admin/studentSlice";
-// import { useNavigate } from "react-router-dom";
 
-// const statusColor = {
-//   active: "green",
-//   blocked: "red",
-// };
-
-// export default function StudentListPage() {
-//   const dispatch = useDispatch();
-//   const navigate = useNavigate();
-//   const { list, loading } = useSelector((s) => s.adminStudents);
-
-//   const [filters, setFilters] = useState({
-//     search: "",
-//     grade: "",
-//     status: "",
-//   });
-
-//   useEffect(() => {
-//     dispatch(fetchStudents(filters));
-//   }, [filters]);
-
-//   return (
-//     <>
-   
-//       <Group justify="space-between" mb="lg">
-//         <Text fw={700} size="xl">
-//           Student & Parent Management
-//         </Text>
-
-//         {/* <Button>Add Student</Button> */}
-//       </Group>
-
-//       <Card mb="lg">
-//         <Group>
-//     {/* 🔍 Search */}
-//     <TextInput
-//       placeholder="Search student or parent"
-//       value={filters.search}
-//       onChange={(e) =>
-//         setFilters((prev) => ({
-//           ...prev,
-//           search: e.target.value,
-//         }))
-//       }
-//     />
-
-//     {/* 🎓 Class / Grade */}
-//     <Select
-//       placeholder="All Classes"
-//       value={filters.grade || "all"}
-//       data={[
-//         { value: "all", label: "All Classes" },
-//         { value: "Grade 1", label: "Grade 1" },
-//         { value: "Grade 2", label: "Grade 2" },
-//         { value: "Grade 3", label: "Grade 3" },
-//         { value: "Grade 4", label: "Grade 4" },
-//         { value: "Grade 5", label: "Grade 5" },
-//         { value: "Grade 6", label: "Grade 6" },
-//         { value: "Grade 7", label: "Grade 7" },
-//         { value: "Grade 8", label: "Grade 8" },
-//         { value: "Grade 9", label: "Grade 9" },
-//         { value: "Grade 10", label: "Grade 10" },
-//       ]}
-//       onChange={(value) =>
-//         setFilters((prev) => ({
-//           ...prev,
-//           grade: value === "all" ? "" : value,
-//         }))
-//       }
-//     />
-
-//     {/* 🚦 Status */}
-//     <Select
-//       placeholder="All Statuses"
-//       value={filters.status || "all"}
-//       data={[
-//         { value: "all", label: "All Statuses" },
-//         { value: "active", label: "Active" },
-//         { value: "suspended", label: "Suspended" },
-//       ]}
-//       onChange={(value) =>
-//         setFilters((prev) => ({
-//           ...prev,
-//           status: value === "all" ? "" : value,
-//         }))
-//       }
-//     />
-//   </Group>
-//       </Card>
-
-//       <Table striped highlightOnHover>
-//         <Table.Thead>
-//           <Table.Tr>
-//             <Table.Th>Student</Table.Th>
-//             <Table.Th>Parent</Table.Th>
-//             <Table.Th>Contact</Table.Th>
-//             <Table.Th>Grade</Table.Th>
-//             <Table.Th>Status</Table.Th>
-//             <Table.Th />
-//           </Table.Tr>
-//         </Table.Thead>
-
-//         <Table.Tbody>
-//           {list.map((s) => (
-//             <Table.Tr key={s._id}>
-//               <Table.Td>
-//                 <Group>
-//                   <Avatar />
-//                   <Text>{s.name}</Text>
-//                 </Group>
-//               </Table.Td>
-
-//               <Table.Td>{s.parentId?.fullName}</Table.Td>
-//               <Table.Td>{s.parentId?.email}</Table.Td>
-//               <Table.Td>{s.grade}</Table.Td>
-//               <Table.Td>
-//                 <Badge color={statusColor[s.status]}>
-//                   {s.status}
-//                 </Badge>
-//               </Table.Td>
-
-//               <Table.Td>
-//                 <Button
-//                   size="xs"
-//                   onClick={() => navigate(`/admin/students/${s._id}`)}
-//                 >
-//                   View Details
-//                 </Button>
-//               </Table.Td>
-//             </Table.Tr>
-//           ))}
-//         </Table.Tbody>
-//       </Table>
-     
-//     </>
-//   );
-// }
 import {
   Table,
   Group,
@@ -162,6 +10,7 @@ import {
   Select,
   Avatar,
   Card,
+  
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -179,15 +28,27 @@ export default function StudentListPage() {
   const navigate = useNavigate();
   const { list, loading } = useSelector((s) => s.adminStudents);
 
-  const [filters, setFilters] = useState({
-    search: "",
-    grade: "",
-    status: "",
-  });
+  const [searchInput, setSearchInput] = useState("");
 
-  useEffect(() => {
-    dispatch(fetchStudents(filters));
-  }, [filters, dispatch]);
+const [filters, setFilters] = useState({
+  search: "",
+  grade: "",
+  status: "",
+});
+useEffect(() => {
+  const delay = setTimeout(() => {
+    setFilters((prev) => ({
+      ...prev,
+      search: searchInput.trim(),
+    }));
+  }, 400);
+
+  return () => clearTimeout(delay);
+}, [searchInput]);
+
+useEffect(() => {
+  dispatch(fetchStudents(filters));
+}, [filters.grade, filters.status, filters.search, dispatch]);
 
   return (
     <Stack gap="lg">
@@ -199,20 +60,16 @@ export default function StudentListPage() {
       </Group>
 
       {/* ================= CONTENT CARD ================= */}
-      <Card radius="lg" p="lg" shadow="sm">
+      
         {/* ================= FILTERS ================= */}
         <Group mb="md" wrap="wrap">
           <TextInput
-            w={260}
-            placeholder="Search student or parent"
-            value={filters.search}
-            onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                search: e.target.value,
-              }))
-            }
-          />
+  w={260}
+  placeholder="Search student or parent"
+  value={searchInput}
+  onChange={(e) => setSearchInput(e.target.value)}
+  
+/>
 
           <Select
             w={180}
@@ -246,7 +103,7 @@ export default function StudentListPage() {
             data={[
               { value: "all", label: "All Statuses" },
               { value: "active", label: "Active" },
-              { value: "suspended", label: "Suspended" },
+              // { value: "suspended", label: "Suspended" },
               { value: "blocked", label: "Blocked" },
             ]}
             onChange={(value) =>
@@ -375,7 +232,7 @@ export default function StudentListPage() {
             ))}
           </Stack>
         </div>
-      </Card>
+      
     </Stack>
   );
 }

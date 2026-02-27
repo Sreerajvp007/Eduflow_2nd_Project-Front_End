@@ -1,6 +1,9 @@
 
-import { useSelector,useDispatch } from "react-redux";
+
+import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import ProgressBar from "./progressBar";
 import OnboardingFooter from "./onboardingFooter";
 
@@ -9,6 +12,7 @@ import TeachingInfoStep from "./steps/TeachingInfoStep";
 import QualificationsStep from "./steps/QualificationsStep";
 import IdVerificationStep from "./steps/IdVerificationStep";
 import OnboardingComplete from "./steps/OnboardingComplete";
+
 import { fetchOnboardingStatus } from "../../../features/tutor/onboarding/tutorOnboardingSlice";
 
 const STEP_COMPONENTS = {
@@ -20,16 +24,27 @@ const STEP_COMPONENTS = {
 };
 
 const TutorOnboarding = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { tutor } = useSelector((state) => state.tutorAuth);
   const { step, profileCompletion } = useSelector(
     (state) => state.tutorOnboarding
   );
-  const dispatch = useDispatch();
-  useEffect(() => {
-  dispatch(fetchOnboardingStatus());
-}, [dispatch]);
 
-  
-  if (step === 5) {
+  useEffect(() => {
+    dispatch(fetchOnboardingStatus());
+  }, [dispatch]);
+
+  /* ================= APPROVED REDIRECT ================= */
+  useEffect(() => {
+    if (tutor?.status === "active") {
+      navigate("/tutor/dashboard");
+    }
+  }, [tutor, navigate]);
+
+  /* ================= STEP 5 (SUBMITTED ONLY) ================= */
+  if (step === 5 && tutor?.status !== "active") {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <OnboardingComplete />

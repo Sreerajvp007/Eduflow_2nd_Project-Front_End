@@ -3,7 +3,7 @@ import axios from "axios";
 import store from "../app/store";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3008",
+ baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
 });
 

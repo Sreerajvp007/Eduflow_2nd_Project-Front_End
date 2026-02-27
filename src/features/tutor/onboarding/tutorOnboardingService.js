@@ -1,51 +1,35 @@
 import axiosInstance from "../../../utils/axiosInstance";
 
 const onboardingAPI = {
-  saveProfileInfo: async (data) => {
-    const res = await axiosInstance.put(
-      "/tutor/onboarding/profile",
-      data
-    );
-    return res.data;
-  },
+  saveProfileInfo: (data) =>
+    axiosInstance.put("/tutor/onboarding/profile", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
 
-  saveTeachingInfo: async (data) => {
-    const res = await axiosInstance.put(
-      "/tutor/onboarding/teaching",
-      data
-    );
-    return res.data;
-  },
+  saveTeachingInfo: (data) =>
+    axiosInstance.put("/tutor/onboarding/teaching", data),
 
-  saveQualifications: async (data) => {
-    const res = await axiosInstance.put(
-      "/tutor/onboarding/qualifications",
-      data
-    );
-    return res.data;
-  },
+  saveQualifications: (data) =>
+    axiosInstance.put("/tutor/onboarding/qualifications", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
 
-  saveIdVerification: async (data) => {
-    const res = await axiosInstance.put(
-      "/tutor/onboarding/id-verification",
-      data
-    );
-    return res.data;
-  },
+  saveIdVerification: (data) =>
+    axiosInstance.put("/tutor/onboarding/id-verification", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }),
 
-  submitForReview: async () => {
-    const res = await axiosInstance.post(
-      "/tutor/onboarding/submit"
-    );
-    return res.data;
-  },
-  getOnboardingStatus: async () => {
-  const res = await axiosInstance.get(
-    "/tutor/onboarding/status"
-  );
-  return res.data;
-},
+  getTeachingMeta: () => axiosInstance.get("/tutor/onboarding/teaching-meta"),
 
+  getOnboardingStatus: () => axiosInstance.get("/tutor/onboarding/status"),
+
+  submitForReview: () => axiosInstance.post("/tutor/onboarding/submit"),
 };
 
 export default onboardingAPI;

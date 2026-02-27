@@ -1,0 +1,311 @@
+
+import {
+  Text,
+  TextInput,
+  Textarea,
+  Button,
+  ActionIcon,
+  NumberInput,
+  Modal,
+  Group,
+  Loader,
+} from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
+import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  fetchTutorCourseById,
+  saveLearningPlan,
+} from "../../features/tutor/course/tutorCourseSlice";
+
+const LearningPlan = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { courseId } = useParams();
+
+  const { selectedCourse, loading } = useSelector(
+    (state) => state.tutorCourses
+  );
+
+  const course = selectedCourse;
+
+  const [sessions, setSessions] = useState([]);
+  const [opened, setOpened] = useState(false);
+
+  const [newSession, setNewSession] = useState({
+    title: "",
+    description: "",
+    sessionDate: null,
+  });
+
+  const [courseName, setCourseName] = useState("");
+  const [description, setDescription] = useState("");
+  const [expectedDuration, setExpectedDuration] = useState("");
+  const [tutorNotes, setTutorNotes] = useState("");
+
+  /* ================= FETCH COURSE ================= */
+  useEffect(() => {
+    dispatch(fetchTutorCourseById(courseId));
+  }, [dispatch, courseId]);
+
+  /* ================= PREFILL IF EXISTS ================= */
+  useEffect(() => {
+    if (course?.learningPlan) {
+      setCourseName(course.learningPlan.courseName || "");
+      setDescription(course.learningPlan.description || "");
+      setExpectedDuration(course.learningPlan.expectedDuration || "");
+      setTutorNotes(course.learningPlan.tutorNotes || "");
+    }
+  }, [course]);
+
+  /* ================= LOADING STATE ================= */
+  if (loading || !course) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader color="teal" />
+      </div>
+    );
+  }
+
+  /* ================= SESSION FUNCTIONS ================= */
+  const handleAddSession = () => {
+    if (!newSession.title) return;
+
+    setSessions([...sessions, newSession]);
+
+    setNewSession({
+      title: "",
+      description: "",
+      sessionDate: null,
+    });
+
+    setOpened(false);
+  };
+
+  const removeSession = (index) => {
+    setSessions(sessions.filter((_, i) => i !== index));
+  };
+
+  /* ================= SAVE PLAN ================= */
+  const handleSubmit = async () => {
+    const result = await dispatch(
+      saveLearningPlan({
+        courseId,
+        data: {
+          courseName,
+          description,
+          expectedDuration,
+          tutorNotes,
+          sessions,
+          isPublished: true,
+        },
+      })
+    );
+
+    if (saveLearningPlan.fulfilled.match(result)) {
+      navigate("/tutor/dashboard");
+    }
+  };
+
+  return (
+    <div className="w-full px-4 sm:px-6 lg:px-10 py-6">
+
+      {/* HEADER */}
+      <div className="mb-8">
+        <Text fw={700} size="xl">
+          Create Learning Plan
+        </Text>
+        <Text size="sm" c="dimmed">
+          Add sessions and structure your course roadmap
+        </Text>
+      </div>
+
+      <div className="space-y-10">
+
+        {/* ================= COURSE OVERVIEW ================= */}
+        <div className="border border-gray-200 rounded-xl p-6 bg-white">
+          <Text fw={600} mb="md">Course Overview</Text>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Info label="Student" value={course.studentId?.name} />
+            <Info label="Parent" value={course.parentId?.fullName} />
+            <Info label="Subject" value={course.subject} />
+            <Info label="Grade" value={course.classLevel} />
+            <Info label="Time Slot" value={course.timeSlot} />
+            <Info
+              label="Start Date"
+              value={
+                course.startDate
+                  ? new Date(course.startDate).toLocaleDateString()
+                  : "-"
+              }
+            />
+          </div>
+        </div>
+
+        {/* ================= LEARNING PLAN DETAILS ================= */}
+        <div className="space-y-5">
+          <Text fw={600}>Learning Plan Details</Text>
+
+          <TextInput
+            label="Course Name"
+            value={courseName}
+            onChange={(e) => setCourseName(e.target.value)}
+          />
+
+          <Textarea
+            label="Course Description"
+            minRows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+
+          <NumberInput
+            label="Expected Course Duration (Months)"
+            min={1}
+            value={expectedDuration}
+            onChange={setExpectedDuration}
+          />
+
+          <Textarea
+            label="Tutor Notes"
+            minRows={3}
+            value={tutorNotes}
+            onChange={(e) => setTutorNotes(e.target.value)}
+          />
+        </div>
+
+        {/* ================= SESSIONS ================= */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <Text fw={600}>Course Sessions</Text>
+
+            <Button
+              size="xs"
+              leftSection={<IconPlus size={14} />}
+              color="teal"
+              onClick={() => setOpened(true)}
+            >
+              Add Session
+            </Button>
+          </div>
+
+          {sessions.length === 0 && (
+            <div className="border border-dashed border-gray-300 rounded-xl p-10 text-center bg-gray-50">
+              <Text size="sm" c="dimmed">
+                No sessions added yet.
+              </Text>
+            </div>
+          )}
+
+          <div className="space-y-4 mt-6">
+            {sessions.map((session, index) => (
+              <div
+                key={index}
+                className="border border-gray-200 rounded-xl p-5 bg-white"
+              >
+                <div className="flex justify-between mb-3">
+                  <div>
+                    <Text size="xs" c="dimmed">
+                      Session {index + 1}
+                    </Text>
+                    <Text fw={600}>{session.title}</Text>
+                  </div>
+
+                  <ActionIcon
+                    color="red"
+                    variant="subtle"
+                    onClick={() => removeSession(index)}
+                  >
+                    <IconTrash size={16} />
+                  </ActionIcon>
+                </div>
+
+                <Text size="xs" c="dimmed">Session Date</Text>
+                <Text fw={500}>
+                  {session.sessionDate
+                    ? new Date(session.sessionDate).toLocaleDateString()
+                    : "-"}
+                </Text>
+
+                <div className="mt-3">
+                  <Text size="xs" c="dimmed">Description</Text>
+                  <Text>{session.description}</Text>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ================= ACTION BUTTON ================= */}
+        <div className="pt-6 flex justify-end">
+          <Button
+            color="teal"
+            radius="xl"
+            onClick={handleSubmit}
+            loading={loading}
+          >
+            Publish Learning Plan
+          </Button>
+        </div>
+      </div>
+
+      {/* ================= ADD SESSION MODAL ================= */}
+      <Modal
+        opened={opened}
+        onClose={() => setOpened(false)}
+        title="Add Course Session"
+        centered
+      >
+        <div className="space-y-4">
+          <TextInput
+            label="Session Title"
+            value={newSession.title}
+            onChange={(e) =>
+              setNewSession({ ...newSession, title: e.target.value })
+            }
+          />
+
+          <Textarea
+            label="Session Description"
+            minRows={3}
+            value={newSession.description}
+            onChange={(e) =>
+              setNewSession({ ...newSession, description: e.target.value })
+            }
+          />
+
+          <DatePickerInput
+            label="Session Date"
+            value={newSession.sessionDate}
+            onChange={(value) =>
+              setNewSession({ ...newSession, sessionDate: value })
+            }
+            minDate={new Date()}
+          />
+
+          <Group justify="flex-end">
+            <Button variant="default" onClick={() => setOpened(false)}>
+              Cancel
+            </Button>
+
+            <Button color="teal" onClick={handleAddSession}>
+              Add Session
+            </Button>
+          </Group>
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
+const Info = ({ label, value }) => (
+  <div>
+    <Text size="xs" c="dimmed">{label}</Text>
+    <Text fw={500}>{value || "-"}</Text>
+  </div>
+);
+
+export default LearningPlan;

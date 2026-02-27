@@ -7,7 +7,7 @@ import {
 } from "../../../../features/tutor/onboarding/tutorOnboardingSlice";
 
 import Button from "../../../../components/common/button";
-import Input from "../../../../components/common/input";
+import MuiInput from "../../../../components/common/input";
 
 const ID_TYPES = [
   "Aadhaar Card",
@@ -18,9 +18,9 @@ const ID_TYPES = [
 
 const IdVerificationStep = () => {
   const dispatch = useDispatch();
-  const { loading, tutor } = useSelector(
-    (state) => state.tutorOnboarding
-  );
+ const { loading, tutor, error } = useSelector(
+  (state) => state.tutorOnboarding
+);
 
   const [form, setForm] = useState({
     idType: tutor?.idVerification?.idType || "Aadhaar Card",
@@ -29,19 +29,31 @@ const IdVerificationStep = () => {
   });
 
   const handleFileUpload = (file) => {
-    if (!file) return;
+  if (!file) return;
 
-    
-    setForm((prev) => ({
-      ...prev,
-      documentUrl: file.name,
-    }));
-  };
+  setForm((prev) => ({
+    ...prev,
+    documentFile: file,
+    documentUrl: file.name,
+  }));
+};
 
-  const handleSubmit = async () => {
-    await dispatch(saveIdVerification(form));
+const handleSubmit = async () => {
+  const formData = new FormData();
+
+  formData.append("idType", form.idType);
+  formData.append("idNumber", form.idNumber);
+
+  if (form.documentFile) {
+    formData.append("document", form.documentFile);
+  }
+
+  const resultAction = await dispatch(saveIdVerification(formData));
+
+  if (saveIdVerification.fulfilled.match(resultAction)) {
     await dispatch(submitForReview());
-  };
+  }
+};
 
   return (
     <div className="max-w-xl mx-auto py-8">
@@ -77,16 +89,17 @@ const IdVerificationStep = () => {
         </div>
 
         {/* ID Number */}
-        <Input
+        <MuiInput
           label="ID Number"
           value={form.idNumber}
           onChange={(e) =>
             setForm({ ...form, idNumber: e.target.value })
           }
+          sx={lightInputSx}
         />
 
         {/* Upload */}
-        <div className="mb-6">
+        <div className="mb-6 mt-2">
           <label className="block text-xs text-gray-500 mb-1">
             Upload ID Proof
           </label>
@@ -146,7 +159,11 @@ const IdVerificationStep = () => {
             Pending
           </span>
         </div>
-
+{error && (
+  <p className="text-red-500 text-sm mb-4">
+    {error}
+  </p>
+)}
         {/* Final CTA */}
         <div className="pt-4 border-t border-gray-200 flex justify-end">
           <Button
@@ -167,3 +184,28 @@ const IdVerificationStep = () => {
 };
 
 export default IdVerificationStep;
+
+const lightInputSx = {
+  "& .MuiOutlinedInput-root": {
+    height: 48,
+    borderRadius: "12px",
+    backgroundColor: "#fff",
+    color: "#111",
+  },
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#d1d5db",
+  },
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#9ca3af",
+  },
+  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#4f46e5",
+    borderWidth: "2px",
+  },
+  "& .MuiInputLabel-root": {
+    color: "#6b7280",
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: "#4f46e5",
+  },
+};

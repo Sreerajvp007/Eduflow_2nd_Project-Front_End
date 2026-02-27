@@ -6,7 +6,13 @@ import parentAuthReducer from  '../features/parent/auth/parentAuthSlice';
 import adminUI from "../features/admin/adminUISlice";
 import adminTutors from "../features/admin/adminTutorSlice";
 import adminStudents from "../features/admin/studentSlice"
+import adminDashboardReducer from "../features/admin/adminDashboardSlice"
+import parentCourseReducer from "../features/parent/parentCourseSlice"
+import parentStudentsReducer from "../features/parent/parentStudentsSlice";
+import parentProfileReducer from "../features/parent/parentProfileSlice";
+import parentCourseListReducer from "../features/parent/parentCourseListSlice";
 
+import tutorCourseReducer from "../features/tutor/course/tutorCourseSlice"
 const store = configureStore({
   reducer: {
     admin: adminReducer,
@@ -15,7 +21,14 @@ const store = configureStore({
     parentAuth:parentAuthReducer,
     adminUI,
     adminTutors,
-    adminStudents, 
+    adminStudents,
+    adminDashboard: adminDashboardReducer, 
+    
+    parentStudents: parentStudentsReducer,
+    parentCourse: parentCourseReducer,
+    parentProfile: parentProfileReducer,
+    parentCourses: parentCourseListReducer,
+    tutorCourses: tutorCourseReducer,
     
   },
   devTools: true,

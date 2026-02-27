@@ -1,27 +1,36 @@
+
 import {
   Avatar,
   Badge,
   Box,
   Button,
   Card,
-  Divider,
-  Grid,
   Group,
-  Rating,
   Stack,
   Text,
+  Modal,
 } from "@mantine/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { fetchTutorDetails } from "../../features/admin/adminTutorSlice";
+import {
+  fetchTutorDetails,
+  updateTutorStatus,
+  approveTutor, // 🔥 make sure this exists in slice
+  verifyQualification,
+  verifyTutorId,
+} from "../../features/admin/adminTutorSlice";
 
 export default function TutorDetailsPage() {
   const { id } = useParams();
   const dispatch = useDispatch();
+
   const { details: tutor, loading } = useSelector(
     (s) => s.adminTutors
   );
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchTutorDetails(id));
@@ -30,15 +39,46 @@ export default function TutorDetailsPage() {
   if (loading) return <Text>Loading tutor details...</Text>;
   if (!tutor) return <Text>No tutor found</Text>;
 
+  /* ================= STATUS FLAGS ================= */
+  const isBlocked = tutor.status === "blocked";
+  const isPending = tutor.status === "pending";
   const isActive = tutor.status === "active";
 
+  /* ================= BLOCK / REACTIVATE ================= */
+  const handleConfirm = async () => {
+    try {
+      setActionLoading(true);
+
+      await dispatch(
+        updateTutorStatus({
+          id: tutor._id,
+          status: isBlocked ? "active" : "blocked",
+        })
+      ).unwrap();
+
+      setConfirmOpen(false);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  /* ================= APPROVE ================= */
+  const handleApprove = async () => {
+    try {
+      setActionLoading(true);
+      await dispatch(approveTutor(tutor._id)).unwrap();
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   return (
-    <Stack gap="lg">
+    <Stack gap="xl">
       {/* ================= HEADER ================= */}
-      <Card radius="lg" p="lg" shadow="sm">
-        <Group justify="space-between">
+      <Card radius="xl" p={{ base: "md", md: "xl" }} shadow="sm">
+        <Group justify="space-between" align="flex-start">
           <Group>
-            <Avatar size={64} radius="xl" src={tutor.profileImage}>
+            <Avatar size={72} radius="xl" src={tutor.profileImage}>
               {tutor.fullName?.charAt(0)}
             </Avatar>
 
@@ -47,166 +87,227 @@ export default function TutorDetailsPage() {
                 {tutor.fullName}
               </Text>
 
-              <Group gap="xs">
-                <Badge color={isActive ? "green" : "red"}>
+              <Group gap="xs" mt={6}>
+                <Badge
+                  color={
+                    isPending
+                      ? "yellow"
+                      : isBlocked
+                      ? "red"
+                      : "green"
+                  }
+                >
                   {tutor.status.toUpperCase()}
                 </Badge>
-
-                <Rating
-                  value={tutor.rating || 4.5}
-                  readOnly
-                  size="sm"
-                />
-                <Text size="sm" c="dimmed">
-                  {tutor.rating || 4.5}
-                </Text>
               </Group>
             </Box>
           </Group>
 
-          <Button color="red">Block Tutor</Button>
+          {/* ================= STATUS ACTION BUTTON ================= */}
+          {isPending ? (
+            <Button
+              size="xs"
+              color="green"
+              loading={actionLoading}
+              onClick={handleApprove}
+            >
+              Approve
+            </Button>
+          ) : (
+            <Button
+              size="xs"
+              color={isBlocked ? "green" : "red"}
+              variant="light"
+              onClick={() => setConfirmOpen(true)}
+            >
+              {isBlocked ? "Reactivate" : "Block"}
+            </Button>
+          )}
         </Group>
       </Card>
 
-      {/* ================= GRID ================= */}
-      <Grid>
-        {/* ===== Personal Information ===== */}
-        <Grid.Col span={4}>
-          <Card radius="lg" p="lg" shadow="sm">
-            <Text fw={600} mb="sm">
-              Personal Information
-            </Text>
-
-            <Stack gap={6}>
-              <InfoRow label="Full Name" value={tutor.fullName} />
-              <InfoRow label="Email" value={tutor.email} />
-              <InfoRow label="Phone" value={tutor.mobile} />
-              <InfoRow
-                label="Joined Date"
-                value={new Date(
-                  tutor.createdAt
-                ).toLocaleDateString()}
-              />
-            </Stack>
-          </Card>
-        </Grid.Col>
-
-        {/* ===== Qualification Documents ===== */}
-        <Grid.Col span={4}>
-          <Card radius="lg" p="lg" shadow="sm">
-            <Text fw={600} mb="sm">
-              Qualification Documents
-            </Text>
-
-            <Stack gap="md">
-              {tutor.qualifications?.map((q) => (
-                <Card key={q._id} withBorder radius="md" p="sm">
-                  <Text size="sm" fw={500}>
-                    {q.title}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    {q.institute}
-                  </Text>
-
-                  <Group mt="xs">
-                    <Button size="xs" variant="light">
-                      Download
-                    </Button>
-                    <Button size="xs" variant="subtle">
-                      View
-                    </Button>
-                  </Group>
-                </Card>
-              ))}
-            </Stack>
-          </Card>
-        </Grid.Col>
-
-        {/* ===== ID Verification ===== */}
-        <Grid.Col span={4}>
-          <Card radius="lg" p="lg" shadow="sm">
-            <Text fw={600} mb="sm">
-              ID Verification
-            </Text>
-
-            <Card withBorder radius="md" p="sm">
-              <Text size="sm">ID Type</Text>
-              <Text size="xs" c="dimmed">
-                Passport / Aadhaar
-              </Text>
-
-              <Badge mt="sm" color="green">
-                Verified
-              </Badge>
-            </Card>
-          </Card>
-        </Grid.Col>
-
-        {/* ===== Subjects & Classes ===== */}
-        <Grid.Col span={6}>
-          <Card radius="lg" p="lg" shadow="sm">
-            <Text fw={600} mb="sm">
-              Subjects & Classes
-            </Text>
-
-            <Group gap="xs" wrap="wrap">
-              {tutor.subjects?.map((sub) => (
-                <Badge
-                  key={sub}
-                  variant="light"
-                  color="blue"
-                >
-                  {sub}
-                </Badge>
-              ))}
-            </Group>
-          </Card>
-        </Grid.Col>
-
-        {/* ===== Availability ===== */}
-        <Grid.Col span={6}>
-          <Card radius="lg" p="lg" shadow="sm">
-            <Text fw={600} mb="sm">
-              Availability
-            </Text>
-
-            <Stack gap={6}>
-              {tutor.availability?.map((day) => (
-                <Text size="sm" key={day.day}>
-                  <b>{day.day}:</b>{" "}
-                  {day.from} - {day.to}
-                </Text>
-              ))}
-            </Stack>
-          </Card>
-        </Grid.Col>
-      </Grid>
-
-      {/* ================= ADMIN ACTIONS ================= */}
-      <Card radius="lg" p="lg" shadow="sm">
-        <Text fw={600} mb="sm">
-          Admin Actions
+      {/* ================= PERSONAL INFO ================= */}
+      <Card radius="xl" p={{ base: "md", md: "xl" }} shadow="xs">
+        <Text fw={600} mb="md">
+          Personal Information
         </Text>
 
-        <Stack>
-          <Button color="red">Block Tutor</Button>
-          <Button color="orange">Suspend Tutor</Button>
-          <Button color="blue">Reactivate Tutor</Button>
+        <Stack gap="md">
+          <InfoBlock label="Full Name" value={tutor.fullName} />
+          <InfoBlock label="Email" value={tutor.email} />
+          <InfoBlock label="Phone" value={tutor.mobile} />
+          <InfoBlock
+            label="Joined"
+            value={
+              tutor.createdAt
+                ? new Date(tutor.createdAt).toLocaleDateString()
+                : "—"
+            }
+          />
         </Stack>
       </Card>
+
+   {/* ================= QUALIFICATIONS ================= */}
+<Card radius="xl" p={{ base: "md", md: "xl" }} shadow="xs">
+  <Text fw={600} mb="md">
+    Qualification Documents
+  </Text>
+
+  <Stack gap="md">
+    {tutor.qualifications?.length ? (
+      tutor.qualifications.map((q) => (
+        <Card key={q._id} withBorder radius="md" p="md">
+          <Stack gap={6}>
+            <Text fw={500}>{q.title}</Text>
+            <Text size="sm" c="dimmed">
+              {q.institute} • {q.year}
+            </Text>
+
+            <Group mt="xs">
+              <Button
+                size="xs"
+                variant="light"
+                onClick={() =>
+                  window.open(q.certificateUrl, "_blank")
+                }
+              >
+                View
+              </Button>
+            </Group>
+          </Stack>
+        </Card>
+      ))
+    ) : (
+      <Text size="sm" c="dimmed">
+        No qualifications submitted
+      </Text>
+    )}
+  </Stack>
+</Card>
+
+    {/* ================= ID VERIFICATION ================= */}
+<Card radius="xl" p={{ base: "md", md: "xl" }} shadow="xs">
+  <Text fw={600} mb="md">
+    ID Document
+  </Text>
+
+  {tutor.idVerification?.documentUrl ? (
+    <Card withBorder radius="md" p="md">
+      <Stack gap={6}>
+        <Text fw={500}>
+          {tutor.idVerification.idType}
+        </Text>
+        <Text size="sm" c="dimmed">
+          {tutor.idVerification.idNumber}
+        </Text>
+
+        <Group mt="xs">
+          <Button
+            size="xs"
+            variant="light"
+            onClick={() =>
+              window.open(
+                tutor.idVerification.documentUrl,
+                "_blank"
+              )
+            }
+          >
+            View ID
+          </Button>
+        </Group>
+      </Stack>
+    </Card>
+  ) : (
+    <Text size="sm" c="dimmed">
+      No ID document submitted
+    </Text>
+  )}
+</Card>
+
+      {/* ================= SUBJECTS ================= */}
+      <Card radius="xl" p={{ base: "md", md: "xl" }} shadow="xs">
+        <Text fw={600} mb="md">
+          Subjects
+        </Text>
+
+        <Group wrap="wrap">
+          {tutor.subjects?.length ? (
+            tutor.subjects.map((sub, index) => (
+              <Badge key={index} variant="light" color="blue">
+                {sub}
+              </Badge>
+            ))
+          ) : (
+            <Text size="sm" c="dimmed">
+              No subjects added
+            </Text>
+          )}
+        </Group>
+      </Card>
+
+      {/* ================= CLASSES ================= */}
+      <Card radius="xl" p={{ base: "md", md: "xl" }} shadow="xs">
+        <Text fw={600} mb="md">
+          Classes
+        </Text>
+
+        <Group wrap="wrap">
+          {tutor.classes?.length ? (
+            tutor.classes.map((cls, index) => (
+              <Badge key={index} variant="light" color="teal">
+                {cls}
+              </Badge>
+            ))
+          ) : (
+            <Text size="sm" c="dimmed">
+              No classes added
+            </Text>
+          )}
+        </Group>
+      </Card>
+
+      {/* ================= CONFIRM MODAL ================= */}
+      <Modal
+        opened={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        centered
+        title="Confirm Action"
+      >
+        <Text mb="md">
+          Are you sure you want to{" "}
+          <b>{isBlocked ? "reactivate" : "block"}</b> this tutor?
+        </Text>
+
+        <Group justify="flex-end">
+          <Button
+            variant="default"
+            onClick={() => setConfirmOpen(false)}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            color={isBlocked ? "green" : "red"}
+            loading={actionLoading}
+            onClick={handleConfirm}
+          >
+            Confirm
+          </Button>
+        </Group>
+      </Modal>
     </Stack>
   );
 }
 
-/* ================= SMALL HELPER ================= */
+/* ================= HELPER ================= */
 
-const InfoRow = ({ label, value }) => (
-  <Group justify="space-between">
-    <Text size="sm" c="dimmed">
+const InfoBlock = ({ label, value }) => (
+  <Box>
+    <Text size="xs" c="dimmed">
       {label}
     </Text>
-    <Text size="sm" fw={500}>
+    <Text fw={500} size="sm">
       {value || "—"}
     </Text>
-  </Group>
+  </Box>
 );

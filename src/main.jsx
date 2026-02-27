@@ -7,6 +7,9 @@ import store from "./app/store";
 import App from "./App";
 
 import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";   
+
+
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(

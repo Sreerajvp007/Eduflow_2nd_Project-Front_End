@@ -1,102 +1,4 @@
 
-// import {
-//   Card,
-//   Group,
-//   Text,
-//   Badge,
-//   Button,
-//   Stack,
-//   Divider,
-// } from "@mantine/core";
-// import { useEffect } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { fetchStudentDetails } from "../../features/admin/studentSlice";
-// import { useParams } from "react-router-dom";
-
-// export default function StudentDetailsPage() {
-//   const { id } = useParams();
-//   const dispatch = useDispatch();
-//   const { details: student, loading } = useSelector(
-//     (s) => s.adminStudents
-//   );
-
-//   useEffect(() => {
-//     dispatch(fetchStudentDetails(id));
-//   }, [id, dispatch]);
-
-//   if (loading) {
-//     return <Text>Loading student details...</Text>;
-//   }
-
-//   if (!student) {
-//     return <Text>No student found</Text>;
-//   }
-
-//   const isSuspended = student.status === "suspended";
-
-//   return (
-//     <>
-//       {/* ===== HEADER ===== */}
-//       <Group justify="space-between" mb="lg">
-//         <Group>
-//           <Text fw={700} size="xl">
-//             {student.name}
-//           </Text>
-//           <Badge color={isSuspended ? "red" : "green"}>
-//             {student.status.toUpperCase()}
-//           </Badge>
-//         </Group>
-
-//         <Button color={isSuspended ? "green" : "red"}>
-//           {isSuspended ? "Activate Student" : "Suspend Student"}
-//         </Button>
-//       </Group>
-
-//       {/* ===== STUDENT INFO ===== */}
-//       <Card mb="lg" withBorder>
-//         <Text fw={600} mb="sm">
-//           Student Information
-//         </Text>
-
-//         <Stack gap={6}>
-//           <Text size="sm">
-//             <b>Board:</b> {student.board}
-//           </Text>
-//           <Text size="sm">
-//             <b>Grade:</b> {student.grade || "—"}
-//           </Text>
-//           <Text size="sm">
-//             <b>Status:</b> {student.status}
-//           </Text>
-          
-//         </Stack>
-//       </Card>
-
-//       {/* ===== PARENT INFO ===== */}
-//       <Card withBorder>
-//         <Text fw={600} mb="sm">
-//           Parent Information
-//         </Text>
-
-//         <Stack gap={6}>
-//           <Text size="sm">
-//             <b>Name:</b> {student.parentId?.fullName || "—"}
-//           </Text>
-//           <Text size="sm">
-//             <b>Email:</b> {student.parentId?.email || "—"}
-//           </Text>
-//           <Text size="sm">
-//             <b>Mobile:</b> {student.parentId?.mobile || "—"}
-//           </Text>
-//           <Text size="sm">
-//             <b>Parent Status:</b>{" "}
-//             {student.parentId?.status || "—"}
-//           </Text>
-//         </Stack>
-//       </Card>
-//     </>
-//   );
-// }
 import {
   Avatar,
   Badge,
@@ -106,27 +8,64 @@ import {
   Group,
   Stack,
   Text,
+  Modal,
 } from "@mantine/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchStudentDetails } from "../../features/admin/studentSlice";
+import {
+  fetchStudentDetails,
+  updateStudentStatus,
+} from "../../features/admin/studentSlice";
 import { useParams } from "react-router-dom";
 
 export default function StudentDetailsPage() {
   const { id } = useParams();
   const dispatch = useDispatch();
+
   const { details: student, loading } = useSelector(
-    (s) => s.adminStudents
+    (state) => state.adminStudents
   );
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [targetStatus, setTargetStatus] = useState(null);
 
   useEffect(() => {
     dispatch(fetchStudentDetails(id));
   }, [id, dispatch]);
 
+  // 🔒 Safe rendering guards
   if (loading) return <Text>Loading student details...</Text>;
   if (!student) return <Text>No student found</Text>;
 
-  const isSuspended = student.status === "suspended";
+  const isBlocked = student.status === "blocked";
+
+  // 🔥 Open confirmation modal for both actions
+  const handleToggleStatus = () => {
+    const newStatus = isBlocked ? "active" : "blocked";
+    setTargetStatus(newStatus);
+    setConfirmOpen(true);
+  };
+
+  // 🔥 Update status handler
+  const handleConfirmAction = async () => {
+    try {
+      setActionLoading(true);
+
+      await dispatch(
+        updateStudentStatus({
+          id: student._id,
+          status: targetStatus,
+        })
+      ).unwrap();
+
+      setConfirmOpen(false);
+    } catch (error) {
+      console.error("Failed to update student status:", error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   return (
     <Stack gap="lg">
@@ -146,21 +85,27 @@ export default function StudentDetailsPage() {
               <Text fw={700} size="lg">
                 {student.name}
               </Text>
+
               <Text size="sm" c="dimmed">
                 {student.grade}
               </Text>
 
               <Badge
                 mt={6}
-                color={isSuspended ? "red" : "green"}
+                color={isBlocked ? "red" : "green"}
               >
                 {student.status.toUpperCase()}
               </Badge>
             </Box>
           </Group>
 
-          <Button color={isSuspended ? "green" : "red"}>
-            {isSuspended ? "Activate Student" : "Suspend Student"}
+          <Button
+            color={isBlocked ? "green" : "red"}
+            variant={isBlocked ? "light" : "filled"}
+            onClick={handleToggleStatus}
+            loading={actionLoading}
+          >
+            {isBlocked ? "Activate Student" : "Block Student"}
           </Button>
         </Group>
       </Card>
@@ -185,24 +130,50 @@ export default function StudentDetailsPage() {
         </Text>
 
         <Stack gap={8}>
-          <InfoRow
-            label="Name"
-            value={student.parentId?.fullName}
-          />
-          <InfoRow
-            label="Email"
-            value={student.parentId?.email}
-          />
-          <InfoRow
-            label="Mobile"
-            value={student.parentId?.mobile}
-          />
+          <InfoRow label="Name" value={student.parentId?.fullName} />
+          <InfoRow label="Email" value={student.parentId?.email} />
+          <InfoRow label="Mobile" value={student.parentId?.mobile} />
           <InfoRow
             label="Parent Status"
             value={student.parentId?.status}
           />
         </Stack>
       </Card>
+
+      {/* ================= CONFIRM MODAL ================= */}
+      <Modal
+        opened={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title={
+          targetStatus === "blocked"
+            ? "Confirm Block"
+            : "Confirm Reactivation"
+        }
+        centered
+      >
+        <Text size="sm" mb="md">
+          {targetStatus === "blocked"
+            ? "Are you sure you want to block this student? The student will not be able to access the platform."
+            : "Are you sure you want to reactivate this student? The student will regain access to the platform."}
+        </Text>
+
+        <Group justify="flex-end">
+          <Button
+            variant="default"
+            onClick={() => setConfirmOpen(false)}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            color={targetStatus === "blocked" ? "red" : "green"}
+            loading={actionLoading}
+            onClick={handleConfirmAction}
+          >
+            Confirm
+          </Button>
+        </Group>
+      </Modal>
     </Stack>
   );
 }
