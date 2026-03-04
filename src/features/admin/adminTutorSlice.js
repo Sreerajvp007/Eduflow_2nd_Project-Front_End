@@ -3,16 +3,25 @@ import api from "../../utils/axiosInstance";
 
 export const fetchTutors = createAsyncThunk(
   "adminTutors/fetch",
-  async (params, thunkAPI) => {
+  async (params = {}, thunkAPI) => {
     try {
-      const res = await api.get("/admin/tutors", { params });
+      const res = await api.get("/admin/tutors", {
+        params: {
+          page: params.page || 1,
+          limit: 3,
+          search: params.search || "",
+          status: params.status || "",
+          subject: params.subject || "",
+        },
+      });
+
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch tutors",
+        err.response?.data?.message || "Failed to fetch tutors"
       );
     }
-  },
+  }
 );
 
 export const fetchTutorDetails = createAsyncThunk(

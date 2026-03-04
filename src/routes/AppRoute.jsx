@@ -16,6 +16,9 @@ import TutorListPage from "../pages/admin/AdminTutorListPage";
 import TutorDetailsPage from "../pages/admin/TutorDetailsPage";
 import TutorCourses from "../pages/tutor/TutorCoursePage";
 import CourseOverview from "../pages/tutor/CourseOverview";
+import MyStudents from "../pages/tutor/MyStudents";
+import StudentCourses from "../pages/tutor/StudentCourses";
+import SchedulePage from "../pages/tutor/SchedulePage";
 
 import ParentSignup from "../pages/parent/parentSignup";
 import ParentLogin from "../pages/parent/parentLogin";
@@ -32,6 +35,8 @@ import EditParent from "../pages/parent/profile/EditParent";
 import ParentCourses from "../pages/parent/ParentCourses";
 import ParentCourseOverview from "../pages/parent/ParentCourseOverview";
 import AddStudent from "../pages/parent/AddStudent";
+import CoursePayment from "../pages/parent/CoursePayment";
+import ParentPayments from "../pages/parent/ParentPayments";
 
 import LearningPlanForm from "../pages/tutor/LearningPlanForm";
 
@@ -71,6 +76,12 @@ const AppRoutes = () => {
           />
           <Route path="/tutor/courses" element={<TutorCourses />} />
           <Route path="courses/:courseId" element={<CourseOverview />} />
+          <Route path="my-students" element={<MyStudents />} />
+          <Route
+    path="students/:studentId/courses"
+    element={<StudentCourses />}
+  />
+  <Route path="schedule" element={<SchedulePage />} />
         </Route>
       </Route>
 
@@ -101,8 +112,13 @@ const AppRoutes = () => {
             path="/parent/courses/:courseId"
             element={<ParentCourseOverview />}
           />
+          <Route
+  path="/parent/courses/:courseId/payment"
+  element={<CoursePayment />}
+/>
 
           <Route path="request-course" element={<ParentCourseFlow />} />
+          <Route path="/parent/payments" element={<ParentPayments />} />
         </Route>
       </Route>
 

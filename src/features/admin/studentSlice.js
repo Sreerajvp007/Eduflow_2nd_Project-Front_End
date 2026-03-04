@@ -5,8 +5,16 @@ import api from "../../utils/axiosInstance";
 
 export const fetchStudents = createAsyncThunk(
   "adminStudents/fetch",
-  async (params) => {
-    const { data } = await api.get("/admin/students", { params });
+  async (params = {}) => {
+    const { data } = await api.get("/admin/students", {
+      params: {
+        page: params.page || 1,
+        limit: 3,
+        search: params.search || "",
+        grade: params.grade || "",
+        status: params.status || "",
+      },
+    });
     return data;
   }
 );

@@ -3,10 +3,18 @@ import api from "../../../utils/axiosInstance";
 
 export const fetchTutorCourses = createAsyncThunk(
   "tutorCourses/fetchManaged",
-  async (_, { rejectWithValue }) => {
+  async ({ page = 1, search = "", status = "all" }, { rejectWithValue }) => {
     try {
-      const res = await api.get("/tutor/courses");
-      return res.data.result;
+      const res = await api.get("/tutor/courses", {
+        params: {
+          page,
+          limit: 3,
+          search,
+          status,
+        },
+      });
+
+      return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message);
     }
@@ -67,12 +75,16 @@ export const markCourseCompleted = createAsyncThunk(
 const tutorCourseSlice = createSlice({
   name: "tutorCourses",
   initialState: {
-    courses: [],
-    newCourses: [],
-    selectedCourse: null,
-    loading: false,
-    error: null,
-  },
+  courses: [],
+  newCourses: [],
+  selectedCourse: null,
+  loading: false,
+  error: null,
+
+  page: 1,
+  totalPages: 1,
+  total: 0,
+},
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -82,7 +94,10 @@ const tutorCourseSlice = createSlice({
       })
       .addCase(fetchTutorCourses.fulfilled, (state, action) => {
         state.loading = false;
-        state.courses = action.payload;
+        state.courses = action.payload.result;
+state.page = action.payload.pagination.page;
+state.totalPages = action.payload.pagination.pages;
+state.total = action.payload.pagination.total;
       })
       .addCase(fetchTutorCourses.rejected, (state, action) => {
         state.loading = false;

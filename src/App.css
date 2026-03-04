@@ -121,3 +121,13 @@
     @apply bg-background text-foreground;
   }
 } */
+.ck-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+}
+
+.ck-editor__editable {
+  min-height: 400px;
+}

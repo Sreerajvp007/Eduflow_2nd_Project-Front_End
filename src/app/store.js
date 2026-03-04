@@ -11,8 +11,11 @@ import parentCourseReducer from "../features/parent/parentCourseSlice"
 import parentStudentsReducer from "../features/parent/parentStudentsSlice";
 import parentProfileReducer from "../features/parent/parentProfileSlice";
 import parentCourseListReducer from "../features/parent/parentCourseListSlice";
+import tutorStudentReducer from "../features/tutor/tutorStudentSlice";
+import parentPaymentsReducer from "../features/parent/parentPaymentSlice"
 
-import tutorCourseReducer from "../features/tutor/course/tutorCourseSlice"
+import tutorCourseReducer from "../features/tutor/course/tutorCourseSlice";
+import scheduleReducer from "../features/tutor/scheduleSlice"
 const store = configureStore({
   reducer: {
     admin: adminReducer,
@@ -29,6 +32,9 @@ const store = configureStore({
     parentProfile: parentProfileReducer,
     parentCourses: parentCourseListReducer,
     tutorCourses: tutorCourseReducer,
+    tutorStudents: tutorStudentReducer,
+    schedule: scheduleReducer, 
+    parentPayments: parentPaymentsReducer,
     
   },
   devTools: true,

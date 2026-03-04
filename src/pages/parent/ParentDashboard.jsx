@@ -10,8 +10,9 @@ import {
   Stack,
 } from "@mantine/core";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { setActiveStudent } from "../../features/parent/parentStudentsSlice";
+import { fetchParentCourses } from "../../features/parent/parentCourseListSlice";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, BookOpen, Calendar } from "lucide-react";
 
@@ -23,6 +24,23 @@ const ParentDashboard = () => {
   const { students, activeStudent } = useSelector(
     (state) => state.parentStudents
   );
+  const { courses } = useSelector(
+  (state) => state.parentCourses
+);
+useEffect(() => {
+  if (activeStudent?._id) {
+    dispatch(
+      fetchParentCourses({
+        studentId: activeStudent._id,
+        page: 1,
+      })
+    );
+  }
+}, [dispatch, activeStudent]);
+const pendingCourses =
+  courses?.filter(
+    (course) => course.paymentStatus === "pending"
+  ) || [];
 
   return (
     <div className="p-4 space-y-6">
@@ -76,8 +94,85 @@ const ParentDashboard = () => {
           </Button>
         </Group>
       </Card>
+{pendingCourses.length > 0 && (
+<div className="bg-red-50 border border-red-100 rounded-2xl p-6">
 
-      {/* ================= COURSE CARD ================= */}
+  {/* Header */}
+ <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 gap-2">
+
+  <div>
+    <h3 className="text-red-600 font-semibold text-lg">
+      Payment Pending
+    </h3>
+
+    <p className="text-sm text-gray-500">
+      Complete payment to continue accessing your courses
+    </p>
+  </div>
+
+  <span className="self-start sm:self-auto bg-red-100 text-red-600 text-xs px-3 py-1 rounded-full">
+    {pendingCourses.length} Pending
+  </span>
+
+</div>
+
+  {/* Cards */}
+  <div className="space-y-3">
+
+    {pendingCourses.map((course) => (
+
+      <div
+        key={course._id}
+        className="
+        bg-white
+        rounded-xl
+        shadow-sm
+        border border-gray-100
+        p-4
+        flex items-center justify-between
+        hover:shadow-md
+        transition
+        "
+      >
+
+        <div>
+          <p className="font-semibold text-gray-800">
+            {course.subject}
+          </p>
+
+          <p className="text-sm text-gray-500">
+            Tutor: {course.tutorId?.fullName}
+          </p>
+        </div>
+
+        <button
+          onClick={() =>
+            navigate(`/parent/courses/${course._id}/payment`, {
+              state: { course }
+            })
+          }
+          className="
+          bg-red-500
+          hover:bg-red-600
+          text-white
+          text-sm
+          px-5
+          py-2
+          rounded-full
+          transition
+          "
+        >
+          Pay Now
+        </button>
+
+      </div>
+
+    ))}
+
+  </div>
+
+</div>
+)}      {/* ================= COURSE CARD ================= */}
       <Card
         radius="xl"
         shadow="sm"
