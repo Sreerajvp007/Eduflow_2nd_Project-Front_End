@@ -39,10 +39,13 @@ import CoursePayment from "../pages/parent/CoursePayment";
 import ParentPayments from "../pages/parent/ParentPayments";
 import AdminFeedbackPage from "../pages/admin/AdminFeedbackPage";
 import TutorReviewsPage from "../pages/tutor/TutorReviewsPage";
+import TutorPaymentsPage from "../pages/tutor/TutorPaymentsPage";
+import AdminPaymentsPage from "../pages/admin/AdminPaymentsPage";
 
 import LearningPlanForm from "../pages/tutor/LearningPlanForm";
 
 import NotFound from "../pages/errors/NotFound";
+
 
 const AppRoutes = () => {
   return (
@@ -60,6 +63,7 @@ const AppRoutes = () => {
           <Route path="tutors" element={<TutorListPage />} />
           <Route path="tutors/:id" element={<TutorDetailsPage />} />
           <Route path="feedback" element={<AdminFeedbackPage />} />
+          <Route path="payments" element={<AdminPaymentsPage />} />
         </Route>
       </Route>
 
@@ -81,6 +85,7 @@ const AppRoutes = () => {
           <Route path="courses/:courseId" element={<CourseOverview />} />
           <Route path="my-students" element={<MyStudents />} />
           <Route path="reviews" element={<TutorReviewsPage />} />
+           <Route path="payments" element={<TutorPaymentsPage />} />
           <Route
     path="students/:studentId/courses"
     element={<StudentCourses />}

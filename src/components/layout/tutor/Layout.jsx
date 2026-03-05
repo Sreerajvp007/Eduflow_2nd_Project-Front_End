@@ -39,7 +39,7 @@ const tutorNavItems = [
   { label: "My Sessions", icon: Calendar, path: "/tutor/sessions" },
   { label: "My Students", icon: Users, path: "/tutor/my-students" },
   { label: "Courses", icon: BookOpen, path: "/tutor/courses" },
-  { label: "Earnings", icon: Wallet, path: "/tutor/earnings" },
+  { label: "Earnings", icon: Wallet, path: "/tutor/payments" },
   { label: "Reviews", icon: Star, path: "/tutor/reviews" },
   { label: "Settings", icon: Settings, path: "/tutor/settings" },
 ];
