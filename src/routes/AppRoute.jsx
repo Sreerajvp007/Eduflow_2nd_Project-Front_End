@@ -37,6 +37,8 @@ import ParentCourseOverview from "../pages/parent/ParentCourseOverview";
 import AddStudent from "../pages/parent/AddStudent";
 import CoursePayment from "../pages/parent/CoursePayment";
 import ParentPayments from "../pages/parent/ParentPayments";
+import AdminFeedbackPage from "../pages/admin/AdminFeedbackPage";
+import TutorReviewsPage from "../pages/tutor/TutorReviewsPage";
 
 import LearningPlanForm from "../pages/tutor/LearningPlanForm";
 
@@ -57,6 +59,7 @@ const AppRoutes = () => {
 
           <Route path="tutors" element={<TutorListPage />} />
           <Route path="tutors/:id" element={<TutorDetailsPage />} />
+          <Route path="feedback" element={<AdminFeedbackPage />} />
         </Route>
       </Route>
 
@@ -77,6 +80,7 @@ const AppRoutes = () => {
           <Route path="/tutor/courses" element={<TutorCourses />} />
           <Route path="courses/:courseId" element={<CourseOverview />} />
           <Route path="my-students" element={<MyStudents />} />
+          <Route path="reviews" element={<TutorReviewsPage />} />
           <Route
     path="students/:studentId/courses"
     element={<StudentCourses />}

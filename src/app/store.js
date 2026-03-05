@@ -12,7 +12,9 @@ import parentStudentsReducer from "../features/parent/parentStudentsSlice";
 import parentProfileReducer from "../features/parent/parentProfileSlice";
 import parentCourseListReducer from "../features/parent/parentCourseListSlice";
 import tutorStudentReducer from "../features/tutor/tutorStudentSlice";
-import parentPaymentsReducer from "../features/parent/parentPaymentSlice"
+import parentPaymentsReducer from "../features/parent/parentPaymentSlice";
+import reviewReducer  from "../features/parent/parentReviewSlice";
+import feedbackReducer from "../features/common/feedbackSlice"
 
 import tutorCourseReducer from "../features/tutor/course/tutorCourseSlice";
 import scheduleReducer from "../features/tutor/scheduleSlice"
@@ -35,6 +37,8 @@ const store = configureStore({
     tutorStudents: tutorStudentReducer,
     schedule: scheduleReducer, 
     parentPayments: parentPaymentsReducer,
+    reviews: reviewReducer,
+    feedback: feedbackReducer,
     
   },
   devTools: true,

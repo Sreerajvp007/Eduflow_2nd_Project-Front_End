@@ -39,7 +39,7 @@ const navItems = [
   { label: "Students & Parents", icon: Users, path: "/admin/students" },
   { label: "Sessions & Bookings", icon: Calendar, path: "/admin/sessions" },
   { label: "Payments & Revenue", icon: CreditCard, path: "/admin/payments" },
-  { label: "Reviews & Feedback", icon: Star, path: "/admin/reviews" },
+  { label: "Reviews & Feedback", icon: Star, path: "/admin/feedback" },
   { label: "Reports", icon: BarChart3, path: "/admin/reports" },
   { label: "Platform Settings", icon: Settings, path: "/admin/settings" },
 ];

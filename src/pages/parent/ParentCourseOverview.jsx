@@ -1,11 +1,20 @@
 
-import { Avatar, Loader } from "@mantine/core";
-import { useEffect } from "react";
+import {
+  Avatar,
+  Loader,
+  Rating,
+  Textarea,
+  Button,
+  Modal
+} from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   fetchParentCourseOverview,
 } from "../../features/parent/parentCourseListSlice";
+import { submitReview ,reportTutor} from "../../features/parent/parentReviewSlice";
 
 const ParentCourseOverview = () => {
 
@@ -13,13 +22,98 @@ const ParentCourseOverview = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [rating, setRating] = useState(0);
+const [review, setReview] = useState("");
+const [reportOpen, setReportOpen] = useState(false);
+const [reportReason, setReportReason] = useState("");
+
+const [parentReview, setParentReview] = useState(null);
+
+
+
   const { selectedCourse, sessions, loading } =
     useSelector((state) => state.parentCourses);
 
-  useEffect(() => {
-    dispatch(fetchParentCourseOverview(courseId));
-  }, [dispatch, courseId]);
+    
+useEffect(() => {
+  dispatch(fetchParentCourseOverview(courseId))
+    .unwrap()
+    .then((res) => {
 
+      // check review returned from backend
+      const existingReview = res?.parentReview || res?.review || null;
+
+      if (existingReview) {
+        setParentReview(existingReview);
+      }
+
+    });
+}, [dispatch, courseId]);
+
+  const handleSubmitReview = async () => {
+
+  if (!rating) {
+    notifications.show({
+      title: "Rating required",
+      message: "Please select a rating",
+      color: "red",
+    });
+    return;
+  }
+
+  await dispatch(
+    submitReview({
+      courseId: selectedCourse._id,
+      rating,
+      review
+    })
+  );
+
+  setParentReview({
+    rating,
+    review,
+    createdAt: new Date()
+  });
+
+  notifications.show({
+    title: "Review Submitted",
+    message: "Thank you for your feedback!",
+    color: "green",
+  });
+
+  setRating(0);
+  setReview("");
+};
+
+
+const handleReportTutor = async () => {
+
+  if (!reportReason.trim()) {
+    notifications.show({
+      title: "Reason required",
+      message: "Please describe the issue",
+      color: "red",
+    });
+    return;
+  }
+
+  await dispatch(
+    reportTutor({
+      courseId: selectedCourse._id,
+      tutorId: selectedCourse.tutorId._id,
+      reason: reportReason
+    })
+  );
+
+  notifications.show({
+    title: "Report Submitted",
+    message: "Our team will review this tutor shortly.",
+    color: "green",
+  });
+
+  setReportOpen(false);
+  setReportReason("");
+};
   if (loading) {
     return (
       <div className="flex justify-center py-20">
@@ -111,27 +205,41 @@ const isPaused =
 
         </div>
 
-        <div className="flex items-center gap-4 mt-6">
+       <div className="flex justify-between items-center mt-6">
 
-          <Avatar
-            src={selectedCourse.tutorId?.profileImage}
-            radius="xl"
-            size="lg"
-          >
-            {selectedCourse.tutorId?.fullName?.charAt(0)}
-          </Avatar>
+<div className="flex items-center gap-4">
 
-          <div>
-            <p className="font-semibold text-gray-800">
-              {selectedCourse.tutorId?.fullName}
-            </p>
+<Avatar
+src={selectedCourse.tutorId?.profileImage}
+radius="xl"
+size="lg"
+>
+{selectedCourse.tutorId?.fullName?.charAt(0)}
+</Avatar>
 
-            <p className="text-xs text-gray-500">
-              Your Tutor
-            </p>
-          </div>
+<div>
+<p className="font-semibold text-gray-800">
+{selectedCourse.tutorId?.fullName}
+</p>
 
-        </div>
+<p className="text-xs text-gray-500">
+Your Tutor
+</p>
+</div>
+
+</div>
+
+<Button
+variant="light"
+color="red"
+size="xs"
+radius="md"
+onClick={() => setReportOpen(true)}
+>
+Report Tutor
+</Button>
+
+</div>
 
       </div>
 
@@ -491,14 +599,107 @@ const isPaused =
               />
 
             </div>
+            
 
           )}
+       {/* ================= REVIEW TUTOR ================= */}
 
+<div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+
+<h3 className="font-semibold text-gray-800 mb-4">
+Tutor Review
+</h3>
+
+{parentReview && parentReview.rating ? (
+
+<div>
+
+<Rating
+value={parentReview.rating}
+readOnly
+size="lg"
+/>
+
+<p className="text-gray-700 mt-3">
+{parentReview.review}
+</p>
+
+<p className="text-xs text-gray-400 mt-2">
+{parentReview.createdAt &&
+  new Date(parentReview.createdAt).toLocaleDateString()}
+</p>
+
+</div>
+
+) : (
+
+<>
+
+<Rating
+value={rating}
+onChange={setRating}
+size="lg"
+color="yellow"
+mb="md"
+/>
+
+<Textarea
+placeholder="Write your review..."
+value={review}
+onChange={(e)=>setReview(e.currentTarget.value)}
+minRows={3}
+/>
+
+<Button
+onClick={handleSubmitReview}
+disabled={!rating}
+mt="md"
+color="indigo"
+radius="md"
+>
+Submit Review
+</Button>
+
+</>
+
+)}
+
+</div>
+<Modal
+opened={reportOpen}
+onClose={()=>{
+  setReportOpen(false);
+  setReportReason("");
+}}
+title="Report Tutor"
+centered
+radius="md"
+>
+
+<Textarea
+label="Describe the issue"
+placeholder="Explain what problem you faced with the tutor..."
+minRows={4}
+value={reportReason}
+onChange={(e)=>setReportReason(e.currentTarget.value)}
+/>
+
+<Button
+fullWidth
+mt="md"
+color="red"
+onClick={handleReportTutor}
+>
+Submit Report
+</Button>
+
+</Modal>
         </>
 
       )}
 
     </div>
+    
   );
 };
 

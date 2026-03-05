@@ -3,11 +3,11 @@ import axios from "../../utils/axiosInstance";
 
 export const fetchParentPayments = createAsyncThunk(
   "parentPayments/fetch",
-  async ({ studentId, page = 1 }) => {
+  async ({ studentId, page = 1, search = "", status = "", month = "" }) => {
 
     const res = await axios.get(
-  `/payments/parent/payments?studentId=${studentId}&page=${page}`
-);
+      `/payments/parent/payments?studentId=${studentId}&page=${page}&search=${search}&status=${status}&month=${month}`
+    );
 
     return res.data;
   }
