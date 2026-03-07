@@ -56,7 +56,7 @@ const parentProfileSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      /* FETCH */
+    
       .addCase(fetchParentProfile.pending, (state) => {
         state.loading = true;
         state.error = null;

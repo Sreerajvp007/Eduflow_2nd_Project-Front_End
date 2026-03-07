@@ -55,7 +55,7 @@ const { tutor, loading, error } = useSelector(
 
   // If onboarding submitted but not approved yet
   if (tutor.onboardingStatus === "submitted") {
-    navigate("/tutor/onboarding-completed");
+    navigate("/tutor/onboarding");
     return;
   }
 

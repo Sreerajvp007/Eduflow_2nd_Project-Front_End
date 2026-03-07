@@ -1,13 +1,5 @@
-
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../utils/axiosInstance";
-
-/*
-====================================
-FETCH TUTOR REVIEWS
-====================================
-*/
 
 export const fetchTutorReviews = createAsyncThunk(
   "feedback/fetchTutorReviews",
@@ -20,17 +12,11 @@ export const fetchTutorReviews = createAsyncThunk(
       return res.data.result;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch tutor reviews"
+        error.response?.data?.message || "Failed to fetch tutor reviews",
       );
     }
-  }
+  },
 );
-
-/*
-====================================
-FETCH ADMIN REVIEWS
-====================================
-*/
 
 export const fetchAdminReviews = createAsyncThunk(
   "feedback/fetchAdminReviews",
@@ -43,17 +29,11 @@ export const fetchAdminReviews = createAsyncThunk(
       return res.data.result;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch admin reviews"
+        error.response?.data?.message || "Failed to fetch admin reviews",
       );
     }
-  }
+  },
 );
-
-/*
-====================================
-FETCH ADMIN REPORTS
-====================================
-*/
 
 export const fetchAdminReports = createAsyncThunk(
   "feedback/fetchAdminReports",
@@ -66,17 +46,11 @@ export const fetchAdminReports = createAsyncThunk(
       return res.data.result;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch admin reports"
+        error.response?.data?.message || "Failed to fetch admin reports",
       );
     }
-  }
+  },
 );
-
-/*
-====================================
-INITIAL STATE
-====================================
-*/
 
 const initialState = {
   reviews: [],
@@ -92,12 +66,6 @@ const initialState = {
   error: null,
 };
 
-/*
-====================================
-SLICE
-====================================
-*/
-
 const feedbackSlice = createSlice({
   name: "feedback",
   initialState,
@@ -112,12 +80,6 @@ const feedbackSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
-
-      /*
-      ============================
-      TUTOR REVIEWS
-      ============================
-      */
 
       .addCase(fetchTutorReviews.pending, (state) => {
         state.loading = true;
@@ -140,12 +102,6 @@ const feedbackSlice = createSlice({
         state.error = action.payload;
       })
 
-      /*
-      ============================
-      ADMIN REVIEWS
-      ============================
-      */
-
       .addCase(fetchAdminReviews.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -165,12 +121,6 @@ const feedbackSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      /*
-      ============================
-      ADMIN REPORTS
-      ============================
-      */
 
       .addCase(fetchAdminReports.pending, (state) => {
         state.loading = true;

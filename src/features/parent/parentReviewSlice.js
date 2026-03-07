@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/axiosInstance";
 
-/* ---------------- ADD REVIEW ---------------- */
+
 
 export const submitReview = createAsyncThunk(
   "reviews/submitReview",
@@ -20,7 +20,7 @@ export const submitReview = createAsyncThunk(
   }
 );
 
-/* ---------------- REPORT TUTOR ---------------- */
+
 
 export const reportTutor = createAsyncThunk(
   "reviews/reportTutor",

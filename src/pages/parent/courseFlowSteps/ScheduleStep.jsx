@@ -62,34 +62,36 @@ const ScheduleStep = () => {
 
   {/* Time Slots */}
  <div className="grid grid-cols-2 gap-4 mb-10">
-  {selectedTutor?.availability?.map((slotItem) => {
-    const isSelected = slot === slotItem.time;
+  {selectedTutor?.availability
+    ?.filter((slotItem) => slotItem.status === "available")
+    ?.map((slotItem) => {
+      const isSelected = slot === slotItem.time;
 
-    return (
-      <Card
-        key={slotItem._id}
-        radius="xl"
-        shadow={isSelected ? "md" : "sm"}
-        onClick={() => setSlot(slotItem.time)}
-        style={{
-          cursor: "pointer",
-          padding: "16px",
-          textAlign: "center",
-          transition: "all 0.25s ease",
-          border: isSelected
-            ? "2px solid #6366f1"
-            : "1px solid #e5e7eb",
-          background: isSelected
-            ? "#eef2ff"
-            : "#ffffff",
-          transform: isSelected ? "scale(1.03)" : "scale(1)",
-          fontWeight: 500,
-        }}
-      >
-        {slotItem.time}
-      </Card>
-    );
-  })}
+      return (
+        <Card
+          key={slotItem._id}
+          radius="xl"
+          shadow={isSelected ? "md" : "sm"}
+          onClick={() => setSlot(slotItem.time)}
+          style={{
+            cursor: "pointer",
+            padding: "16px",
+            textAlign: "center",
+            transition: "all 0.25s ease",
+            border: isSelected
+              ? "2px solid #6366f1"
+              : "1px solid #e5e7eb",
+            background: isSelected
+              ? "#eef2ff"
+              : "#ffffff",
+            transform: isSelected ? "scale(1.03)" : "scale(1)",
+            fontWeight: 500,
+          }}
+        >
+          {slotItem.time}
+        </Card>
+      );
+    })}
 </div>
 
   {/* Buttons */}

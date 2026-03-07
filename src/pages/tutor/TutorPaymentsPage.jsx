@@ -1,401 +1,8 @@
 
-// import { useEffect, useState } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-
-// import {
-//   fetchTutorEarnings,
-//   fetchTutorHistory,
-//   fetchTutorPayouts,
-//   requestPayout,
-// } from "../../features/common/paymentsSlice";
-
-// import {
-//   Table,
-//   Text,
-//   Loader,
-//   Pagination,
-//   Modal,
-//   Avatar,
-//   Group,
-//   Card,
-//   Button,
-//   Stack,
-//   Badge,
-//   TextInput,
-//   Select,
-//   SegmentedControl,
-// } from "@mantine/core";
-
-// export default function TutorPaymentsPage() {
-//   const dispatch = useDispatch();
-
-//   const {
-//     stats,
-//     history,
-//     payouts,
-//     page,
-//     totalPages,
-//     loading,
-//   } = useSelector((state) => state.payments);
-
-//   const [view, setView] = useState("payments");
-
-//   const [opened, setOpened] = useState(false);
-
-//   const [amount, setAmount] = useState("");
-//   const [method, setMethod] = useState("");
-//   const [notes, setNotes] = useState("");
-
-//   useEffect(() => {
-//     dispatch(fetchTutorEarnings());
-
-//     if (view === "payments") {
-//       dispatch(fetchTutorHistory(page));
-//     } else {
-//       dispatch(fetchTutorPayouts(page));
-//     }
-//   }, [dispatch, page, view]);
-
-//   if (loading) {
-//     return (
-//       <div className="flex justify-center p-10">
-//         <Loader />
-//       </div>
-//     );
-//   }
-
-//   const submit = () => {
-//     dispatch(requestPayout({ amount, method, notes }));
-//     setOpened(false);
-//   };
-
-//   return (
-//     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
-
-//       {/* HEADER */}
-
-//       <div>
-//         <Text fw={700} size="lg">
-//           Payments
-//         </Text>
-
-//         <Text size="xs" c="dimmed">
-//           Your earnings and payout requests
-//         </Text>
-//       </div>
-
-//       {/* STATS */}
-
-//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-//         <Card shadow="sm" radius="md" p="md">
-//           <Text size="xs" c="dimmed">Total Earnings</Text>
-//           <Text fw={700} size="lg">₹{stats?.totalEarnings}</Text>
-//         </Card>
-
-//         <Card shadow="sm" radius="md" p="md">
-//           <Text size="xs" c="dimmed">Monthly Income</Text>
-//           <Text fw={700} size="lg">₹{stats?.monthlyIncome}</Text>
-//         </Card>
-
-//         <Card shadow="sm" radius="md" p="md">
-//           <Text size="xs" c="dimmed">Pending Payout</Text>
-//           <Text fw={700} size="lg">₹{stats?.pendingAmount}</Text>
-//         </Card>
-
-//         <Card shadow="sm" radius="md" p="md">
-//           <Text size="xs" c="dimmed">Wallet Balance</Text>
-//           <Text fw={700} size="lg">₹{stats?.walletBalance}</Text>
-
-//           <Button
-//             size="xs"
-//             mt="sm"
-//             fullWidth
-//             onClick={() => setOpened(true)}
-//           >
-//             Request Payout
-//           </Button>
-//         </Card>
-
-//       </div>
-
-//       {/* TABLE SWITCH */}
-
-//       <Group justify="flex-start" mb="sm">
-
-// <SegmentedControl
-// value={view}
-// onChange={setView}
-// data={[
-// { label: "Payments", value: "payments" },
-// { label: "Payout Requests", value: "payouts" },
-// ]}
-// />
-
-// </Group>
-
-// <Text fw={600} mb="sm">
-// {view === "payments"
-// ? "Student Course Payments"
-// : "Payout Requests"}
-// </Text>
-
-//       {/* MOBILE CARDS */}
-
-//       <div className="md:hidden space-y-3">
-
-//         {view === "payments" &&
-//           history.map((p) => {
-//             const student = p.courseId?.studentId?.name;
-
-//             return (
-//               <Card key={p._id} shadow="sm" radius="md" p="md">
-//                 <Stack gap={6}>
-
-//                   <Group>
-//                     <Avatar size="sm">
-//                       {student?.charAt(0)}
-//                     </Avatar>
-
-//                     <div>
-//                       <Text fw={500} size="sm">
-//                         {student}
-//                       </Text>
-
-//                       <Text size="xs" c="dimmed">
-//                         {p.courseId?.subject}
-//                       </Text>
-//                     </div>
-//                   </Group>
-
-//                   <Text fw={600} c="green">
-//                     ₹{p.tutorEarning}
-//                   </Text>
-
-//                   <Text size="xs" c="dimmed">
-//                     {new Date(p.createdAt).toLocaleDateString()}
-//                   </Text>
-
-//                 </Stack>
-//               </Card>
-//             );
-//           })}
-
-//         {view === "payouts" &&
-//           payouts.map((p) => (
-//             <Card key={p._id} shadow="sm" radius="md" p="md">
-
-//               <Stack gap={6}>
-
-//                 <Text fw={600}>₹{p.amount}</Text>
-
-//                 <Text size="sm">{p.method}</Text>
-
-//                 <Badge
-//                   color={
-//                     p.status === "paid"
-//                       ? "green"
-//                       : p.status === "pending"
-//                       ? "yellow"
-//                       : "red"
-//                   }
-//                 >
-//                   {p.status}
-//                 </Badge>
-
-//                 <Text size="xs" c="dimmed">
-//                   {new Date(p.createdAt).toLocaleDateString()}
-//                 </Text>
-
-//               </Stack>
-
-//             </Card>
-//           ))}
-
-//       </div>
-
-//       {/* DESKTOP TABLE */}
-
-//       <div className="hidden md:block">
-
-//         <Card shadow="sm" radius="md" p="md">
-
-//           <Table highlightOnHover>
-
-//             {/* PAYMENTS TABLE */}
-
-//            {view === "payments" && (
-//   <>
-//     <Table.Thead>
-//       <Table.Tr>
-//         <Table.Th>Student</Table.Th>
-//         <Table.Th>Subject</Table.Th>
-//         <Table.Th>Amount Earned</Table.Th>
-//         <Table.Th>Date</Table.Th>
-//       </Table.Tr>
-//     </Table.Thead>
-
-//     <Table.Tbody>
-//       {history.map((p) => {
-
-//         const student = p.studentName;
-
-//         return (
-//           <Table.Tr key={p._id}>
-
-//             <Table.Td>
-//               <Group gap="xs">
-//                 <Avatar size="sm">
-//                   {student?.charAt(0)}
-//                 </Avatar>
-
-//                 <Text size="sm">{student}</Text>
-//               </Group>
-//             </Table.Td>
-
-//             <Table.Td>
-//               <Text size="sm">{p.subject}</Text>
-//             </Table.Td>
-
-//             <Table.Td>
-//               <Text fw={600} c="green">
-//                 ₹{p.tutorEarning}
-//               </Text>
-//             </Table.Td>
-
-//             <Table.Td>
-//               {new Date(p.createdAt).toLocaleDateString()}
-//             </Table.Td>
-
-//           </Table.Tr>
-//         );
-
-//       })}
-//     </Table.Tbody>
-//   </>
-// )}
-//             {/* PAYOUT TABLE */}
-
-//             {view === "payouts" && (
-//               <>
-//                 <Table.Thead>
-//                   <Table.Tr>
-//                     <Table.Th>Amount</Table.Th>
-//                     <Table.Th>Method</Table.Th>
-//                     <Table.Th>Status</Table.Th>
-//                     <Table.Th>Date</Table.Th>
-//                   </Table.Tr>
-//                 </Table.Thead>
-
-//                 <Table.Tbody>
-
-//                   {payouts.map((p) => (
-//                     <Table.Tr key={p._id}>
-
-//                       <Table.Td>₹{p.amount}</Table.Td>
-
-//                       <Table.Td>{p.method}</Table.Td>
-
-//                       <Table.Td>
-//                         <Badge
-//                           color={
-//                             p.status === "paid"
-//                               ? "green"
-//                               : p.status === "pending"
-//                               ? "yellow"
-//                               : "red"
-//                           }
-//                         >
-//                           {p.status}
-//                         </Badge>
-//                       </Table.Td>
-
-//                       <Table.Td>
-//                         {new Date(p.createdAt).toLocaleDateString()}
-//                       </Table.Td>
-
-//                     </Table.Tr>
-//                   ))}
-
-//                 </Table.Tbody>
-//               </>
-//             )}
-
-//           </Table>
-
-//         </Card>
-
-//       </div>
-
-//       {/* PAGINATION */}
-
-//       {totalPages > 1 && (
-
-//         <div className="flex justify-end">
-
-//           <Pagination
-//             value={page}
-//             onChange={(p) => {
-//               if (view === "payments") {
-//                 dispatch(fetchTutorHistory(p));
-//               } else {
-//                 dispatch(fetchTutorPayouts(p));
-//               }
-//             }}
-//             total={totalPages}
-//           />
-
-//         </div>
-
-//       )}
-
-//       {/* MODAL */}
-
-//       <Modal
-//         opened={opened}
-//         onClose={() => setOpened(false)}
-//         title="Request Payout"
-//       >
-
-//         <Stack>
-
-//           <TextInput
-//             label="Amount"
-//             value={amount}
-//             onChange={(e) => setAmount(e.target.value)}
-//           />
-
-//           <Select
-//             label="Method"
-//             data={[
-//               { value: "bank", label: "Bank Transfer" },
-//               { value: "upi", label: "UPI" },
-//               { value: "wallet", label: "Wallet" },
-//             ]}
-//             value={method}
-//             onChange={setMethod}
-//           />
-
-//           <TextInput
-//             label="Notes"
-//             value={notes}
-//             onChange={(e) => setNotes(e.target.value)}
-//           />
-
-//           <Button onClick={submit}>
-//             Submit Request
-//           </Button>
-
-//         </Stack>
-
-//       </Modal>
-
-//     </div>
-//   );
-// }
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { notifications } from "@mantine/notifications";
 
 import {
   fetchTutorEarnings,
@@ -470,21 +77,35 @@ return(
 );
 }
 
+
 const submit = async () => {
 
-await dispatch(requestPayout({
-amount,
-method,
-notes
-}));
+  const result = await dispatch(
+    requestPayout({ amount, method, notes })
+  );
 
-/* clear modal fields */
+  if (requestPayout.fulfilled.match(result)) {
 
-setAmount("");
-setMethod("");
-setNotes("");
+    notifications.show({
+      title: "Success",
+      message: "Payout request submitted successfully",
+      color: "green"
+    });
 
-setOpened(false);
+    setAmount("");
+    setMethod("");
+    setNotes("");
+    setOpened(false);
+
+  } else {
+
+    notifications.show({
+      title: "Error",
+      message: result.payload || "Failed to request payout",
+      color: "red"
+    });
+
+  }
 
 };
 
@@ -532,8 +153,8 @@ Your earnings and payout requests
 </Card>
 
 <Card shadow="sm" radius="md" p="md">
-<Text size="xs" c="dimmed">Monthly Income</Text>
-<Text fw={700} size="lg">₹{stats?.monthlyIncome}</Text>
+<Text size="xs" c="dimmed"> Total Money withdrawn</Text>
+<Text fw={700} size="lg">₹{stats?.totalWithdrawn?.toLocaleString() || 0}</Text>
 </Card>
 
 <Card shadow="sm" radius="md" p="md">
@@ -611,7 +232,7 @@ data={[
 <Table.Thead>
 
 <Table.Tr>
-
+<Table.Th>Parent</Table.Th>
 <Table.Th>Student</Table.Th>
 <Table.Th>Subject</Table.Th>
 <Table.Th>Amount Earned</Table.Th>
@@ -627,18 +248,31 @@ data={[
 {history.map((p)=>{
 
 const student = p.studentName;
+const parent =p.parentName
 
 return(
 
 <Table.Tr key={p._id}>
-
 <Table.Td>
 
 <Group gap="xs">
 
 <Avatar size="sm">
-{student?.charAt(0)}
+{parent?.charAt(0)}
 </Avatar>
+
+<Text size="sm">{parent}</Text>
+
+</Group>
+
+</Table.Td>
+<Table.Td>
+
+<Group gap="xs">
+
+{/* <Avatar size="sm">
+{student?.charAt(0)}
+</Avatar> */}
 
 <Text size="sm">{student}</Text>
 

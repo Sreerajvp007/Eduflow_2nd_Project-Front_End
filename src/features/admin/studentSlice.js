@@ -9,7 +9,7 @@ export const fetchStudents = createAsyncThunk(
     const { data } = await api.get("/admin/students", {
       params: {
         page: params.page || 1,
-        limit: 3,
+        limit: 2,
         search: params.search || "",
         grade: params.grade || "",
         status: params.status || "",

@@ -46,7 +46,6 @@ import LearningPlanForm from "../pages/tutor/LearningPlanForm";
 
 import NotFound from "../pages/errors/NotFound";
 
-
 const AppRoutes = () => {
   return (
     <Routes>
@@ -85,12 +84,12 @@ const AppRoutes = () => {
           <Route path="courses/:courseId" element={<CourseOverview />} />
           <Route path="my-students" element={<MyStudents />} />
           <Route path="reviews" element={<TutorReviewsPage />} />
-           <Route path="payments" element={<TutorPaymentsPage />} />
+          <Route path="payments" element={<TutorPaymentsPage />} />
           <Route
-    path="students/:studentId/courses"
-    element={<StudentCourses />}
-  />
-  <Route path="schedule" element={<SchedulePage />} />
+            path="students/:studentId/courses"
+            element={<StudentCourses />}
+          />
+          <Route path="schedule" element={<SchedulePage />} />
         </Route>
       </Route>
 
@@ -122,9 +121,9 @@ const AppRoutes = () => {
             element={<ParentCourseOverview />}
           />
           <Route
-  path="/parent/courses/:courseId/payment"
-  element={<CoursePayment />}
-/>
+            path="/parent/courses/:courseId/payment"
+            element={<CoursePayment />}
+          />
 
           <Route path="request-course" element={<ParentCourseFlow />} />
           <Route path="/parent/payments" element={<ParentPayments />} />

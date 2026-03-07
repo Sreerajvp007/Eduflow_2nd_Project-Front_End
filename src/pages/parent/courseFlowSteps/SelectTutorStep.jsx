@@ -88,7 +88,7 @@ const SelectTutorStep = () => {
                 color: "#374151",
               }}
             >
-              ₹{tutor.hourlyRate}/hr
+              ₹{tutor.monthlyFee}/Month
             </Text>
           </div>
         </Group>

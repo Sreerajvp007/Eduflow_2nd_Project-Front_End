@@ -10,7 +10,7 @@ import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchNewTutorCourses,
-  fetchTutorCourses, // ✅ ADD THIS
+  fetchTutorCourses, 
 } from "../../features/tutor/course/tutorCourseSlice";
 import { useNavigate } from "react-router-dom";
 

@@ -16,7 +16,7 @@ import parentPaymentsReducer from "../features/parent/parentPaymentSlice";
 import reviewReducer  from "../features/parent/parentReviewSlice";
 import feedbackReducer from "../features/common/feedbackSlice"
 import paymentsReducer from "../features/common/paymentsSlice"
-
+import sessionReducer from "../features/tutor/sessionSlice"
 
 import tutorCourseReducer from "../features/tutor/course/tutorCourseSlice";
 import scheduleReducer from "../features/tutor/scheduleSlice"
@@ -42,6 +42,8 @@ const store = configureStore({
     reviews: reviewReducer,
     feedback: feedbackReducer,
     payments: paymentsReducer,
+    sessions: sessionReducer,
+
     
   },
   devTools: true,

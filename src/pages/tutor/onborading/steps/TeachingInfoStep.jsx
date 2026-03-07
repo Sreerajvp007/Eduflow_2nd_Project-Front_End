@@ -1,4 +1,5 @@
 
+
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -8,49 +9,56 @@ import {
 
 import MuiInput from "../../../../components/common/input";
 import MuiButton from "../../../../components/common/button";
-import MuiRadioGroup from "../../../../components/common/Radio";
 import MuiCheckboxGroup from "../../../../components/common/checkboxGroup";
 
 const TeachingInfoStep = () => {
   const dispatch = useDispatch();
 
   const { loading, tutor, teachingMeta, error } = useSelector(
-  (state) => state.tutorOnboarding
-);
+    (state) => state.tutorOnboarding
+  );
+
   const [form, setForm] = useState({
-    syllabus: tutor?.syllabus || "STATE",
+    syllabus: tutor?.syllabus || [],
     classes: tutor?.classes || [],
     subjects: tutor?.subjects || [],
     teachingExperience: tutor?.teachingExperience || "",
-    hourlyRate: tutor?.hourlyRate || "",
+    monthlyFee: tutor?.monthlyFee || "",
+    availability: tutor?.availability?.map((a) => a.time) || [],
   });
 
-  /* 🔥 Fetch classes + subjects from DB */
+  /* 🔥 Fetch classes + subjects */
   useEffect(() => {
     dispatch(fetchTeachingMeta());
   }, [dispatch]);
 
   /* 🔥 Dynamic Class Options */
-const classOptions = useMemo(() => {
-  return teachingMeta.map((c) => ({
-    label: `Grade ${c.classGrade}`,   // 👈 show Grade 5
-    value: c.classGrade,              // 👈 keep Number (5)
-  }));
-}, [teachingMeta]);
+  const classOptions = useMemo(() => {
+    return teachingMeta.map((c) => ({
+      label: `Grade ${c.classGrade}`,
+      value: c.classGrade,
+    }));
+  }, [teachingMeta]);
 
-  /* 🔥 Dynamic Subject Options based on selected classes + syllabus */
+  /* 🔥 Subject Options based on boards + classes */
   const subjectOptions = useMemo(() => {
-    const subjects = teachingMeta
-      .filter((c) => form.classes.includes(c.classGrade))
-      .flatMap(
-        (c) =>
-          c.subjectsByBoard?.[form.syllabus]?.map((s) => ({
-            label: s.name,
-            value: s.name,
-          })) || []
-      );
+    let subjects = [];
 
-    // remove duplicates
+    teachingMeta
+      .filter((c) => form.classes.includes(c.classGrade))
+      .forEach((c) => {
+        form.syllabus.forEach((board) => {
+          const boardSubjects = c.subjectsByBoard?.[board] || [];
+
+          boardSubjects.forEach((s) => {
+            subjects.push({
+              label: s.name,
+              value: s.name,
+            });
+          });
+        });
+      });
+
     const unique = Array.from(
       new Map(subjects.map((s) => [s.value, s])).values()
     );
@@ -58,7 +66,7 @@ const classOptions = useMemo(() => {
     return unique;
   }, [teachingMeta, form.classes, form.syllabus]);
 
-  /* 🔥 Remove subject if class unselected */
+  /* 🔥 Remove subject if invalid */
   useEffect(() => {
     const validSubjects = subjectOptions.map((s) => s.value);
 
@@ -70,8 +78,24 @@ const classOptions = useMemo(() => {
     }));
   }, [subjectOptions]);
 
+  /* 🔥 Time slot options */
+  const timeSlotOptions = [
+    "6:00 AM","7:00 AM","8:00 AM","9:00 AM","10:00 AM","11:00 AM",
+    "12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM",
+    "5:00 PM","6:00 PM","7:00 PM","8:00 PM","9:00 PM"
+  ].map((time) => ({
+    label: time,
+    value: time,
+  }));
+
   const handleSave = async () => {
-    await dispatch(saveTeachingInfo(form));
+
+    const payload = {
+  ...form,
+  availability: form.availability
+};
+
+    await dispatch(saveTeachingInfo(payload));
   };
 
   return (
@@ -88,23 +112,22 @@ const classOptions = useMemo(() => {
           </p>
         </div>
 
-        {/* Syllabus */}
+        {/* Boards */}
         <div className="mb-6">
           <p className="text-sm font-medium text-gray-700 mb-2">
-            Teaching syllabus
+            Teaching Boards
           </p>
 
-          <MuiRadioGroup
-            value={form.syllabus}
-            onChange={(val) =>
-              setForm({ ...form, syllabus: val })
+          <MuiCheckboxGroup
+            values={form.syllabus}
+            onChange={(vals) =>
+              setForm({ ...form, syllabus: vals })
             }
             options={[
               { label: "STATE", value: "STATE" },
               { label: "CBSE", value: "CBSE" },
               { label: "ICSE", value: "ICSE" },
             ]}
-            theme="light"
           />
         </div>
 
@@ -138,6 +161,48 @@ const classOptions = useMemo(() => {
           />
         </div>
 
+       {/* Availability */}
+<div className="mb-6">
+  <p className="text-sm font-medium text-gray-700 mb-3">
+    Available Time Slots
+  </p>
+
+  <div className="grid grid-cols-4 gap-2">
+    {[
+      "6:00 AM","7:00 AM","8:00 AM","5:00 PM",
+
+
+      "6:00 PM","7:00 PM","8:00 PM","9:00 PM"
+    ].map((time) => {
+      const selected = form.availability.includes(time);
+
+      return (
+        <button
+          key={time}
+          type="button"
+          onClick={() => {
+            setForm((prev) => ({
+              ...prev,
+              availability: selected
+                ? prev.availability.filter((t) => t !== time)
+                : [...prev.availability, time],
+            }));
+          }}
+          className={`
+            text-sm rounded-lg border px-3 py-2 transition
+            ${
+              selected
+                ? "bg-indigo-600 text-white border-indigo-600"
+                : "bg-white border-gray-300 hover:border-indigo-400"
+            }
+          `}
+        >
+          {time}
+        </button>
+      );
+    })}
+  </div>
+</div>
         {/* Experience */}
         <div className="mb-6">
           <MuiInput
@@ -154,26 +219,27 @@ const classOptions = useMemo(() => {
           />
         </div>
 
-        {/* Rate */}
+        {/* Monthly Fee */}
         <div className="mb-6">
           <MuiInput
-            label="Payment per hour"
+            label="Monthly Fee"
             type="number"
-            value={form.hourlyRate}
+            value={form.monthlyFee}
             onChange={(e) =>
               setForm({
                 ...form,
-                hourlyRate: e.target.value,
+                monthlyFee: e.target.value,
               })
             }
             sx={lightInputSx}
           />
         </div>
+
         {error && (
-  <p className="text-red-500 text-sm mb-4">
-    {error}
-  </p>
-)}
+          <p className="text-red-500 text-sm mb-4">
+            {error}
+          </p>
+        )}
 
         {/* CTA */}
         <div className="pt-4 border-t border-gray-200 flex justify-end">

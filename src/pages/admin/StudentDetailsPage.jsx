@@ -9,6 +9,7 @@ import {
   Stack,
   Text,
   Modal,
+  Grid,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -34,20 +35,17 @@ export default function StudentDetailsPage() {
     dispatch(fetchStudentDetails(id));
   }, [id, dispatch]);
 
-  // 🔒 Safe rendering guards
   if (loading) return <Text>Loading student details...</Text>;
   if (!student) return <Text>No student found</Text>;
 
   const isBlocked = student.status === "blocked";
 
-  // 🔥 Open confirmation modal for both actions
   const handleToggleStatus = () => {
     const newStatus = isBlocked ? "active" : "blocked";
     setTargetStatus(newStatus);
     setConfirmOpen(true);
   };
 
-  // 🔥 Update status handler
   const handleConfirmAction = async () => {
     try {
       setActionLoading(true);
@@ -69,7 +67,9 @@ export default function StudentDetailsPage() {
 
   return (
     <Stack gap="lg">
+
       {/* ================= STUDENT PROFILE CARD ================= */}
+
       <Card withBorder radius="lg" p="lg">
         <Group justify="space-between" align="center">
           <Group>
@@ -87,13 +87,10 @@ export default function StudentDetailsPage() {
               </Text>
 
               <Text size="sm" c="dimmed">
-                {student.grade}
+                Grade - {student.grade}
               </Text>
 
-              <Badge
-                mt={6}
-                color={isBlocked ? "red" : "green"}
-              >
+              <Badge mt={6} color={isBlocked ? "red" : "green"}>
                 {student.status.toUpperCase()}
               </Badge>
             </Box>
@@ -110,37 +107,50 @@ export default function StudentDetailsPage() {
         </Group>
       </Card>
 
-      {/* ================= STUDENT INFORMATION ================= */}
-      <Card withBorder radius="lg" p="lg">
-        <Text fw={600} mb="md">
-          Student Information
-        </Text>
+      {/* ================= TWO CARDS IN ONE ROW ================= */}
 
-        <Stack gap={8}>
-          <InfoRow label="Board" value={student.board} />
-          <InfoRow label="Grade" value={student.grade} />
-          <InfoRow label="Status" value={student.status} />
-        </Stack>
-      </Card>
+      <Grid>
 
-      {/* ================= PARENT INFORMATION ================= */}
-      <Card withBorder radius="lg" p="lg">
-        <Text fw={600} mb="md">
-          Parent Information
-        </Text>
+        {/* STUDENT INFORMATION */}
 
-        <Stack gap={8}>
-          <InfoRow label="Name" value={student.parentId?.fullName} />
-          <InfoRow label="Email" value={student.parentId?.email} />
-          <InfoRow label="Mobile" value={student.parentId?.mobile} />
-          <InfoRow
-            label="Parent Status"
-            value={student.parentId?.status}
-          />
-        </Stack>
-      </Card>
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Card withBorder radius="lg" p="lg" h="100%">
+            <Text fw={600} mb="md">
+              Student Information
+            </Text>
+
+            <Stack gap={8}>
+              <InfoRow label="Board" value={student.board} />
+              <InfoRow label="Grade" value={student.grade} />
+              <InfoRow label="Status" value={student.status} />
+            </Stack>
+          </Card>
+        </Grid.Col>
+
+        {/* PARENT INFORMATION */}
+
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Card withBorder radius="lg" p="lg" h="100%">
+            <Text fw={600} mb="md">
+              Parent Information
+            </Text>
+
+            <Stack gap={8}>
+              <InfoRow label="Name" value={student.parentId?.fullName} />
+              <InfoRow label="Email" value={student.parentId?.email} />
+              <InfoRow label="Mobile" value={student.parentId?.mobile} />
+              <InfoRow
+                label="Parent Status"
+                value={student.parentId?.status}
+              />
+            </Stack>
+          </Card>
+        </Grid.Col>
+
+      </Grid>
 
       {/* ================= CONFIRM MODAL ================= */}
+
       <Modal
         opened={confirmOpen}
         onClose={() => setConfirmOpen(false)}
@@ -174,19 +184,32 @@ export default function StudentDetailsPage() {
           </Button>
         </Group>
       </Modal>
+
     </Stack>
   );
 }
 
 /* ================= SMALL REUSABLE ROW ================= */
 
+// const InfoRow = ({ label, value }) => (
+//   <Group justify="space-between">
+//     <Text size="sm" c="dimmed">
+//       {label}
+//     </Text>
+//     <Text size="sm" fw={500}>
+//       {value || "—"}
+//     </Text>
+//   </Group>
+// );
+
 const InfoRow = ({ label, value }) => (
-  <Group justify="space-between">
-    <Text size="sm" c="dimmed">
+  <Stack gap={2}>
+    <Text size="xs" c="dimmed">
       {label}
     </Text>
+
     <Text size="sm" fw={500}>
       {value || "—"}
     </Text>
-  </Group>
+  </Stack>
 );

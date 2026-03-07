@@ -102,9 +102,19 @@ const TutorLayout = () => {
             </Group>
 
             <Group gap="sm">
-              <Avatar radius="xl" color="teal">
-                T
-              </Avatar>
+             <Group gap="sm">
+  <Avatar
+    radius="xl"
+    size="md"
+    src={tutor?.profileImage || undefined}
+    alt={tutor?.fullName}
+    style={{
+      border: "2px solid teal"
+    }}
+  >
+    {tutor?.fullName?.charAt(0)}
+  </Avatar>
+</Group>
 
               <ActionIcon
                 variant="subtle"

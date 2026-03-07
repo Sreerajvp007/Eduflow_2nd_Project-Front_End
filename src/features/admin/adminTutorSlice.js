@@ -8,7 +8,7 @@ export const fetchTutors = createAsyncThunk(
       const res = await api.get("/admin/tutors", {
         params: {
           page: params.page || 1,
-          limit: 3,
+          limit: 2,
           search: params.search || "",
           status: params.status || "",
           subject: params.subject || "",
@@ -54,17 +54,24 @@ export const updateTutorStatus = createAsyncThunk(
 
 export const fetchPendingTutors = createAsyncThunk(
   "adminTutors/fetchPending",
-  async (_, thunkAPI) => {
+  async ({ page = 1 } = {}, thunkAPI) => {
     try {
-      const res = await api.get("/admin/tutors/pending");
-      return res.data.result;
+      const res = await api.get("/admin/tutors/pending", {
+        params: {
+          page,
+          limit: 5,
+        },
+      });
+
+      return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || "Failed to fetch pending tutors",
       );
     }
-  },
+  }
 );
+
 
 export const approveTutor = createAsyncThunk(
   "adminTutors/approve",
@@ -180,9 +187,10 @@ const adminTutorSlice = createSlice({
         state.loading = true;
       })
       .addCase(fetchPendingTutors.fulfilled, (state, action) => {
-        state.loading = false;
-        state.pendingList = action.payload;
-      })
+  state.loading = false;
+  state.pendingList = action.payload.result;
+  state.pagination = action.payload.pagination;
+})
       .addCase(fetchPendingTutors.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
