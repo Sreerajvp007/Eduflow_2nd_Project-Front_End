@@ -34,6 +34,7 @@ export const adminRefresh = createAsyncThunk(
 const adminSlice = createSlice({
   name: "admin",
   initialState: {
+    admin: null,
     accessToken: null,
     loading: false,
     error: null,
@@ -42,6 +43,7 @@ const adminSlice = createSlice({
   reducers: {
     adminLogout: (state) => {
       state.accessToken = null;
+      state.admin = null;
       state.authInitialized = true;
       localStorage.removeItem("role");
     },
@@ -56,6 +58,7 @@ const adminSlice = createSlice({
       .addCase(adminLogin.fulfilled, (state, action) => {
         state.loading = false;
         state.accessToken = action.payload.result.accessToken;
+        state.admin = action.payload.result.admin;
         state.authInitialized = true;
         localStorage.setItem("role", "admin");
       })
@@ -67,6 +70,7 @@ const adminSlice = createSlice({
 
       .addCase(adminRefresh.fulfilled, (state, action) => {
         state.accessToken = action.payload.result.accessToken;
+        state.admin = action.payload.result.user;
         state.authInitialized = true;
       })
       .addCase(adminRefresh.rejected, (state) => {

@@ -114,6 +114,7 @@ const ParentLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const { loading } = useSelector((state) => state.parentStudents);
+  const { profile } = useSelector((state) => state.parentProfile);
 
   useEffect(() => {
     dispatch(fetchParentStudents());
@@ -149,12 +150,12 @@ const ParentLayout = () => {
             )}
 
             <Text fw={700} size="lg">
-              ParentFlow
+               {profile?.fullName || "Parent"}
             </Text>
           </Group>
 
           <Avatar radius="xl" color="violet">
-            P
+             {profile?.fullName?.charAt(0) || "P"}
           </Avatar>
         </Group>
       </AppShell.Header>

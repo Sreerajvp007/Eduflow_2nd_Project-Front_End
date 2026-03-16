@@ -20,14 +20,19 @@ export const addStudent = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await api.post("/parent/students", data);
-
       return res.data.result;
     } catch (err) {
+      const apiError = err.response?.data;
+
+      if (apiError?.errors?.length) {
+        return rejectWithValue(apiError.errors[0].message);
+      }
+
       return rejectWithValue(
-        err.response?.data?.message || "Failed to add student",
+        apiError?.message || "Failed to add student"
       );
     }
-  },
+  }
 );
 
 export const updateStudent = createAsyncThunk(
@@ -37,11 +42,19 @@ export const updateStudent = createAsyncThunk(
       const res = await api.put(`/parent/students/${studentId}`, data);
       return res.data.result;
     } catch (err) {
+      const apiError = err.response?.data;
+
+      
+      if (apiError?.errors?.length) {
+        return rejectWithValue(apiError.errors[0].message);
+      }
+
+     
       return rejectWithValue(
-        err.response?.data?.message || "Failed to update student",
+        apiError?.message || "Failed to update student"
       );
     }
-  },
+  }
 );
 
 const parentStudentsSlice = createSlice({

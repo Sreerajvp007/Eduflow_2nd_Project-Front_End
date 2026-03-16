@@ -225,6 +225,10 @@ export default function TutorDetailsPage() {
                   label="Availability"
                   data={tutor.availability?.map((a) => a.time)}
                 />
+                 <Info
+  label="Monthly Fee"
+  value={`₹${tutor.monthlyFee}`}
+/>
 
               </Stack>
 

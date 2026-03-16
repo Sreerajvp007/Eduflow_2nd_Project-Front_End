@@ -18,10 +18,10 @@ export const fetchTutors = createAsyncThunk(
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch tutors"
+        err.response?.data?.message || "Failed to fetch tutors",
       );
     }
-  }
+  },
 );
 
 export const fetchTutorDetails = createAsyncThunk(
@@ -69,9 +69,8 @@ export const fetchPendingTutors = createAsyncThunk(
         err.response?.data?.message || "Failed to fetch pending tutors",
       );
     }
-  }
+  },
 );
-
 
 export const approveTutor = createAsyncThunk(
   "adminTutors/approve",
@@ -131,14 +130,64 @@ export const verifyTutorId = createAsyncThunk(
   },
 );
 
+export const fetchProfileEditRequests = createAsyncThunk(
+  "adminTutors/fetchProfileEditRequests",
+  async ({ page = 1 } = {}, thunkAPI) => {
+    try {
+      const res = await api.get("/admin/profile-edit-requests", {
+        params: {
+          page,
+          limit: 5,
+        },
+      });
+
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to fetch edit requests",
+      );
+    }
+  },
+);
+
+export const approveProfileEdit = createAsyncThunk(
+  "adminTutors/approveProfileEdit",
+  async (requestId, thunkAPI) => {
+    try {
+      await api.patch(`/admin/profile-edit/${requestId}/approve`);
+      return requestId;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to approve request",
+      );
+    }
+  },
+);
+
+export const rejectProfileEdit = createAsyncThunk(
+  "adminTutors/rejectProfileEdit",
+  async (requestId, thunkAPI) => {
+    try {
+      await api.patch(`/admin/profile-edit/${requestId}/reject`);
+      return requestId;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to reject request",
+      );
+    }
+  },
+);
+
 const adminTutorSlice = createSlice({
   name: "adminTutors",
   initialState: {
     list: [],
     pendingList: [],
+    editRequests: [],
     details: null,
     loading: false,
     pagination: null,
+    requestPagination: null,
     error: null,
   },
   reducers: {},
@@ -187,10 +236,10 @@ const adminTutorSlice = createSlice({
         state.loading = true;
       })
       .addCase(fetchPendingTutors.fulfilled, (state, action) => {
-  state.loading = false;
-  state.pendingList = action.payload.result;
-  state.pagination = action.payload.pagination;
-})
+        state.loading = false;
+        state.pendingList = action.payload.result;
+        state.pagination = action.payload.pagination;
+      })
       .addCase(fetchPendingTutors.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -238,6 +287,23 @@ const adminTutorSlice = createSlice({
         if (state.details?._id === tutorId) {
           state.details.idVerification.verified = true;
         }
+      })
+      .addCase(fetchProfileEditRequests.fulfilled, (state, action) => {
+        state.loading = false;
+        state.editRequests = action.payload.result;
+        state.requestPagination = action.payload.pagination;
+      })
+
+      .addCase(approveProfileEdit.fulfilled, (state, action) => {
+        state.editRequests = state.editRequests.filter(
+          (r) => r._id !== action.payload,
+        );
+      })
+
+      .addCase(rejectProfileEdit.fulfilled, (state, action) => {
+        state.editRequests = state.editRequests.filter(
+          (r) => r._id !== action.payload,
+        );
       });
   },
 });

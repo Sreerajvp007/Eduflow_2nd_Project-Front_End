@@ -17,9 +17,14 @@ import reviewReducer  from "../features/parent/parentReviewSlice";
 import feedbackReducer from "../features/common/feedbackSlice"
 import paymentsReducer from "../features/common/paymentsSlice"
 import sessionReducer from "../features/tutor/sessionSlice"
-
+import tutorSessionReducer from "../features/tutor/tutorSessionSlice";
+import parentSessionReducer from "../features/parent/parentSessionSlice";
+import adminClasses from "../features/admin/adminClassSlice";
+import adminAnalytics from "../features/admin/adminAnalyticsSlice"
+import settingsReducer from "../features/tutor/settingsSlice"
 import tutorCourseReducer from "../features/tutor/course/tutorCourseSlice";
-import scheduleReducer from "../features/tutor/scheduleSlice"
+import scheduleReducer from "../features/tutor/scheduleSlice";
+import adminSettings from "../features/admin/adminSettingsSlice"
 const store = configureStore({
   reducer: {
     admin: adminReducer,
@@ -29,6 +34,9 @@ const store = configureStore({
     adminUI,
     adminTutors,
     adminStudents,
+     adminClasses,
+     adminSettings,
+     adminAnalytics,
     adminDashboard: adminDashboardReducer, 
     
     parentStudents: parentStudentsReducer,
@@ -43,6 +51,9 @@ const store = configureStore({
     feedback: feedbackReducer,
     payments: paymentsReducer,
     sessions: sessionReducer,
+    tutorSessions: tutorSessionReducer,
+    parentSessions: parentSessionReducer,
+    settings: settingsReducer,
 
     
   },

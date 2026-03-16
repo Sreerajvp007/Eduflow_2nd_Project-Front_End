@@ -1,29 +1,27 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../utils/axiosInstance";
 
-export const fetchSchedule = createAsyncThunk(
-  "schedule/fetch",
-  async () => {
-    const { data } = await axiosInstance.get("/tutor/schedule");
-    return data;
-  }
-);
+export const fetchSchedule = createAsyncThunk("schedule/fetch", async () => {
+  const { data } = await axiosInstance.get("/tutor/schedule");
+  return data;
+});
 
 export const createSessionAsync = createAsyncThunk(
   "schedule/createSession",
   async (payload) => {
     const { data } = await axiosInstance.post(
       "tutor/schedule/session",
-      payload
+      payload,
     );
     return data;
-  }
+  },
 );
 
 const slice = createSlice({
   name: "schedule",
   initialState: {
     availability: [],
+    students: [],
     courses: [],
     sessions: [],
   },

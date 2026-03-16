@@ -1,5 +1,4 @@
 
-
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +31,7 @@ const AdminDashboard = () => {
   const [page, setPage] = useState(1);
 
   const { stats, loading: statsLoading } = useSelector(
-    (state) => state.adminDashboard,
+    (state) => state.adminDashboard
   );
 
   const {
@@ -61,7 +60,9 @@ const AdminDashboard = () => {
 
   return (
     <Stack className="p-4 md:p-6" gap="xl">
+      
       {/* ================= HEADER ================= */}
+
       <div>
         <Title order={2}>Admin Dashboard</Title>
         <Text c="dimmed" size="sm" mt={4}>
@@ -70,75 +71,99 @@ const AdminDashboard = () => {
       </div>
 
       {/* ================= KEY METRICS ================= */}
+
       <div>
         <Title order={4} mb="md">
           Key Metrics
         </Title>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
           <StatCard
             title="Total Students"
             value={stats?.totalStudents ?? 0}
             loading={statsLoading}
           />
+
           <StatCard
             title="Total Tutors"
             value={stats?.totalTutors ?? 0}
             loading={statsLoading}
           />
+
           <StatCard
             title="Total Course Purchases"
             value={stats?.totalPurchases ?? 0}
             loading={statsLoading}
           />
+
           <StatCard
             title="Active Courses"
             value={stats?.activeCourses ?? 0}
             loading={statsLoading}
           />
+
         </div>
       </div>
 
       {/* ================= PENDING TUTORS ================= */}
-      <Card shadow="sm" radius="xl" withBorder p="lg">
+
+      <Card shadow="sm" radius="md" withBorder p="lg">
+
         <Group justify="space-between" mb="md">
-          <Title order={4}>Pending Tutor Verifications</Title>
+
+          <Title order={4}>
+            Pending Tutor Verifications
+          </Title>
 
           <Badge color="yellow" variant="light">
             {pagination?.total ?? pendingList?.length ?? 0} Pending
           </Badge>
+
         </Group>
 
         {tutorsLoading ? (
+
           <Group justify="center" py="lg">
             <Loader size="sm" />
           </Group>
+
         ) : pendingList?.length === 0 ? (
+
           <div className="text-center py-10">
             <Text size="sm" c="dimmed">
               No pending tutor requests
             </Text>
           </div>
+
         ) : (
+
           <>
             <div className="space-y-4">
+
               {pendingList.map((tutor) => (
+
                 <Card
                   key={tutor._id}
-                  radius="xl"
+                  radius="md"
                   shadow="xs"
                   p="md"
                   withBorder
                   className="hover:shadow-sm transition"
                 >
+
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
                     {/* LEFT SIDE */}
+
                     <div className="flex items-start sm:items-center gap-3 min-w-0">
+
                       <Avatar radius="xl" src={tutor.profileImage}>
                         {tutor.fullName?.charAt(0)}
                       </Avatar>
 
                       <div className="min-w-0">
+
                         <Text fw={600} size="sm">
                           {tutor.fullName}
                         </Text>
@@ -155,14 +180,18 @@ const AdminDashboard = () => {
                           Applied:{" "}
                           {new Date(tutor.createdAt).toLocaleDateString()}
                         </Text>
+
                       </div>
+
                     </div>
 
                     {/* RIGHT SIDE BUTTONS */}
+
                     <Group
                       gap="xs"
                       className="flex-wrap sm:flex-nowrap justify-start sm:justify-end"
                     >
+
                       <Button
                         size="xs"
                         variant="light"
@@ -190,45 +219,74 @@ const AdminDashboard = () => {
                       >
                         Reject
                       </Button>
+
                     </Group>
+
                   </div>
+
                 </Card>
+
               ))}
+
             </div>
 
             {/* ================= PAGINATION ================= */}
 
             {pagination && (
+
               <Group justify="flex-end" mt="lg">
+
                 <Pagination
                   total={pagination.totalPages}
                   value={page}
                   onChange={setPage}
                   size="sm"
                 />
+
               </Group>
+
             )}
+
           </>
+
         )}
+
       </Card>
+
     </Stack>
   );
 };
 
+
+/* ================= STAT CARD ================= */
+
 const StatCard = ({ title, value, loading }) => (
-  <div className="bg-white rounded-3xl border border-gray-200 px-6 py-6 shadow-sm hover:shadow-md transition">
-    <Text size="sm" c="dimmed">
+
+  <Card
+    radius="md"
+    shadow="sm"
+    p="md"
+    withBorder
+  >
+
+    <Text size="xs" c="dimmed">
       {title}
     </Text>
 
     {loading ? (
-      <Loader size="sm" mt="md" />
+
+      <Loader size="sm" mt="xs" />
+
     ) : (
-      <Title order={2} mt="sm">
+
+      <Text fw={600} size="lg">
         {value}
-      </Title>
+      </Text>
+
     )}
-  </div>
+
+  </Card>
+
 );
 
 export default AdminDashboard;

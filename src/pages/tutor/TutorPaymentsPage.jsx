@@ -40,20 +40,16 @@ const { stats, history, payouts, page, totalPages, loading } =
 useSelector((state) => state.payments);
 
 const [view,setView] = useState("payments");
-
 const [opened,setOpened] = useState(false);
+const [submitting,setSubmitting] = useState(false);
 
 const [amount,setAmount] = useState("");
-const [method,setMethod] = useState("");
+const [method,setMethod] = useState("bank");
 const [notes,setNotes] = useState("");
-
-/* overview modal */
 
 const [overviewOpened,setOverviewOpened] = useState(false);
 const [selectedItem,setSelectedItem] = useState(null);
 const [overviewType,setOverviewType] = useState("");
-
-/* payout filter */
 
 const [statusFilter,setStatusFilter] = useState("all");
 
@@ -77,46 +73,87 @@ return(
 );
 }
 
+/* -----------------------------
+SUBMIT PAYOUT
+----------------------------- */
 
 const submit = async () => {
 
-  const result = await dispatch(
-    requestPayout({ amount, method, notes })
-  );
+if(!amount){
+notifications.show({
+title:"Error",
+message:"Enter payout amount",
+color:"red"
+});
+return;
+}
 
-  if (requestPayout.fulfilled.match(result)) {
+if(Number(amount) > stats.walletBalance){
+notifications.show({
+title:"Error",
+message:"Amount exceeds wallet balance",
+color:"red"
+});
+return;
+}
 
-    notifications.show({
-      title: "Success",
-      message: "Payout request submitted successfully",
-      color: "green"
-    });
+try{
 
-    setAmount("");
-    setMethod("");
-    setNotes("");
-    setOpened(false);
+setSubmitting(true);
 
-  } else {
+const result = await dispatch(
+requestPayout({ amount:Number(amount), method, notes })
+);
 
-    notifications.show({
-      title: "Error",
-      message: result.payload || "Failed to request payout",
-      color: "red"
-    });
+if(requestPayout.fulfilled.match(result)){
 
-  }
+notifications.show({
+title:"Success",
+message:"Payout request submitted",
+color:"green"
+});
+
+setAmount("");
+setMethod("bank");
+setNotes("");
+setOpened(false);
+
+}else{
+
+notifications.show({
+title:"Error",
+message: result.payload || "Failed to request payout",
+color:"red"
+});
+
+}
+
+}catch(err){
+
+notifications.show({
+title:"Error",
+message:"Something went wrong",
+color:"red"
+});
+
+}finally{
+setSubmitting(false);
+}
 
 };
 
-/* filtered payouts */
+/* -----------------------------
+FILTER PAYOUTS
+----------------------------- */
 
 const filteredPayouts =
 statusFilter === "all"
 ? payouts
 : payouts.filter(p=>p.status===statusFilter);
 
-/* open overview */
+/* -----------------------------
+OPEN OVERVIEW
+----------------------------- */
 
 const openOverview = (item,type)=>{
 setSelectedItem(item);
@@ -142,32 +179,94 @@ Your earnings and payout requests
 
 </div>
 
+{!stats?.hasBankDetails && (
 
+<Card
+withBorder
+radius="md"
+p="md"
+style={{
+background:"#fff7e6",
+borderColor:"#ffd591"
+}}
+>
+
+<Group justify="space-between">
+
+<div>
+
+<Text fw={600}>
+Add your bank details to receive payouts
+</Text>
+
+<Text size="sm" c="dimmed">
+You must add bank details before requesting a withdrawal.
+</Text>
+
+</div>
+
+<Link to="/tutor/settings/bank">
+
+<Button color="orange">
+Add Bank Details
+</Button>
+
+</Link>
+
+</Group>
+
+</Card>
+
+)}
 {/* STATS */}
 
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-<Card shadow="sm" radius="md" p="md">
+<Card shadow="sm" p="md">
 <Text size="xs" c="dimmed">Total Earnings</Text>
 <Text fw={700} size="lg">₹{stats?.totalEarnings}</Text>
 </Card>
 
-<Card shadow="sm" radius="md" p="md">
-<Text size="xs" c="dimmed"> Total Money withdrawn</Text>
-<Text fw={700} size="lg">₹{stats?.totalWithdrawn?.toLocaleString() || 0}</Text>
+<Card shadow="sm" p="md">
+<Text size="xs" c="dimmed">Total Withdrawn</Text>
+<Text fw={700} size="lg">
+₹{stats?.totalWithdrawn?.toLocaleString() || 0}
+</Text>
 </Card>
 
-<Card shadow="sm" radius="md" p="md">
+<Card shadow="sm" p="md">
 <Text size="xs" c="dimmed">Pending Payout</Text>
 <Text fw={700} size="lg">₹{stats?.pendingAmount}</Text>
 </Card>
 
-<Card shadow="sm" radius="md" p="md">
+<Card shadow="sm" p="md">
 
 <Text size="xs" c="dimmed">Wallet Balance</Text>
 <Text fw={700} size="lg">₹{stats?.walletBalance}</Text>
 
-<Button size="xs" mt="sm" fullWidth onClick={()=>setOpened(true)}>
+<Button
+size="xs"
+mt="sm"
+fullWidth
+disabled={!stats?.walletBalance}
+onClick={() => {
+
+if(!stats?.hasBankDetails){
+
+notifications.show({
+title:"Add Bank Details",
+message:"Please add bank details before requesting payout",
+color:"red"
+});
+
+return;
+
+}
+
+setOpened(true);
+
+}}
+>
 Request Payout
 </Button>
 
@@ -188,8 +287,6 @@ data={[
 {label:"Payout Requests",value:"payouts"},
 ]}
 />
-
-{/* payout filter */}
 
 {view==="payouts" && (
 
@@ -219,18 +316,14 @@ data={[
 
 {/* TABLE */}
 
-<Card shadow="sm" radius="md" p="md">
+<Card shadow="sm" p="md">
 
 <Table highlightOnHover>
-
-{/* PAYMENT HISTORY */}
 
 {view==="payments" && (
 
 <>
-
 <Table.Thead>
-
 <Table.Tr>
 <Table.Th>Parent</Table.Th>
 <Table.Th>Student</Table.Th>
@@ -238,9 +331,7 @@ data={[
 <Table.Th>Amount Earned</Table.Th>
 <Table.Th>Date</Table.Th>
 <Table.Th>Action</Table.Th>
-
 </Table.Tr>
-
 </Table.Thead>
 
 <Table.Tbody>
@@ -248,11 +339,12 @@ data={[
 {history.map((p)=>{
 
 const student = p.studentName;
-const parent =p.parentName
+const parent = p.parentName;
 
 return(
 
 <Table.Tr key={p._id}>
+
 <Table.Td>
 
 <Group gap="xs">
@@ -266,30 +358,15 @@ return(
 </Group>
 
 </Table.Td>
-<Table.Td>
 
-<Group gap="xs">
+<Table.Td>{student}</Table.Td>
 
-{/* <Avatar size="sm">
-{student?.charAt(0)}
-</Avatar> */}
-
-<Text size="sm">{student}</Text>
-
-</Group>
-
-</Table.Td>
+<Table.Td>{p.subject}</Table.Td>
 
 <Table.Td>
-{p.subject}
-</Table.Td>
-
-<Table.Td>
-
 <Text fw={600} c="green">
 ₹{p.tutorEarning}
 </Text>
-
 </Table.Td>
 
 <Table.Td>
@@ -321,12 +398,9 @@ Overview
 )}
 
 
-{/* PAYOUT TABLE */}
-
 {view==="payouts" && (
 
 <>
-
 <Table.Thead>
 
 <Table.Tr>
@@ -407,13 +481,11 @@ Overview
 <Pagination
 value={page}
 onChange={(p)=>{
-
 if(view==="payments"){
 dispatch(fetchTutorHistory(p));
 }else{
 dispatch(fetchTutorPayouts(p));
 }
-
 }}
 total={totalPages}
 />
@@ -423,7 +495,7 @@ total={totalPages}
 )}
 
 
-{/* REQUEST PAYOUT MODAL */}
+{/* PAYOUT MODAL */}
 
 <Modal
 opened={opened}
@@ -435,6 +507,7 @@ title="Request Payout"
 
 <TextInput
 label="Amount"
+placeholder="Enter amount"
 value={amount}
 onChange={(e)=>setAmount(e.target.value)}
 />
@@ -444,7 +517,6 @@ label="Method"
 data={[
 {value:"bank",label:"Bank Transfer"},
 {value:"upi",label:"UPI"},
-{value:"wallet",label:"Wallet"},
 ]}
 value={method}
 onChange={setMethod}
@@ -452,21 +524,21 @@ onChange={setMethod}
 
 <TextInput
 label="Notes"
+placeholder="Optional notes"
 value={notes}
 onChange={(e)=>setNotes(e.target.value)}
 />
 
-<Button onClick={submit}>
+<Button
+loading={submitting}
+onClick={submit}
+>
 Submit Request
 </Button>
 
 </Stack>
 
 </Modal>
-
-
-{/* OVERVIEW MODAL */}
-
 {/* OVERVIEW MODAL */}
 
 <Modal
@@ -480,8 +552,6 @@ radius="md"
 {selectedItem && overviewType==="payment" && (
 
 <Stack gap="md">
-
-{/* Student Header */}
 
 <Card withBorder radius="md">
 
@@ -507,9 +577,6 @@ Student
 
 </Card>
 
-
-{/* Details Grid */}
-
 <Grid>
 
 <Grid.Col span={6}>
@@ -530,7 +597,6 @@ Subject
 
 </Grid.Col>
 
-
 <Grid.Col span={6}>
 
 <Card withBorder>
@@ -549,7 +615,6 @@ Tutor Earnings
 
 </Grid.Col>
 
-
 <Grid.Col span={6}>
 
 <Card withBorder>
@@ -567,7 +632,6 @@ Payment Date
 </Card>
 
 </Grid.Col>
-
 
 <Grid.Col span={6}>
 
@@ -588,9 +652,6 @@ Parent
 </Grid.Col>
 
 </Grid>
-
-
-{/* Course Link */}
 
 <Card withBorder>
 
@@ -629,8 +690,6 @@ Open Course Overview
 )}
 
 
-{/* PAYOUT OVERVIEW */}
-
 {selectedItem && overviewType==="payout" && (
 
 <Stack gap="md">
@@ -646,7 +705,6 @@ Withdrawal request from wallet
 </Text>
 
 </Card>
-
 
 <Grid>
 
@@ -668,7 +726,6 @@ Amount
 
 </Grid.Col>
 
-
 <Grid.Col span={6}>
 
 <Card withBorder>
@@ -686,7 +743,6 @@ Method
 </Card>
 
 </Grid.Col>
-
 
 <Grid.Col span={6}>
 
@@ -714,7 +770,6 @@ selectedItem.status==="paid"
 
 </Grid.Col>
 
-
 <Grid.Col span={6}>
 
 <Card withBorder>
@@ -734,7 +789,6 @@ Requested Date
 </Grid.Col>
 
 </Grid>
-
 
 <Card withBorder>
 
@@ -756,9 +810,7 @@ Notes
 
 </Modal>
 
-
 </div>
 
 );
-
 }

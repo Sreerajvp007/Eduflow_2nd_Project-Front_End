@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   verifyParentLoginOtp,
   sendParentLoginOtp,
+  resendParentLoginOtp
 } from "../../features/parent/auth/parentAuthSlice";
 
 import MuiButton from "../../components/common/button";
@@ -45,10 +46,15 @@ const ParentVerifyLoginOtp = () => {
   };
 
 
-  const handleResend = async () => {
-    await dispatch(sendParentLoginOtp({ email }));
+const handleResend = async () => {
+
+  const res = await dispatch(resendParentLoginOtp({ email }));
+
+  if(res.meta.requestStatus === "fulfilled"){
     setTimer(30);
-  };
+  }
+
+};
 
   if (!email) return null;
 
@@ -99,11 +105,12 @@ const ParentVerifyLoginOtp = () => {
             </p>
           ) : (
             <button
-              onClick={handleResend}
-              className="text-sm font-medium underline underline-offset-4"
-            >
-              Resend OTP
-            </button>
+disabled={timer > 0}
+onClick={handleResend}
+className="text-sm font-medium underline underline-offset-4 disabled:opacity-50"
+>
+Resend OTP
+</button>
           )}
         </div>
 

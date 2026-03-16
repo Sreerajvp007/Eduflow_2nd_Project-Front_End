@@ -83,9 +83,27 @@ export const parentLogoutThunk = createAsyncThunk(
   },
 );
 
+export const resendParentLoginOtp = createAsyncThunk(
+  "parent/resendLoginOtp",
+  async (data, thunkAPI) => {
+    try {
+      const res = await axiosInstance.post(
+        "/auth/parent/login/resend-otp",
+        data,
+      );
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to resend OTP",
+      );
+    }
+  },
+);
+
 const parentAuthSlice = createSlice({
   name: "parentAuth",
   initialState: {
+    parent: null,
     accessToken: null,
     loading: false,
     error: null,
@@ -93,6 +111,7 @@ const parentAuthSlice = createSlice({
   },
   reducers: {
     parentLogout: (state) => {
+      state.parent = null;
       state.accessToken = null;
       state.authInitialized = true;
       localStorage.removeItem("role");
@@ -143,6 +162,11 @@ const parentAuthSlice = createSlice({
 
       .addCase(verifyParentLoginOtp.fulfilled, (state, action) => {
         state.accessToken = action.payload.result.accessToken;
+
+        state.parent = {
+          id: action.payload.result.parentId,
+        };
+
         state.authInitialized = true;
         localStorage.setItem("role", "parent");
       })
@@ -155,12 +179,25 @@ const parentAuthSlice = createSlice({
 
       .addCase(parentRefresh.fulfilled, (state, action) => {
         state.accessToken = action.payload.result.accessToken;
+
+        state.parent = action.payload.result.user;
+
         state.authInitialized = true;
       })
       .addCase(parentRefresh.rejected, (state) => {
         state.accessToken = null;
         state.authInitialized = true;
         localStorage.removeItem("role");
+      })
+      .addCase(resendParentLoginOtp.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(resendParentLoginOtp.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(resendParentLoginOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

@@ -1,4 +1,5 @@
 
+
 import { useEffect, useState } from "react";
 import {
   Button,
@@ -28,8 +29,11 @@ export default function SchedulePage(){
 
 const dispatch = useDispatch();
 
-const { sessions, availability, students } =
-useSelector(state => state.sessions);
+const state = useSelector(state => state.sessions) || {};
+
+const sessions = state.sessions || [];
+const availability = state.availability || [];
+const students = state.students || [];
 
 const [week,setWeek] = useState(dayjs());
 
@@ -55,9 +59,11 @@ dispatch(fetchAvailability());
 dispatch(fetchTutorStudents());
 },[dispatch]);
 
-const times = availability?.map(a=>a.time) || [];
+const times = availability?.map(a => a.time) || [];
 
-const startOfWeek = week.startOf("week");
+const startOfWeek = week.startOf("week").add(1,"day");
+
+/* RESET FORM */
 
 const resetForm = ()=>{
 setForm({
@@ -138,6 +144,8 @@ color:"red"
 
 const cancelClass = async()=>{
 
+if(!selectedSession) return;
+
 await dispatch(cancelSession(selectedSession._id));
 
 notifications.show({
@@ -153,6 +161,8 @@ setPreviewOpen(false);
 /* DELETE SESSION */
 
 const deleteClass = async()=>{
+
+if(!selectedSession) return;
 
 await dispatch(deleteSession(selectedSession._id));
 
@@ -170,13 +180,13 @@ setPreviewOpen(false);
 
 const getStatus=(date,time)=>{
 
-const blocked = availability.find(
+const blocked = availability?.find(
 a=>a.time===time && a.status==="blocked"
 );
 
 if(blocked) return "blocked";
 
-const s = sessions.find(
+const s = sessions?.find(
 x =>
 dayjs(x.sessionDate).format("YYYY-MM-DD")
 === date.format("YYYY-MM-DD")
@@ -195,6 +205,8 @@ return "booked";
 
 const toggleBlock=(slot)=>{
 
+if(!slot) return;
+
 if(slot.status==="blocked"){
 dispatch(unblockAvailability(slot.time));
 }else{
@@ -206,7 +218,7 @@ dispatch(blockAvailability(slot.time));
 /* SUBJECTS */
 
 const selectedStudent =
-students.find(s=>s.studentId===form.studentId);
+students?.find(s=>s.studentId===form.studentId);
 
 const subjects = selectedStudent?.subjects || [];
 
@@ -220,9 +232,17 @@ return(
 
 <div className="flex items-center justify-between mb-8">
 
+<div>
+
 <h1 className="text-2xl font-semibold">
 Schedule
 </h1>
+
+<p className="text-gray-500 text-sm">
+Manage your tutoring sessions
+</p>
+
+</div>
 
 <div className="flex items-center gap-3">
 
@@ -261,17 +281,18 @@ onClick={()=>setWeek(week.add(1,"week"))}
 
 {/* CALENDAR */}
 
-<div className="bg-white border rounded-2xl shadow-sm p-6">
+<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
 
 <div className="grid grid-cols-8 gap-3">
 
 <div></div>
 
 {days.map((d,i)=>(
-<div key={d} className="text-center font-semibold">
+<div key={d} className="text-center font-medium text-gray-700">
 {d}
-<br/>
+<div className="text-xs text-gray-400">
 {startOfWeek.add(i,"day").format("DD")}
+</div>
 </div>
 ))}
 
@@ -279,7 +300,7 @@ onClick={()=>setWeek(week.add(1,"week"))}
 
 <div key={time+"row"} className="contents">
 
-<div className="text-gray-600 font-medium">
+<div className="text-gray-500 font-medium flex items-center">
 {time}
 </div>
 
@@ -304,10 +325,10 @@ openPreview(date,time);
 }
 
 }}
-className={`h-16 rounded-xl border flex items-center justify-center text-xs cursor-pointer transition
+className={`h-16 rounded-xl flex items-center justify-center text-xs cursor-pointer transition-all
 
 ${status==="available"
-?"hover:bg-gray-50"
+?"bg-gray-50 hover:bg-gray-100 border border-gray-200"
 
 :status==="blocked"
 ?"bg-gray-400 text-white cursor-not-allowed"
@@ -321,9 +342,7 @@ ${status==="available"
 >
 
 {status==="available" && "Tap to book"}
-
 {status==="booked" && "Class"}
-
 {status==="cancelled" && "Cancelled"}
 
 </div>
@@ -342,7 +361,7 @@ ${status==="available"
 
 {/* LEGEND */}
 
-<div className="bg-white border rounded-2xl shadow-sm p-5 h-fit">
+<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 h-fit">
 
 <h3 className="font-semibold mb-4">
 Legend

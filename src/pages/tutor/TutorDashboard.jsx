@@ -1,4 +1,5 @@
 
+
 import {
   Card,
   Text,
@@ -6,38 +7,33 @@ import {
   Button,
   Loader,
 } from "@mantine/core";
-import { useEffect, useMemo } from "react";
+
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
 import {
   fetchNewTutorCourses,
-  fetchTutorCourses, 
+  fetchTutorDashboardStats
 } from "../../features/tutor/course/tutorCourseSlice";
+
 import { useNavigate } from "react-router-dom";
 
 const TutorDashboard = () => {
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { newCourses, courses, loading } = useSelector(
+  const { newCourses, dashboardStats, loading } = useSelector(
     (state) => state.tutorCourses
   );
 
-  /* ✅ FETCH BOTH DATASETS ON FIRST LOAD */
+  /* FETCH DASHBOARD DATA */
   useEffect(() => {
-    dispatch(fetchNewTutorCourses());
-    dispatch(fetchTutorCourses()); // ✅ IMPORTANT FIX
-  }, [dispatch]);
 
-  /* ✅ ACTIVE COURSES */
-  const activeCourses = useMemo(() => {
-    return (
-      courses?.filter(
-        (c) =>
-          c.paymentStatus === "paid" &&
-          c.courseStatus === "active"
-      ) || []
-    );
-  }, [courses]);
+    dispatch(fetchNewTutorCourses());
+    dispatch(fetchTutorDashboardStats());
+
+  }, [dispatch]);
 
   if (loading) {
     return (
@@ -61,33 +57,35 @@ const TutorDashboard = () => {
       </div>
 
       {/* ================= STATS ================= */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
         <StatCard
           title="New Courses"
-          value={newCourses?.length || 0}
+          value={dashboardStats?.newCourses || 0}
         />
 
         <StatCard
           title="Active Courses"
-          value={activeCourses.length}
-        />
-
-        {/* If you don't need duplicates, you can remove these */}
-        <StatCard
-          title="Active Courses"
-          value={activeCourses.length}
+          value={dashboardStats?.activeCourses || 0}
         />
 
         <StatCard
-          title="Active Courses"
-          value={activeCourses.length}
+          title="Tutor Rating"
+          value={dashboardStats?.rating || 0}
+        />
+
+        <StatCard
+          title="Upcoming Sessions"
+          value={dashboardStats?.upcomingSessions || 0}
         />
 
       </div>
 
       {/* ================= COURSE LIST ================= */}
+
       <Card radius="xl" shadow="sm" p="lg" withBorder>
+
         <Text fw={600} size="md" mb="md">
           Pending Learning Plans
         </Text>
@@ -101,7 +99,9 @@ const TutorDashboard = () => {
         )}
 
         <div className="space-y-4">
+
           {newCourses?.map((course) => (
+
             <Card
               key={course._id}
               radius="xl"
@@ -110,15 +110,19 @@ const TutorDashboard = () => {
               withBorder
               className="hover:shadow-sm transition"
             >
+
               <div className="flex items-center justify-between gap-4">
 
                 {/* LEFT */}
+
                 <div className="flex items-center gap-3 min-w-0">
+
                   <Avatar radius="xl" color="teal" size="md">
                     {course.studentId?.name?.charAt(0)}
                   </Avatar>
 
                   <div className="min-w-0">
+
                     <Text fw={600} size="sm" className="truncate">
                       {course.subject}
                     </Text>
@@ -126,10 +130,13 @@ const TutorDashboard = () => {
                     <Text size="xs" c="dimmed" className="truncate">
                       {course.studentId?.name} • Grade {course.classLevel}
                     </Text>
+
                   </div>
+
                 </div>
 
                 {/* RIGHT */}
+
                 <Button
                   radius="xl"
                   color="teal"
@@ -144,23 +151,33 @@ const TutorDashboard = () => {
                 </Button>
 
               </div>
+
             </Card>
+
           ))}
+
         </div>
+
       </Card>
+
     </div>
   );
 };
 
 const StatCard = ({ title, value }) => (
+
   <Card radius="xl" shadow="sm" p="lg" withBorder>
+
     <Text size="sm" c="dimmed">
       {title}
     </Text>
+
     <Text size="xl" fw={700} mt={4}>
       {value}
     </Text>
+
   </Card>
+
 );
 
 export default TutorDashboard;

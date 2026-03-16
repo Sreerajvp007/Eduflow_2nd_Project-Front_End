@@ -19,6 +19,7 @@ import CourseOverview from "../pages/tutor/CourseOverview";
 import MyStudents from "../pages/tutor/MyStudents";
 import StudentCourses from "../pages/tutor/StudentCourses";
 import SchedulePage from "../pages/tutor/SchedulePage";
+import TutorSessions from "../pages/tutor/sessions";
 
 import ParentSignup from "../pages/parent/parentSignup";
 import ParentLogin from "../pages/parent/parentLogin";
@@ -41,8 +42,18 @@ import AdminFeedbackPage from "../pages/admin/AdminFeedbackPage";
 import TutorReviewsPage from "../pages/tutor/TutorReviewsPage";
 import TutorPaymentsPage from "../pages/tutor/TutorPaymentsPage";
 import AdminPaymentsPage from "../pages/admin/AdminPaymentsPage";
-
+import ParentSessionsPage from "../pages/parent/SessionsPage";
+import AdminClassesPage from "../pages/admin/AdminClassesPage";
 import LearningPlanForm from "../pages/tutor/LearningPlanForm";
+import AdminSettingsPage from "../pages/admin/AdminSettingsPage";
+import AdminReportsPage from "../pages/admin/AdminReportsPage";
+import TutorLiveSessionPage from "../pages/tutor/TutorLiveSessionPage";
+import TutorBankDetailsPage from "../pages/tutor/TutorBankDetailsPage";
+import TutorSettingsPage from "../pages/tutor/TutorSettingsPage";
+import TutorEditProfilePage from "../pages/tutor/TutorEditProfilePage";
+import ParentLiveSessionPage from "../pages/parent/ParentLiveSessionPage";
+
+
 
 import NotFound from "../pages/errors/NotFound";
 
@@ -63,6 +74,16 @@ const AppRoutes = () => {
           <Route path="tutors/:id" element={<TutorDetailsPage />} />
           <Route path="feedback" element={<AdminFeedbackPage />} />
           <Route path="payments" element={<AdminPaymentsPage />} />
+          <Route path="/admin/classes" element={<AdminClassesPage />} />
+
+          <Route
+path="/admin/settings"
+element={<AdminSettingsPage/>}
+/>
+<Route
+path="/admin/reports"
+element={<AdminReportsPage/>}
+/>
         </Route>
       </Route>
 
@@ -89,7 +110,13 @@ const AppRoutes = () => {
             path="students/:studentId/courses"
             element={<StudentCourses />}
           />
+          <Route path="/tutor/sessions" element={<TutorSessions />} />
+          <Route path="/tutor/settings" element={<TutorSettingsPage />} />
+
+<Route path="/tutor/settings/bank" element={<TutorBankDetailsPage />} />
+<Route path="/tutor/settings/profile" element={<TutorEditProfilePage/>} />
           <Route path="schedule" element={<SchedulePage />} />
+<Route path="live/:sessionId/:channelName" element={<TutorLiveSessionPage/>}/>
         </Route>
       </Route>
 
@@ -127,6 +154,14 @@ const AppRoutes = () => {
 
           <Route path="request-course" element={<ParentCourseFlow />} />
           <Route path="/parent/payments" element={<ParentPayments />} />
+          <Route
+path="/parent/sessions"
+element={<ParentSessionsPage/>}
+/>
+<Route
+path="/parent/live/:channelName/:sessionId"
+element={<ParentLiveSessionPage/>}
+/>
         </Route>
       </Route>
 

@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-
+import { sendParentSignupOtp } from "../../features/parent/auth/parentAuthSlice";
+import { useDispatch } from "react-redux";
 const ParentVerifySignupOtp = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { state } = useLocation(); 
 
   const { email, fullName, mobile } = state || {};
@@ -20,7 +22,17 @@ const ParentVerifySignupOtp = () => {
     return () => clearTimeout(t);
   }, [timer]);
 
- 
+ const handleResend = async () => {
+
+  const res = await dispatch(
+    sendParentSignupOtp({ fullName, email, mobile })
+  );
+
+  if (res.meta.requestStatus === "fulfilled") {
+    setTimer(30);
+  }
+
+};
   const handleChange = (value, index) => {
     if (!/^\d?$/.test(value)) return;
 
@@ -134,18 +146,18 @@ const ParentVerifySignupOtp = () => {
         </div>
 
         {/* RESEND */}
-        <div className="text-sm opacity-80 mb-8">
-          {timer > 0 ? (
-            <>Resend OTP in 00:{timer.toString().padStart(2, "0")}</>
-          ) : (
-            <button
-              onClick={() => setTimer(30)}
-              className="underline underline-offset-4"
-            >
-              Resend OTP
-            </button>
-          )}
-        </div>
+       <div className="text-sm opacity-80 mb-8">
+  {timer > 0 ? (
+    <>Resend OTP in 00:{timer.toString().padStart(2, "0")}</>
+  ) : (
+    <button
+      onClick={handleResend}
+      className="underline underline-offset-4"
+    >
+      Resend OTP
+    </button>
+  )}
+</div>
 
         {/* NEXT BUTTON */}
         <Button

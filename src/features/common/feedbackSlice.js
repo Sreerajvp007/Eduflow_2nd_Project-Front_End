@@ -52,6 +52,27 @@ export const fetchAdminReports = createAsyncThunk(
   },
 );
 
+export const markReportSolved = createAsyncThunk(
+  "feedback/markReportSolved",
+  async (reportId, { rejectWithValue }) => {
+    try {
+
+      const res = await axiosInstance.patch(
+        `/admin/feedback/reports/${reportId}/solve`
+      );
+
+      return res.data.result;
+
+    } catch (error) {
+
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update report"
+      );
+
+    }
+  }
+);
+
 const initialState = {
   reviews: [],
   reports: [],
@@ -139,7 +160,18 @@ const feedbackSlice = createSlice({
       .addCase(fetchAdminReports.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(markReportSolved.fulfilled, (state, action) => {
+
+  const index = state.reports.findIndex(
+    (r) => r._id === action.payload._id
+  );
+
+  if (index !== -1) {
+    state.reports[index] = action.payload;
+  }
+
+});
   },
 });
 

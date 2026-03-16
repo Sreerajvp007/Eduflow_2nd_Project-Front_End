@@ -8,6 +8,7 @@ import {
   Loader,
   Center,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { updateParentProfile } from "../../../features/parent/parentProfileSlice";
@@ -41,10 +42,25 @@ const EditParent = () => {
     );
   }
 
-  const handleUpdate = async () => {
-    await dispatch(updateParentProfile({ name, phone }));
-    navigate("/parent/profile");
-  };
+const handleUpdate = async () => {
+  try {
+  await dispatch(updateParentProfile({ name, phone })).unwrap();
+
+  notifications.show({
+    title: "Success",
+    message: "Profile updated",
+    color: "green",
+  });
+   navigate("/parent/profile");
+
+} catch (err) {
+  notifications.show({
+    title: "Error",
+    message: err,
+    color: "red",
+  });
+}
+};
 
   return (
     <div className="p-4">

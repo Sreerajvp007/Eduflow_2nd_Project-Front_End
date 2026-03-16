@@ -26,7 +26,8 @@ import { Link } from "react-router-dom";
 
 import {
   fetchAdminReviews,
-  fetchAdminReports
+  fetchAdminReports,
+  markReportSolved
 } from "../../features/common/feedbackSlice";
 
 export default function AdminFeedbackPage(){
@@ -66,6 +67,14 @@ search
 }
 
 },[dispatch,section,page,search,sort]);
+
+const handleSolve = () => {
+
+dispatch(markReportSolved(selected._id));
+
+setOpened(false);
+
+};
 
 if(loading){
 return(
@@ -728,6 +737,26 @@ selected.status === "pending"
 
 </div>
 
+{/* Parent Contact */}
+
+<Card withBorder>
+
+<Text size="xs" c="dimmed">
+Parent Contact
+</Text>
+
+<Text size="sm">
+Email: {selected.parentId?.email || "Not available"}
+</Text>
+
+<Text size="sm">
+Mobile: {selected.parentId?.mobile || "Not available"}
+</Text>
+
+</Card>
+
+{/* Report Reason */}
+
 <Card withBorder>
 
 <Text size="xs" c="dimmed">
@@ -740,10 +769,28 @@ Report Reason
 
 </Card>
 
-</div>
+{/* Action Button */}
+
+<Group justify="flex-end">
+
+{selected.status !== "solved" && (
+
+<Button
+color="green"
+onClick={handleSolve}
+>
+
+Mark as Solved
+
+</Button>
 
 )}
 
+</Group>
+
+</div>
+
+)}
 </Modal>
 
 </div>

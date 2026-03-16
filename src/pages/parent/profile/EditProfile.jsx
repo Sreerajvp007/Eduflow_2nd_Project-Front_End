@@ -7,6 +7,7 @@ import {
   Title,
   Select,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { updateStudent } from "../../../features/parent/parentStudentsSlice";
@@ -25,15 +26,30 @@ const EditProfile = () => {
   const [board, setBoard] = useState(activeStudent?.board || "STATE");
 
   const handleUpdate = async () => {
+  try {
     await dispatch(
       updateStudent({
         studentId: activeStudent._id,
         data: { name, grade, board },
       })
-    );
+    ).unwrap();
+
+    notifications.show({
+      title: "Success",
+      message: "Student updated successfully",
+      color: "green",
+    });
 
     navigate("/parent/profile");
-  };
+
+  } catch (err) {
+    notifications.show({
+      title: "Error",
+      message: err,
+      color: "red",
+    });
+  }
+};
 
   return (
     <div className="p-4">

@@ -26,6 +26,7 @@ export const fetchNewTutorCourses = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await api.get("/tutor/new-courses");
+
       return res.data.result;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message);
@@ -38,6 +39,7 @@ export const fetchTutorCourseById = createAsyncThunk(
   async (courseId, { rejectWithValue }) => {
     try {
       const res = await api.get(`/tutor/courses/${courseId}`);
+
       return res.data.result;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message);
@@ -53,6 +55,7 @@ export const saveLearningPlan = createAsyncThunk(
         `/tutor/courses/${courseId}/learning-plan`,
         data,
       );
+
       return res.data.result;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message);
@@ -65,7 +68,36 @@ export const markCourseCompleted = createAsyncThunk(
   async (courseId, { rejectWithValue }) => {
     try {
       const res = await api.patch(`/tutor/courses/${courseId}/complete`);
+
       return res.data.result;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message);
+    }
+  },
+);
+
+export const updateSessionStatus = createAsyncThunk(
+  "tutorCourses/updateSessionStatus",
+  async ({ sessionId, status }, { rejectWithValue }) => {
+    try {
+      const res = await api.patch(`/tutor/session/${sessionId}/status`, {
+        status,
+      });
+
+      return res.data.result;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message);
+    }
+  },
+);
+
+export const fetchTutorDashboardStats = createAsyncThunk(
+  "tutorCourses/fetchDashboardStats",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await api.get("/tutor/dashboard");
+
+      return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message);
     }
@@ -74,31 +106,45 @@ export const markCourseCompleted = createAsyncThunk(
 
 const tutorCourseSlice = createSlice({
   name: "tutorCourses",
-  initialState: {
-  courses: [],
-  newCourses: [],
-  selectedCourse: null,
-  loading: false,
-  error: null,
 
-  page: 1,
-  totalPages: 1,
-  total: 0,
-},
+  initialState: {
+    courses: [],
+    newCourses: [],
+    selectedCourse: null,
+
+    loading: false,
+    error: null,
+
+    page: 1,
+    totalPages: 1,
+    total: 0,
+
+    dashboardStats: {
+      newCourses: 0,
+      activeCourses: 0,
+      upcomingSessions: 0,
+      rating: 0,
+    },
+  },
+
   reducers: {},
+
   extraReducers: (builder) => {
     builder
 
       .addCase(fetchTutorCourses.pending, (state) => {
         state.loading = true;
       })
+
       .addCase(fetchTutorCourses.fulfilled, (state, action) => {
         state.loading = false;
+
         state.courses = action.payload.result;
-state.page = action.payload.pagination.page;
-state.totalPages = action.payload.pagination.pages;
-state.total = action.payload.pagination.total;
+        state.page = action.payload.pagination.page;
+        state.totalPages = action.payload.pagination.pages;
+        state.total = action.payload.pagination.total;
       })
+
       .addCase(fetchTutorCourses.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -107,10 +153,12 @@ state.total = action.payload.pagination.total;
       .addCase(fetchNewTutorCourses.pending, (state) => {
         state.loading = true;
       })
+
       .addCase(fetchNewTutorCourses.fulfilled, (state, action) => {
         state.loading = false;
         state.newCourses = action.payload;
       })
+
       .addCase(fetchNewTutorCourses.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -119,10 +167,12 @@ state.total = action.payload.pagination.total;
       .addCase(fetchTutorCourseById.pending, (state) => {
         state.loading = true;
       })
+
       .addCase(fetchTutorCourseById.fulfilled, (state, action) => {
         state.loading = false;
         state.selectedCourse = action.payload;
       })
+
       .addCase(fetchTutorCourseById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -131,6 +181,7 @@ state.total = action.payload.pagination.total;
       .addCase(saveLearningPlan.pending, (state) => {
         state.loading = true;
       })
+
       .addCase(saveLearningPlan.fulfilled, (state, action) => {
         state.loading = false;
 
@@ -150,6 +201,7 @@ state.total = action.payload.pagination.total;
           state.courses.unshift(updated);
         }
       })
+
       .addCase(saveLearningPlan.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -158,6 +210,7 @@ state.total = action.payload.pagination.total;
       .addCase(markCourseCompleted.pending, (state) => {
         state.loading = true;
       })
+
       .addCase(markCourseCompleted.fulfilled, (state, action) => {
         state.loading = false;
 
@@ -171,7 +224,36 @@ state.total = action.payload.pagination.total;
           state.courses[index] = updated;
         }
       })
+
       .addCase(markCourseCompleted.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(updateSessionStatus.fulfilled, (state, action) => {
+        const updatedSession = action.payload;
+
+        if (state.selectedCourse?.sessions) {
+          const index = state.selectedCourse.sessions.findIndex(
+            (s) => s._id === updatedSession._id,
+          );
+
+          if (index !== -1) {
+            state.selectedCourse.sessions[index] = updatedSession;
+          }
+        }
+      })
+
+      .addCase(fetchTutorDashboardStats.pending, (state) => {
+        state.loading = true;
+      })
+
+      .addCase(fetchTutorDashboardStats.fulfilled, (state, action) => {
+        state.loading = false;
+        state.dashboardStats = action.payload;
+      })
+
+      .addCase(fetchTutorDashboardStats.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

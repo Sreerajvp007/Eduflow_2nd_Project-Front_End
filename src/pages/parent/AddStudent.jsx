@@ -7,6 +7,7 @@ import {
   Stack,
   Title,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addStudent } from "../../features/parent/parentStudentsSlice";
@@ -23,14 +24,27 @@ const AddStudent = () => {
   });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const result = await dispatch(addStudent(form));
+  try {
+    await dispatch(addStudent(form)).unwrap();
 
-    if (addStudent.fulfilled.match(result)) {
-      navigate("/parent/dashboard");
-    }
-  };
+    notifications.show({
+      title: "Success",
+      message: "Student added successfully",
+      color: "green",
+    });
+
+    navigate("/parent/dashboard");
+
+  } catch (err) {
+    notifications.show({
+      title: "Error",
+      message: err,
+      color: "red",
+    });
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

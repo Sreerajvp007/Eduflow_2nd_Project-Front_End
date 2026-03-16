@@ -25,6 +25,7 @@ const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [opened, setOpened] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const { profile } = useSelector(
     (state) => state.parentProfile
@@ -100,9 +101,8 @@ const Profile = () => {
               }}
               onClick={() => {
                 if (item.action === "delete") {
-                  dispatch(deleteParentProfile());
-                  navigate("/");
-                } else {
+  setDeleteOpen(true);
+} else {
                   navigate(item.path);
                 }
               }}
@@ -196,6 +196,45 @@ const Profile = () => {
           </Button>
         </div>
       </Modal>
+      <Modal
+  opened={deleteOpen}
+  onClose={() => setDeleteOpen(false)}
+  centered
+  radius="xl"
+  title={<Text fw={600}>Delete Profile</Text>}
+>
+  <Stack>
+
+    <Text size="sm" c="dimmed">
+      Are you sure you want to delete your profile?
+      This action cannot be undone.
+    </Text>
+
+    <Group grow mt="md">
+
+      <Button
+        variant="default"
+        radius="xl"
+        onClick={() => setDeleteOpen(false)}
+      >
+        Cancel
+      </Button>
+
+      <Button
+        color="red"
+        radius="xl"
+        onClick={async () => {
+          await dispatch(deleteParentProfile());
+          navigate("/");
+        }}
+      >
+        Delete Profile
+      </Button>
+
+    </Group>
+
+  </Stack>
+</Modal>
     </div>
   );
 };

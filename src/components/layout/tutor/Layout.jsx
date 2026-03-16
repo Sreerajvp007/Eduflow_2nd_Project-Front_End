@@ -97,7 +97,7 @@ const TutorLayout = () => {
                 hiddenFrom="lg"
               />
               <Text fw={700} size="lg">
-                TutorFlow
+               {tutor?.fullName}
               </Text>
             </Group>
 

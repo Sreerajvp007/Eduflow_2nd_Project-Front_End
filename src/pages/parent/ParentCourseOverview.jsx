@@ -9,6 +9,7 @@ import {
   Modal
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { IconBroadcast } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
@@ -139,20 +140,29 @@ const ParentCourseOverview = () => {
       : Math.round((completed / totalSessions) * 100);
 
   /* PAYMENT LOGIC */
+  const isCompleted =
+selectedCourse.courseStatus === "completed";
   const dueDate = new Date(selectedCourse.nextPaymentDate);
   const now = new Date();
 
-  const minutesDiff = Math.floor((dueDate - now) / (1000 * 60));
+  const daysDiff = Math.floor((dueDate - now) / (1000 * 60 * 60 * 24));
+const pauseInDays = daysDiff < 0 ? 3 - Math.abs(daysDiff) : null;
+const cancelInDays = daysDiff < 0 ? 10 - Math.abs(daysDiff) : null;
 
   /* REMINDER */
-  const isReminder =
-    selectedCourse.paymentStatus === "paid" &&
-    minutesDiff <= 2;
+  // const isReminder =
+  //   selectedCourse.paymentStatus === "paid" &&
+  //   minutesDiff <= 2;
+const isReminder =
+selectedCourse.paymentStatus === "paid" &&
+selectedCourse.courseStatus === "active" &&
+daysDiff > 0 &&
+daysDiff <= 2;
 
   /* PAYMENT REQUIRED */
-  const isPaymentDue =
-    selectedCourse.paymentStatus === "pending" &&
-    selectedCourse.courseStatus !== "paused";
+ const isPaymentDue =
+selectedCourse.paymentStatus === "pending" &&
+selectedCourse.courseStatus === "active";
 
   /* PAUSED */
   const isPaused =
@@ -184,8 +194,12 @@ const ParentCourseOverview = () => {
           <span
             className={`px-3 py-1 text-xs rounded-full font-medium ${
               selectedCourse.courseStatus === "active"
-                ? "bg-green-100 text-green-600"
-                : "bg-gray-100 text-gray-500"
+  ? "bg-green-100 text-green-600"
+  : selectedCourse.courseStatus === "completed"
+  ? "bg-blue-100 text-blue-600"
+  : selectedCourse.courseStatus === "paused"
+  ? "bg-yellow-100 text-yellow-600"
+  : "bg-red-100 text-red-600"
             }`}
           >
             {selectedCourse.courseStatus}
@@ -316,7 +330,7 @@ const ParentCourseOverview = () => {
 
       {/* ================= PAYMENT REMINDER ================= */}
 
-      {isReminder && (
+      {!isCompleted && isReminder && (
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
 
@@ -328,8 +342,9 @@ const ParentCourseOverview = () => {
               </h3>
 
               <p className="text-sm text-yellow-600 mt-1">
-                Your next payment is approaching. You can pay now to avoid interruption.
-              </p>
+  Your payment is due in <strong>{daysDiff}</strong> day{daysDiff !== 1 && "s"}.
+  Please pay before the due date to avoid interruption.
+</p>
             </div>
 
             <button
@@ -351,7 +366,7 @@ const ParentCourseOverview = () => {
 
       {/* ================= PAYMENT REQUIRED ================= */}
 
-      {isPaymentDue && (
+      {!isCompleted && isPaymentDue && (
 
         <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
 
@@ -360,8 +375,9 @@ const ParentCourseOverview = () => {
           </h3>
 
           <p className="text-sm text-red-500 mt-1">
-            Your monthly payment is due. Please complete payment to continue accessing the course.
-          </p>
+  Payment overdue. Your course will be paused in{" "}
+  <strong>{Math.max(pauseInDays, 0)}</strong> day{pauseInDays !== 1 && "s"} if payment is not completed.
+</p>
 
           <button
             onClick={() =>
@@ -380,7 +396,7 @@ const ParentCourseOverview = () => {
 
       {/* ================= LOCK MESSAGE ================= */}
 
-      {isPaymentDue && (
+      {!isCompleted && isPaymentDue && (
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-center">
 
@@ -391,10 +407,27 @@ const ParentCourseOverview = () => {
         </div>
 
       )}
+      {!isCompleted && isPaymentDue && cancelInDays !== null && cancelInDays > 0 && (
+
+<div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
+
+<h3 className="text-lg font-semibold text-orange-600">
+Course Cancellation Warning
+</h3>
+
+<p className="text-sm text-orange-500 mt-1">
+If payment is not completed, this course will be permanently cancelled in
+<strong> {cancelInDays} </strong>
+day{cancelInDays !== 1 && "s"}.
+</p>
+
+</div>
+
+)}
 
       {/* ================= COURSE PAUSED ================= */}
 
-      {isPaused && (
+      { !isCompleted && isPaused && (
 
         <div className="bg-red-100 border border-red-300 rounded-2xl p-6 text-center">
 
@@ -515,65 +548,81 @@ const ParentCourseOverview = () => {
 
           )}
 
-          {/* SESSIONS */}
+         {/* ================= SESSIONS ================= */}
 
-          <div className="space-y-4">
+<div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
 
-            <h3 className="font-semibold text-gray-800">
-              Sessions
-            </h3>
+  <h3 className="font-semibold text-gray-800 mb-4">
+    Sessions
+  </h3>
 
-            {totalSessions === 0 && (
-              <div className="bg-white rounded-2xl p-6 shadow-sm text-center text-gray-500 border border-gray-100">
-                No sessions scheduled yet
-              </div>
-            )}
+  {totalSessions === 0 && (
+    <div className="text-center text-gray-500 py-6">
+      No sessions scheduled yet
+    </div>
+  )}
 
-            {sessions?.map((session) => (
+  <div className="space-y-3">
 
-              <div
-                key={session._id}
-                className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100"
-              >
+    {sessions?.map((session) => (
 
-                <div className="flex justify-between items-center">
+      <div
+  key={session._id}
+  className="border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 hover:bg-gray-100 transition"
+>
+  <div className="flex items-center justify-between">
 
-                  <h4 className="font-medium text-gray-800">
-                    {session.title}
-                  </h4>
+    <div className="flex items-center gap-3">
 
-                  <span
-                    className={`px-3 py-1 text-xs rounded-full font-medium ${
-                      session.status === "completed"
-                        ? "bg-green-100 text-green-600"
-                        : session.status === "cancelled"
-                        ? "bg-red-100 text-red-500"
-                        : "bg-yellow-100 text-yellow-600"
-                    }`}
-                  >
-                    {session.status}
-                  </span>
+      {/* icon */}
+     <div className="bg-indigo-100 text-indigo-600 w-10 h-10 flex items-center justify-center rounded-lg">
+  <IconBroadcast size={20} />
+</div>
 
-                </div>
+      <div className="flex flex-col">
 
-                <p className="text-xs text-gray-400 mt-2">
-                  {new Date(session.sessionDate).toLocaleDateString()}
-                </p>
+        <div className="flex items-center gap-3">
 
-                {/* FIX: was {session.description} which printed raw HTML as text */}
-                {session.description && (
-                  <div
-                    className="text-sm text-gray-600 mt-3 ck-view-content"
-                    dangerouslySetInnerHTML={{ __html: session.description }}
-                  />
-                )}
+          <p className="font-semibold text-gray-800">
+            {session.title}
+          </p>
 
-              </div>
+          <span className="text-xs text-gray-400">
+            {new Date(session.sessionDate).toLocaleDateString()}
+          </span>
 
-            ))}
+        </div>
 
-          </div>
+        {session.description && (
+          <p className="text-sm text-gray-600 mt-1">
+            {session.description.replace(/<[^>]*>?/gm, "")}
+          </p>
+        )}
 
+      </div>
+
+    </div>
+
+    {/* status badge */}
+    <span
+      className={`px-3 py-1 text-xs rounded-full font-medium ${
+        session.status === "completed"
+          ? "bg-green-100 text-green-600"
+          : session.status === "cancelled"
+          ? "bg-red-100 text-red-500"
+          : "bg-yellow-100 text-yellow-600"
+      }`}
+    >
+      {session.status}
+    </span>
+
+  </div>
+</div>
+    ))}
+
+  </div>
+
+</div>
           {/* TUTOR NOTES */}
 
           {hasContent(selectedCourse.learningPlan?.tutorNotes) && (
@@ -596,69 +645,73 @@ const ParentCourseOverview = () => {
 
           )}
 
-          {/* ================= REVIEW TUTOR ================= */}
+   {/* ================= REVIEW TUTOR ================= */}
 
-          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+{selectedCourse.learningPlan.isPublished && (
 
-            <h3 className="font-semibold text-gray-800 mb-4">
-              Tutor Review
-            </h3>
+  <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
 
-            {parentReview && parentReview.rating ? (
+    <h3 className="font-semibold text-gray-800 mb-4">
+      Tutor Review
+    </h3>
 
-              <div>
+    {parentReview && parentReview.rating ? (
 
-                <Rating
-                  value={parentReview.rating}
-                  readOnly
-                  size="lg"
-                />
+      <div>
 
-                <p className="text-gray-700 mt-3">
-                  {parentReview.review}
-                </p>
+        <Rating
+          value={parentReview.rating}
+          readOnly
+          size="lg"
+        />
 
-                <p className="text-xs text-gray-400 mt-2">
-                  {parentReview.createdAt &&
-                    new Date(parentReview.createdAt).toLocaleDateString()}
-                </p>
+        <p className="text-gray-700 mt-3">
+          {parentReview.review}
+        </p>
 
-              </div>
+        <p className="text-xs text-gray-400 mt-2">
+          {parentReview.createdAt &&
+            new Date(parentReview.createdAt).toLocaleDateString()}
+        </p>
 
-            ) : (
+      </div>
 
-              <>
+    ) : (
 
-                <Rating
-                  value={rating}
-                  onChange={setRating}
-                  size="lg"
-                  color="yellow"
-                  mb="md"
-                />
+      <>
 
-                <Textarea
-                  placeholder="Write your review..."
-                  value={review}
-                  onChange={(e) => setReview(e.currentTarget.value)}
-                  minRows={3}
-                />
+        <Rating
+          value={rating}
+          onChange={setRating}
+          size="lg"
+          color="yellow"
+          mb="md"
+        />
 
-                <Button
-                  onClick={handleSubmitReview}
-                  disabled={!rating}
-                  mt="md"
-                  color="indigo"
-                  radius="md"
-                >
-                  Submit Review
-                </Button>
+        <Textarea
+          placeholder="Write your review..."
+          value={review}
+          onChange={(e) => setReview(e.currentTarget.value)}
+          minRows={3}
+        />
 
-              </>
+        <Button
+          onClick={handleSubmitReview}
+          disabled={!rating}
+          mt="md"
+          color="indigo"
+          radius="md"
+        >
+          Submit Review
+        </Button>
 
-            )}
+      </>
 
-          </div>
+    )}
+
+  </div>
+
+)}
 
           <Modal
             opened={reportOpen}

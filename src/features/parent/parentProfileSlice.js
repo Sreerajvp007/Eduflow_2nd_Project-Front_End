@@ -22,9 +22,15 @@ export const updateParentProfile = createAsyncThunk(
       const res = await api.put("/parent/profile", data);
       return res.data.result;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Update failed");
+      const apiError = err.response?.data;
+
+      if (apiError?.errors?.length) {
+        return rejectWithValue(apiError.errors[0].message);
+      }
+
+      return rejectWithValue(apiError?.message || "Update failed");
     }
-  },
+  }
 );
 
 export const deleteParentProfile = createAsyncThunk(

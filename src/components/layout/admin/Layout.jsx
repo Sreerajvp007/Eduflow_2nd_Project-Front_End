@@ -30,14 +30,14 @@ import {
 } from "lucide-react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector} from "react-redux";
 import { adminLogout } from "../../../features/admin/adminAuthSlice";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
   { label: "Tutor Management", icon: GraduationCap, path: "/admin/tutors" },
   { label: "Students & Parents", icon: Users, path: "/admin/students" },
-  { label: "Sessions & Bookings", icon: Calendar, path: "/admin/sessions" },
+  // { label: "Sessions & Bookings", icon: Calendar, path: "/admin/sessions" },
   { label: "Payments & Revenue", icon: CreditCard, path: "/admin/payments" },
   { label: "Reviews & Feedback", icon: Star, path: "/admin/feedback" },
   { label: "Reports", icon: BarChart3, path: "/admin/reports" },
@@ -54,6 +54,7 @@ const SidebarContent = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  
 
   return (
     <Box
@@ -142,6 +143,7 @@ const AdminLayout = () => {
 
   const [drawerOpened, drawer] = useDisclosure(false);
   const [collapsed, setCollapsed] = useState(false);
+  const { admin } = useSelector((state) => state.admin);
 
   return (
     <>
@@ -178,13 +180,13 @@ const AdminLayout = () => {
                 hiddenFrom="lg"
               />
               <Text fw={700} size="lg">
-                Eduflow
+                {admin?.fullName}
               </Text>
             </Group>
 
             <Group gap="sm">
               <Avatar radius="xl" color="indigo">
-                A
+                {admin?.fullName?.charAt(0)}
               </Avatar>
 
               <ActionIcon

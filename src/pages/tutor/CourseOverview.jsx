@@ -14,6 +14,7 @@ import {
 
 import { DatePickerInput } from "@mantine/dates";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconBroadcast } from "@tabler/icons-react";
 
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
@@ -21,11 +22,13 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { IconCheck, IconX } from "@tabler/icons-react";
 
 import {
   fetchTutorCourseById,
   saveLearningPlan,
   markCourseCompleted,
+  updateSessionStatus 
 } from "../../features/tutor/course/tutorCourseSlice";
 
 const CourseOverview = () => {
@@ -279,66 +282,149 @@ const CourseOverview = () => {
 
         {/* ================= SESSIONS ================= */}
 
-        <div>
+  {/* ================= SESSIONS ================= */}
 
-          <Group justify="space-between" mb="md">
+<div>
 
-            <Text fw={600}>Course Sessions</Text>
+  <Group justify="space-between" mb="md">
 
-            <Button
-              size="xs"
-              leftSection={<IconPlus size={14} />}
-              color="teal"
-              onClick={() => setSessionModalOpen(true)}
-            >
-              Add Session
-            </Button>
+    <Text fw={600}>Course Sessions</Text>
 
-          </Group>
+    <Button
+      size="xs"
+      leftSection={<IconPlus size={14} />}
+      color="teal"
+      onClick={() => setSessionModalOpen(true)}
+    >
+      Add Session
+    </Button>
 
-          <div className="space-y-3">
+  </Group>
 
-            {sessions.map((session, index) => (
+  <div className="space-y-3">
 
-              <Card key={index} withBorder radius="md" p="md">
+   {sessions.map((session, index) => (
 
-                <Group justify="space-between">
+  <div
+    key={session._id || index}
+    className="border border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-gray-100 transition"
+  >
 
-                  <div>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-                    <Text fw={600}>{session.title}</Text>
+      {/* LEFT SIDE */}
+      <div className="flex items-start gap-3">
 
-                    <Text size="xs" c="dimmed">
-                      {session.sessionDate
-                        ? new Date(session.sessionDate).toLocaleDateString()
-                        : "-"}
-                    </Text>
+        <div className="bg-indigo-100 text-indigo-600 w-10 h-10 flex items-center justify-center rounded-lg flex-shrink-0">
+          <IconBroadcast size={20}/>
+        </div>
 
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: session.description,
-                      }}
-                    />
+        <div className="min-w-0">
 
-                  </div>
+          {/* TITLE + DATE + STATUS */}
+          <div className="flex flex-wrap items-center gap-2">
 
-                  <ActionIcon
-                    color="red"
-                    variant="subtle"
-                    onClick={() => handleRemoveSession(index)}
-                  >
-                    <IconTrash size={16} />
-                  </ActionIcon>
+            <p className="font-semibold text-gray-800">
+              {session.title}
+            </p>
 
-                </Group>
+            <span className="text-xs text-gray-400">
+              {session.sessionDate
+                ? new Date(session.sessionDate).toLocaleDateString()
+                : "-"}
+            </span>
 
-              </Card>
-
-            ))}
+            {session.status && (
+              <span
+                className={`text-xs px-2 py-1 rounded-full font-medium
+                ${
+                  session.status === "completed"
+                    ? "bg-green-100 text-green-600"
+                    : session.status === "cancelled"
+                    ? "bg-red-100 text-red-600"
+                    : "bg-yellow-100 text-yellow-600"
+                }`}
+              >
+                {session.status}
+              </span>
+            )}
 
           </div>
 
+          {/* DESCRIPTION */}
+          {session.description && (
+            <div
+              className="text-sm text-gray-600 mt-1 break-words"
+              dangerouslySetInnerHTML={{
+                __html: session.description,
+              }}
+            />
+          )}
+
         </div>
+
+      </div>
+
+      {/* ACTION BUTTONS */}
+      <div className="flex items-center gap-2 self-start sm:self-auto">
+
+        <ActionIcon
+          color="green"
+          variant="light"
+          disabled={!session._id || session.status === "completed"}
+          onClick={() =>
+            dispatch(
+              updateSessionStatus({
+                sessionId: session._id,
+                status: "completed",
+              })
+            )
+          }
+        >
+          <IconCheck size={16}/>
+        </ActionIcon>
+
+        <ActionIcon
+          color="red"
+          variant="light"
+          disabled={!session._id || session.status === "cancelled"}
+          onClick={() =>
+            dispatch(
+              updateSessionStatus({
+                sessionId: session._id,
+                status: "cancelled",
+              })
+            )
+          }
+        >
+          <IconX size={16}/>
+        </ActionIcon>
+
+        <ActionIcon
+          color="gray"
+          variant="subtle"
+          onClick={() => handleRemoveSession(index)}
+        >
+          <IconTrash size={16}/>
+        </ActionIcon>
+
+      </div>
+
+    </div>
+
+  </div>
+
+))}
+
+    {sessions.length === 0 && (
+      <Text size="sm" c="dimmed">
+        No sessions added yet
+      </Text>
+    )}
+
+  </div>
+
+</div>
 
         {/* ACTION BUTTONS */}
 
