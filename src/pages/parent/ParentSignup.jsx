@@ -54,11 +54,11 @@ const ParentSignup = () => {
         </p>
 
         {/* ERROR */}
-        {error && (
-          <p className="text-red-200 text-sm mb-4">
-            {error}
-          </p>
-        )}
+ {error && (
+  <p className="text-red-200 text-sm mb-4">
+    {error}
+  </p>
+)}
 
         {/* FORM */}
         <form

@@ -18,6 +18,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   LayoutDashboard,
   Calendar,
+  Clock,
   Users,
   BookOpen,
   Wallet,
@@ -36,7 +37,8 @@ import { tutorLogout } from "../../../features/tutor/auth/tutorAuthSlice";
 
 const tutorNavItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/tutor/dashboard" },
-  { label: "My Sessions", icon: Calendar, path: "/tutor/sessions" },
+  { label: "My Schedule", icon: Calendar, path: "/tutor/schedule" },
+  { label: "My Sessions", icon: Clock, path: "/tutor/sessions" },
   { label: "My Students", icon: Users, path: "/tutor/my-students" },
   { label: "Courses", icon: BookOpen, path: "/tutor/courses" },
   { label: "Earnings", icon: Wallet, path: "/tutor/payments" },

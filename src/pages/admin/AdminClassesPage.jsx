@@ -1,3 +1,455 @@
+// import {
+//   Card,
+//   Text,
+//   Title,
+//   Button,
+//   TextInput,
+//   Badge,
+//   Modal,
+//   Tabs,
+//   Loader,
+//   Group,
+//   Stack,
+//   ActionIcon
+// } from "@mantine/core";
+
+// import { IconPlus, IconTrash } from "@tabler/icons-react";
+
+// import { useDispatch, useSelector } from "react-redux";
+// import { useEffect, useState } from "react";
+
+// import {
+//   fetchClasses,
+//   createClass,
+//   updateSubjectsForBoard,
+//   deleteClass
+// } from "../../features/admin/adminClassSlice";
+
+// export default function AdminClassesPage() {
+
+// const dispatch = useDispatch();
+
+// const { list, loading } = useSelector(
+// (state) => state.adminClasses
+// );
+
+// const [grade,setGrade] = useState("");
+
+// const [opened,setOpened] = useState(false);
+
+// const [selectedClass,setSelectedClass] = useState(null);
+
+// const [board,setBoard] = useState("STATE");
+
+// const [subjects,setSubjects] = useState([]);
+
+// const [newSubject,setNewSubject] = useState("");
+
+
+
+// /* ================= FETCH ================= */
+
+// useEffect(()=>{
+
+// dispatch(fetchClasses());
+
+// },[dispatch]);
+
+
+
+// /* ================= CREATE CLASS ================= */
+
+// const handleCreateClass = async ()=>{
+
+// if(!grade) return;
+
+// await dispatch(createClass({
+// classGrade:Number(grade)
+// }));
+
+// setGrade("");
+
+// dispatch(fetchClasses());
+
+// };
+
+
+
+// /* ================= OPEN EDIT ================= */
+
+// const openEditModal = (cls)=>{
+
+// setSelectedClass(cls);
+
+// setBoard("STATE");
+
+// setSubjects(
+// cls.subjectsByBoard?.STATE?.map(s=>s.name) || []
+// );
+
+// setOpened(true);
+
+// };
+
+
+
+// /* ================= CHANGE BOARD ================= */
+
+// useEffect(()=>{
+
+// if(selectedClass){
+
+// setSubjects(
+// selectedClass.subjectsByBoard?.[board]?.map(s=>s.name) || []
+// );
+
+// }
+
+// },[board,selectedClass]);
+
+
+
+// /* ================= ADD SUBJECT ================= */
+
+// const addSubject = ()=>{
+
+// if(!newSubject.trim()) return;
+
+// setSubjects([...subjects,newSubject.trim()]);
+
+// setNewSubject("");
+
+// };
+
+
+
+// /* ================= DELETE SUBJECT ================= */
+
+// const removeSubject = (index)=>{
+
+// const updated = subjects.filter((_,i)=>i!==index);
+
+// setSubjects(updated);
+
+// };
+
+
+
+// /* ================= SAVE SUBJECTS ================= */
+
+// const handleSaveSubjects = async ()=>{
+
+// await dispatch(updateSubjectsForBoard({
+
+// classId:selectedClass._id,
+
+// board,
+
+// subjects
+
+// }));
+
+// setOpened(false);
+
+// dispatch(fetchClasses());
+
+// };
+
+
+
+// /* ================= DELETE CLASS ================= */
+
+// const handleDeleteClass = async (id)=>{
+
+// if(!window.confirm("Delete this class?")) return;
+
+// await dispatch(deleteClass(id));
+
+// dispatch(fetchClasses());
+
+// };
+
+
+
+// if(loading){
+
+// return(
+
+// <div className="flex justify-center p-10">
+
+// <Loader/>
+
+// </div>
+
+// );
+
+// }
+
+
+
+// return(
+
+// <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
+
+// {/* ================= HEADER ================= */}
+
+// <div>
+
+// <Title order={3}>
+// Classes & Subjects
+// </Title>
+
+// <Text size="sm" c="dimmed">
+// Manage subjects for each class and board
+// </Text>
+
+// </div>
+
+
+
+// {/* ================= ADD CLASS ================= */}
+
+// <Card shadow="sm" radius="lg" withBorder>
+
+// <Group>
+
+// <TextInput
+// placeholder="Enter Class Grade (1-12)"
+// value={grade}
+// onChange={(e)=>setGrade(e.currentTarget.value)}
+// className="w-48"
+// />
+
+// <Button
+// leftSection={<IconPlus size={16}/>}
+// onClick={handleCreateClass}
+// >
+
+// Add Class
+
+// </Button>
+
+// </Group>
+
+// </Card>
+
+
+
+// {/* ================= CLASS LIST ================= */}
+
+// <div className="grid md:grid-cols-2 gap-4">
+
+// {list.map((cls)=>(
+
+// <Card key={cls._id} shadow="sm" radius="lg" withBorder>
+
+// <Stack gap={10}>
+
+// <Group justify="space-between">
+
+// <Text fw={600}>
+// Class {cls.classGrade}
+// </Text>
+
+// <ActionIcon
+// color="red"
+// variant="subtle"
+// onClick={()=>handleDeleteClass(cls._id)}
+// >
+
+// <IconTrash size={16}/>
+
+// </ActionIcon>
+
+// </Group>
+
+
+
+// {/* SUBJECT LIST */}
+
+// <div className="space-y-2">
+
+// <Text size="sm" fw={500}>
+// STATE
+// </Text>
+
+// <div className="flex flex-wrap gap-2">
+
+// {cls.subjectsByBoard?.STATE?.map((s)=>(
+// <Badge key={s.name}>{s.name}</Badge>
+// ))}
+
+// </div>
+
+
+
+// <Text size="sm" fw={500}>
+// CBSE
+// </Text>
+
+// <div className="flex flex-wrap gap-2">
+
+// {cls.subjectsByBoard?.CBSE?.map((s)=>(
+// <Badge key={s.name}>{s.name}</Badge>
+// ))}
+
+// </div>
+
+
+
+// <Text size="sm" fw={500}>
+// ICSE
+// </Text>
+
+// <div className="flex flex-wrap gap-2">
+
+// {cls.subjectsByBoard?.ICSE?.map((s)=>(
+// <Badge key={s.name}>{s.name}</Badge>
+// ))}
+
+// </div>
+
+// </div>
+
+
+
+// <Button
+// variant="light"
+// mt="sm"
+// onClick={()=>openEditModal(cls)}
+// >
+
+// Edit Subjects
+
+// </Button>
+
+// </Stack>
+
+// </Card>
+
+// ))}
+
+// </div>
+
+
+
+// {/* ================= EDIT SUBJECTS MODAL ================= */}
+
+// <Modal
+// opened={opened}
+// onClose={()=>setOpened(false)}
+// title={`Edit Subjects - Class ${selectedClass?.classGrade}`}
+// radius="lg"
+// size="md"
+// >
+
+// <Tabs value={board} onChange={setBoard}>
+
+// <Tabs.List>
+
+// <Tabs.Tab value="STATE">STATE</Tabs.Tab>
+
+// <Tabs.Tab value="CBSE">CBSE</Tabs.Tab>
+
+// <Tabs.Tab value="ICSE">ICSE</Tabs.Tab>
+
+// </Tabs.List>
+
+// </Tabs>
+
+
+
+// {/* SUBJECT LIST */}
+
+// <div className="mt-4 flex flex-wrap gap-2">
+
+// {subjects.map((sub,i)=>(
+
+// <Badge
+// key={i}
+// rightSection={
+
+// <ActionIcon
+// size="xs"
+// color="red"
+// variant="transparent"
+// onClick={()=>removeSubject(i)}
+// >
+
+// <IconTrash size={12}/>
+
+// </ActionIcon>
+
+// }
+// >
+
+// {sub}
+
+// </Badge>
+
+// ))}
+
+// </div>
+
+
+
+// {/* ADD SUBJECT */}
+
+// <Group mt="md">
+
+// <TextInput
+// placeholder="Add subject"
+// value={newSubject}
+// onChange={(e)=>setNewSubject(e.currentTarget.value)}
+// />
+
+// <Button
+// leftSection={<IconPlus size={14}/>}
+// onClick={addSubject}
+// >
+
+// Add
+
+// </Button>
+
+// </Group>
+
+
+
+// <Button
+// fullWidth
+// mt="md"
+// onClick={handleSaveSubjects}
+// >
+
+// Save Changes
+
+// </Button>
+
+
+
+// <Button
+// color="red"
+// variant="light"
+// fullWidth
+// mt="sm"
+// onClick={()=>handleDeleteClass(selectedClass._id)}
+// >
+
+// Delete This Class
+
+// </Button>
+
+// </Modal>
+
+
+
+// </div>
+
+// );
+
+// }
+
 import {
   Card,
   Text,
@@ -10,7 +462,8 @@ import {
   Loader,
   Group,
   Stack,
-  ActionIcon
+  ActionIcon,
+  Accordion
 } from "@mantine/core";
 
 import { IconPlus, IconTrash } from "@tabler/icons-react";
@@ -34,33 +487,20 @@ const { list, loading } = useSelector(
 );
 
 const [grade,setGrade] = useState("");
-
 const [opened,setOpened] = useState(false);
-
 const [selectedClass,setSelectedClass] = useState(null);
 
 const [board,setBoard] = useState("STATE");
-
 const [subjects,setSubjects] = useState([]);
-
 const [newSubject,setNewSubject] = useState("");
 
-
-
 /* ================= FETCH ================= */
-
 useEffect(()=>{
-
 dispatch(fetchClasses());
-
 },[dispatch]);
 
-
-
-/* ================= CREATE CLASS ================= */
-
+/* ================= CREATE ================= */
 const handleCreateClass = async ()=>{
-
 if(!grade) return;
 
 await dispatch(createClass({
@@ -68,19 +508,12 @@ classGrade:Number(grade)
 }));
 
 setGrade("");
-
 dispatch(fetchClasses());
-
 };
 
-
-
 /* ================= OPEN EDIT ================= */
-
 const openEditModal = (cls)=>{
-
 setSelectedClass(cls);
-
 setBoard("STATE");
 
 setSubjects(
@@ -88,131 +521,78 @@ cls.subjectsByBoard?.STATE?.map(s=>s.name) || []
 );
 
 setOpened(true);
-
 };
 
-
-
-/* ================= CHANGE BOARD ================= */
-
+/* ================= BOARD CHANGE ================= */
 useEffect(()=>{
-
 if(selectedClass){
-
 setSubjects(
 selectedClass.subjectsByBoard?.[board]?.map(s=>s.name) || []
 );
-
 }
-
 },[board,selectedClass]);
 
-
-
 /* ================= ADD SUBJECT ================= */
+const addSubject = () => {
+  if (!newSubject.trim()) return;
 
-const addSubject = ()=>{
+  const formatted = newSubject.trim().toUpperCase(); // ✅ CONVERT HERE
 
-if(!newSubject.trim()) return;
+  // avoid duplicates (optional but recommended)
+  if (subjects.includes(formatted)) return;
 
-setSubjects([...subjects,newSubject.trim()]);
-
-setNewSubject("");
-
+  setSubjects([...subjects, formatted]);
+  setNewSubject("");
 };
-
-
 
 /* ================= DELETE SUBJECT ================= */
-
 const removeSubject = (index)=>{
-
-const updated = subjects.filter((_,i)=>i!==index);
-
-setSubjects(updated);
-
+setSubjects(subjects.filter((_,i)=>i!==index));
 };
 
-
-
-/* ================= SAVE SUBJECTS ================= */
-
+/* ================= SAVE ================= */
 const handleSaveSubjects = async ()=>{
-
 await dispatch(updateSubjectsForBoard({
-
 classId:selectedClass._id,
-
 board,
-
 subjects
-
 }));
 
 setOpened(false);
-
 dispatch(fetchClasses());
-
 };
 
-
-
 /* ================= DELETE CLASS ================= */
-
 const handleDeleteClass = async (id)=>{
-
 if(!window.confirm("Delete this class?")) return;
 
 await dispatch(deleteClass(id));
-
 dispatch(fetchClasses());
-
 };
 
-
-
 if(loading){
-
 return(
-
 <div className="flex justify-center p-10">
-
 <Loader/>
-
 </div>
-
 );
-
 }
 
-
-
 return(
 
-<div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
+<div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
 
 {/* ================= HEADER ================= */}
-
 <div>
-
-<Title order={3}>
-Classes & Subjects
-</Title>
-
+<Title order={3}>Classes & Subjects</Title>
 <Text size="sm" c="dimmed">
 Manage subjects for each class and board
 </Text>
-
 </div>
 
-
-
 {/* ================= ADD CLASS ================= */}
-
 <Card shadow="sm" radius="lg" withBorder>
-
 <Group>
-
 <TextInput
 placeholder="Enter Class Grade (1-12)"
 value={grade}
@@ -224,28 +604,26 @@ className="w-48"
 leftSection={<IconPlus size={16}/>}
 onClick={handleCreateClass}
 >
-
 Add Class
-
 </Button>
-
 </Group>
-
 </Card>
 
-
-
-{/* ================= CLASS LIST ================= */}
-
-<div className="grid md:grid-cols-2 gap-4">
+{/* ================= ACCORDION ================= */}
+<Accordion
+variant="separated"
+radius="lg"
+chevronPosition="right"
+>
 
 {list.map((cls)=>(
 
-<Card key={cls._id} shadow="sm" radius="lg" withBorder>
+<Accordion.Item key={cls._id} value={cls._id}>
 
-<Stack gap={10}>
+{/* HEADER */}
+<Accordion.Control>
 
-<Group justify="space-between">
+<Group justify="space-between" w="100%">
 
 <Text fw={600}>
 Class {cls.classGrade}
@@ -254,87 +632,90 @@ Class {cls.classGrade}
 <ActionIcon
 color="red"
 variant="subtle"
-onClick={()=>handleDeleteClass(cls._id)}
+onClick={(e)=>{
+e.stopPropagation(); // IMPORTANT (prevents accordion toggle)
+handleDeleteClass(cls._id);
+}}
 >
-
 <IconTrash size={16}/>
-
 </ActionIcon>
 
 </Group>
 
+</Accordion.Control>
 
+{/* CONTENT */}
+<Accordion.Panel>
 
-{/* SUBJECT LIST */}
+<Stack gap="md">
 
-<div className="space-y-2">
-
-<Text size="sm" fw={500}>
-STATE
-</Text>
-
-<div className="flex flex-wrap gap-2">
-
-{cls.subjectsByBoard?.STATE?.map((s)=>(
-<Badge key={s.name}>{s.name}</Badge>
-))}
-
+{/* STATE */}
+<div>
+<Text size="sm" fw={500}>STATE</Text>
+<div className="flex flex-wrap gap-2 mt-1">
+{cls.subjectsByBoard?.STATE?.length ? (
+cls.subjectsByBoard.STATE.map((s)=>(
+<Badge key={s.name} variant="light" color="gray">
+{s.name}
+</Badge>
+))
+) : (
+<Text size="xs" c="dimmed">No subjects</Text>
+)}
+</div>
 </div>
 
-
-
-<Text size="sm" fw={500}>
-CBSE
-</Text>
-
-<div className="flex flex-wrap gap-2">
-
-{cls.subjectsByBoard?.CBSE?.map((s)=>(
-<Badge key={s.name}>{s.name}</Badge>
-))}
-
+{/* CBSE */}
+<div>
+<Text size="sm" fw={500}>CBSE</Text>
+<div className="flex flex-wrap gap-2 mt-1">
+{cls.subjectsByBoard?.CBSE?.length ? (
+cls.subjectsByBoard.CBSE.map((s)=>(
+<Badge key={s.name} variant="light" color="gray">
+{s.name}
+</Badge>
+))
+) : (
+<Text size="xs" c="dimmed">No subjects</Text>
+)}
+</div>
 </div>
 
-
-
-<Text size="sm" fw={500}>
-ICSE
-</Text>
-
-<div className="flex flex-wrap gap-2">
-
-{cls.subjectsByBoard?.ICSE?.map((s)=>(
-<Badge key={s.name}>{s.name}</Badge>
-))}
-
+{/* ICSE */}
+<div>
+<Text size="sm" fw={500}>ICSE</Text>
+<div className="flex flex-wrap gap-2 mt-1">
+{cls.subjectsByBoard?.ICSE?.length ? (
+cls.subjectsByBoard.ICSE.map((s)=>(
+<Badge key={s.name} variant="light" color="gray">
+{s.name}
+</Badge>
+))
+) : (
+<Text size="xs" c="dimmed">No subjects</Text>
+)}
 </div>
-
 </div>
-
-
 
 <Button
 variant="light"
 mt="sm"
 onClick={()=>openEditModal(cls)}
 >
-
 Edit Subjects
-
 </Button>
 
 </Stack>
 
-</Card>
+</Accordion.Panel>
+
+</Accordion.Item>
 
 ))}
 
-</div>
+</Accordion>
 
-
-
-{/* ================= EDIT SUBJECTS MODAL ================= */}
-
+{/* ================= MODAL ================= */}
 <Modal
 opened={opened}
 onClose={()=>setOpened(false)}
@@ -346,57 +727,40 @@ size="md"
 <Tabs value={board} onChange={setBoard}>
 
 <Tabs.List>
-
 <Tabs.Tab value="STATE">STATE</Tabs.Tab>
-
 <Tabs.Tab value="CBSE">CBSE</Tabs.Tab>
-
 <Tabs.Tab value="ICSE">ICSE</Tabs.Tab>
-
 </Tabs.List>
 
 </Tabs>
 
-
-
 {/* SUBJECT LIST */}
-
 <div className="mt-4 flex flex-wrap gap-2">
 
 {subjects.map((sub,i)=>(
-
 <Badge
 key={i}
+color="gray"
+variant="light"
 rightSection={
-
 <ActionIcon
 size="xs"
 color="red"
 variant="transparent"
 onClick={()=>removeSubject(i)}
 >
-
 <IconTrash size={12}/>
-
 </ActionIcon>
-
 }
 >
-
 {sub}
-
 </Badge>
-
 ))}
 
 </div>
 
-
-
 {/* ADD SUBJECT */}
-
 <Group mt="md">
-
 <TextInput
 placeholder="Add subject"
 value={newSubject}
@@ -407,26 +771,13 @@ onChange={(e)=>setNewSubject(e.currentTarget.value)}
 leftSection={<IconPlus size={14}/>}
 onClick={addSubject}
 >
-
 Add
-
 </Button>
-
 </Group>
 
-
-
-<Button
-fullWidth
-mt="md"
-onClick={handleSaveSubjects}
->
-
+<Button fullWidth mt="md" onClick={handleSaveSubjects}>
 Save Changes
-
 </Button>
-
-
 
 <Button
 color="red"
@@ -435,17 +786,11 @@ fullWidth
 mt="sm"
 onClick={()=>handleDeleteClass(selectedClass._id)}
 >
-
 Delete This Class
-
 </Button>
 
 </Modal>
 
-
-
 </div>
-
 );
-
 }

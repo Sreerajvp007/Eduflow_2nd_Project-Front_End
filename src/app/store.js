@@ -24,7 +24,8 @@ import adminAnalytics from "../features/admin/adminAnalyticsSlice"
 import settingsReducer from "../features/tutor/settingsSlice"
 import tutorCourseReducer from "../features/tutor/course/tutorCourseSlice";
 import scheduleReducer from "../features/tutor/scheduleSlice";
-import adminSettings from "../features/admin/adminSettingsSlice"
+import adminSettings from "../features/admin/adminSettingsSlice";
+import parentReducer from "../features/admin/parentSlice"
 const store = configureStore({
   reducer: {
     admin: adminReducer,
@@ -38,7 +39,6 @@ const store = configureStore({
      adminSettings,
      adminAnalytics,
     adminDashboard: adminDashboardReducer, 
-    
     parentStudents: parentStudentsReducer,
     parentCourse: parentCourseReducer,
     parentProfile: parentProfileReducer,
@@ -54,6 +54,7 @@ const store = configureStore({
     tutorSessions: tutorSessionReducer,
     parentSessions: parentSessionReducer,
     settings: settingsReducer,
+    adminParents: parentReducer,
 
     
   },

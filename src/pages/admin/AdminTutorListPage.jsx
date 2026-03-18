@@ -45,7 +45,7 @@ pagination,
 requestPagination
 } = useSelector((s)=>s.adminTutors);
 
-const [activeTab,setActiveTab] = useState("requests");
+const [activeTab,setActiveTab] = useState("tutors");
 
 const [filters,setFilters] = useState({
 search:"",
@@ -117,17 +117,38 @@ Manage tutors, view profiles and review profile edit requests
 
 
 {/* SWITCH BUTTONS */}
+<div className="flex justify-start">
 
 <SegmentedControl
   value={activeTab}
-  onChange={setActiveTab}
+  onChange={(value) => {
+    setActiveTab(value);
+    setFilters((prev) => ({
+      ...prev,
+      page: 1,
+    }));
+  }}
   data={[
-    { label: "Profile Requests", value: "requests" },
     { label: "Tutors", value: "tutors" },
+    { label: "Profile Requests", value: "requests" },
   ]}
-  radius="md"
-  size="sm"
+  radius="md" // 👈 same feel as your Students page
+  size="sm"   // 👈 balanced (NOT xs, NOT lg)
+  className="bg-gray-100 p-1 rounded-md"
+  styles={{
+    indicator: {
+      backgroundColor: "#ffffff",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+      borderRadius: "6px"
+    },
+    label: {
+      fontWeight: 500
+      // ❌ no custom padding → keeps natural Mantine spacing
+    }
+  }}
 />
+
+</div>
 
 
 {/* ================= PROFILE EDIT REQUEST TABLE ================= */}
@@ -281,7 +302,7 @@ total={requestPagination.pages}
 <div className="flex flex-col sm:flex-row gap-3">
 
 <TextInput
-placeholder="Search tutor..."
+placeholder="Search by Tutor name"
 leftSection={<IconSearch size={14}/>}
 value={filters.search}
 onChange={(e)=>handleSearchChange(e.currentTarget.value)}

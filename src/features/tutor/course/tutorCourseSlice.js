@@ -8,7 +8,7 @@ export const fetchTutorCourses = createAsyncThunk(
       const res = await api.get("/tutor/courses", {
         params: {
           page,
-          limit: 1,
+          limit: 5,
           search,
           status,
         },

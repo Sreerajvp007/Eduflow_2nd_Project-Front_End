@@ -5,6 +5,7 @@ import { sendParentLoginOtp } from "../../features/parent/auth/parentAuthSlice";
 
 import MuiButton from "../../components/common/button";
 import MuiInput from "../../components/common/input";
+
 const ParentLogin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -58,6 +59,11 @@ const ParentLogin = () => {
   value={email}
   onChange={(e) => setEmail(e.target.value)}
 />
+{error?.message && (
+  <p className="text-red-200 text-sm mb-2">
+    {error.message}
+  </p>
+)}
 
           </div>
 

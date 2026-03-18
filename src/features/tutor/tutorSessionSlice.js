@@ -28,6 +28,18 @@ export const endTutorSession = createAsyncThunk(
   },
 );
 
+export const updateSessionStatus = createAsyncThunk(
+  "tutorSessions/updateStatus",
+  async ({ sessionId, status }) => {
+    const res = await axios.patch(
+      `/tutor/session/${sessionId}/status`,
+      { status }
+    );
+
+    return res.data.result;
+  }
+);
+
 const tutorSessionSlice = createSlice({
   name: "tutorSessions",
 
@@ -76,7 +88,16 @@ const tutorSessionSlice = createSlice({
         if (index !== -1) {
           state.sessions[index].status = "completed";
         }
-      });
+      })
+      .addCase(updateSessionStatus.fulfilled, (state, action) => {
+  const index = state.sessions.findIndex(
+    (s) => s._id === action.payload._id
+  );
+
+  if (index !== -1) {
+    state.sessions[index].status = action.payload.status;
+  }
+});
   },
 });
 

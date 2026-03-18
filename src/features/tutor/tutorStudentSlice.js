@@ -15,7 +15,7 @@ export const fetchMyStudents = createAsyncThunk(
       const res = await axiosInstance.get("/tutor/my-students", {
         params: {
           page,
-          limit: 1,
+          limit: 5,
           search,
           grade,
           status,
@@ -41,7 +41,7 @@ export const fetchStudentCourses = createAsyncThunk(
         {
           params: {
             page,
-            limit: 3,
+            limit: 5,
           },
         }
       );

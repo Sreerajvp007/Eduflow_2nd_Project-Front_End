@@ -1,3 +1,4 @@
+
 import {
   AppShell,
   Group,
@@ -12,8 +13,11 @@ import {
   Drawer,
   Divider,
   Center,
+  Indicator, 
 } from "@mantine/core";
+
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+
 import {
   LayoutDashboard,
   Users,
@@ -27,17 +31,23 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Bell, 
+  BookOpen
 } from "lucide-react";
+
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { useDispatch, useSelector} from "react-redux";
+import { useState, useEffect } from "react"; 
+import { useDispatch, useSelector } from "react-redux";
+
 import { adminLogout } from "../../../features/admin/adminAuthSlice";
+import { fetchProfileEditRequests } from "../../../features/admin/adminTutorSlice"; 
+
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
   { label: "Tutor Management", icon: GraduationCap, path: "/admin/tutors" },
   { label: "Students & Parents", icon: Users, path: "/admin/students" },
-  // { label: "Sessions & Bookings", icon: Calendar, path: "/admin/sessions" },
+  { label: "Classes & Subjects", icon: BookOpen, path: "/admin/classes" },
   { label: "Payments & Revenue", icon: CreditCard, path: "/admin/payments" },
   { label: "Reviews & Feedback", icon: Star, path: "/admin/feedback" },
   { label: "Reports", icon: BarChart3, path: "/admin/reports" },
@@ -54,7 +64,6 @@ const SidebarContent = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
 
   return (
     <Box
@@ -77,11 +86,7 @@ const SidebarContent = ({
         <Group gap={4}>
           {showCollapseToggle && (
             <ActionIcon size="sm" variant="subtle" onClick={onToggleCollapse}>
-              {collapsed ? (
-                <ChevronRight size={16} />
-              ) : (
-                <ChevronLeft size={16} />
-              )}
+              {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
             </ActionIcon>
           )}
 
@@ -98,7 +103,6 @@ const SidebarContent = ({
       <ScrollArea flex={1} px={collapsed ? 0 : "xs"} py="sm">
         {navItems.map((item) => {
           const active = location.pathname.startsWith(item.path);
-
           const Icon = item.icon;
 
           return (
@@ -139,11 +143,49 @@ const SidebarContent = ({
 
 const AdminLayout = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate(); 
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   const [drawerOpened, drawer] = useDisclosure(false);
   const [collapsed, setCollapsed] = useState(false);
+
   const { admin } = useSelector((state) => state.admin);
+ 
+const { editRequests } = useSelector((state) => state.adminTutors);
+
+const notificationCount = editRequests?.length || 0;
+ 
+  useEffect(() => {
+    console.log("🔌 ADMIN SSE CONNECTING...");
+
+const es = new EventSource(
+  `${import.meta.env.VITE_API_BASE_URL}/admin/notifications/stream`
+);
+
+    es.onopen = () => {
+      console.log("✅ ADMIN SSE CONNECTED");
+    };
+
+    es.onmessage = (e) => {
+      console.log("🔥 SSE RECEIVED:", e.data);
+
+      const data = JSON.parse(e.data);
+
+if (data.type === "NEW_PROFILE_REQUEST") {
+  dispatch(fetchProfileEditRequests());
+}
+    };
+
+    es.onerror = (err) => {
+      console.log("❌ SSE ERROR", err);
+    };
+
+    return () => es.close();
+  }, [dispatch]);
+  useEffect(() => {
+  
+  dispatch(fetchProfileEditRequests());
+}, [dispatch]);
 
   return (
     <>
@@ -184,7 +226,24 @@ const AdminLayout = () => {
               </Text>
             </Group>
 
+            {/* 🔔 RIGHT SIDE */}
             <Group gap="sm">
+
+              {/* 🔔 NOTIFICATION ICON */}
+              <Indicator
+                inline
+                label={notificationCount}
+                size={16}
+                disabled={notificationCount === 0}
+              >
+                <ActionIcon
+                  variant="subtle"
+                  onClick={() => navigate("/admin/notifications")}
+                >
+                  <Bell size={20} />
+                </ActionIcon>
+              </Indicator>
+
               <Avatar radius="xl" color="indigo">
                 {admin?.fullName?.charAt(0)}
               </Avatar>

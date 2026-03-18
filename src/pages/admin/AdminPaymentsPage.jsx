@@ -417,7 +417,7 @@ Overview
 
 <Button
 size="xs"
-variant="light"
+color="blue" // 👈 main fix
 loading={payingId===p._id}
 disabled={
 p.status==="paid" ||

@@ -8,7 +8,7 @@ export const fetchTutors = createAsyncThunk(
       const res = await api.get("/admin/tutors", {
         params: {
           page: params.page || 1,
-          limit: 2,
+          limit: 5,
           search: params.search || "",
           status: params.status || "",
           subject: params.subject || "",
@@ -189,8 +189,14 @@ const adminTutorSlice = createSlice({
     pagination: null,
     requestPagination: null,
     error: null,
+     notificationCount: 0, // ✅ ADD THIS
+    
   },
-  reducers: {},
+  reducers: {
+    incrementNotification: (state) => {
+      state.notificationCount += 1;
+    },
+  },
 
   extraReducers: (builder) => {
     builder
@@ -307,5 +313,7 @@ const adminTutorSlice = createSlice({
       });
   },
 });
+
+export const { incrementNotification } = adminTutorSlice.actions;
 
 export default adminTutorSlice.reducer;

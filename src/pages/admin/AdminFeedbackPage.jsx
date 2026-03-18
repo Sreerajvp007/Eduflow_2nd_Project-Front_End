@@ -23,7 +23,7 @@ import {
 
 import { IconSearch } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-
+import api from "../../utils/axiosInstance"
 import {
   fetchAdminReviews,
   fetchAdminReports,
@@ -49,25 +49,42 @@ const [sort,setSort] = useState("latest");
 const [opened,setOpened] = useState(false);
 const [selected,setSelected] = useState(null);
 
-useEffect(()=>{
+const [tutorFilter, setTutorFilter] = useState("");
+const [parentFilter, setParentFilter] = useState("");
 
-if(section === "reviews"){
-dispatch(fetchAdminReviews({
-page,
-search,
-sort
-}));
-}
+const [tutorsList, setTutorsList] = useState([]);
+const [parentsList, setParentsList] = useState([]);
 
-if(section === "reports"){
-dispatch(fetchAdminReports({
-page,
-search
-}));
-}
+useEffect(() => {
+  const fetchFilters = async () => {
+    const res = await api.get(`/admin/filter-lists?type=${section}`);
+    setTutorsList(res.data.result.tutors);
+    setParentsList(res.data.result.parents);
+  };
 
-},[dispatch,section,page,search,sort]);
+  fetchFilters();
+}, [section]);
 
+useEffect(() => {
+  if (section === "reviews") {
+    dispatch(fetchAdminReviews({
+      page,
+      search,
+      sort,
+      tutorId: tutorFilter,
+      parentId: parentFilter,
+    }));
+  }
+
+  if (section === "reports") {
+    dispatch(fetchAdminReports({
+      page,
+      search,
+      tutorId: tutorFilter,
+      parentId: parentFilter,
+    }));
+  }
+}, [dispatch, section, page, search, sort, tutorFilter, parentFilter]);
 const handleSolve = () => {
 
 dispatch(markReportSolved(selected._id));
@@ -132,7 +149,33 @@ setSearch(e.currentTarget.value);
 }}
 className="w-full sm:w-72"
 />
+{/* ✅ Tutor filter */}
+<Select
+  placeholder="Filter by Tutor"
+  data={tutorsList.map(t => ({
+    value: t._id,
+    label: t.fullName
+  }))}
+  value={tutorFilter}
+  onChange={(v) => {
+    setPage(1);
+    setTutorFilter(v || "");
+  }}
+/>
 
+{/* ✅ Parent filter */}
+<Select
+  placeholder="Filter by Parent"
+  data={parentsList.map(p => ({
+    value: p._id,
+    label: p.fullName
+  }))}
+  value={parentFilter}
+  onChange={(v) => {
+    setPage(1);
+    setParentFilter(v || "");
+  }}
+/>
 {section === "reviews" && (
 
 <Select

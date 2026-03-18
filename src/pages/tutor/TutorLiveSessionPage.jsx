@@ -11,6 +11,9 @@ Group,
 Paper,
 Text,
 Badge,
+Modal,
+Stack,
+Button
 
 } from "@mantine/core";
 
@@ -42,6 +45,7 @@ const remoteRef = useRef(null);
 const [audioTrack,setAudioTrack] = useState(null);
 const [videoTrack,setVideoTrack] = useState(null);
 const [screenTrack,setScreenTrack] = useState(null);
+const [confirmOpen,setConfirmOpen] = useState(false);
 
 const [mic,setMic] = useState(true);
 const [camera,setCamera] = useState(true);
@@ -218,11 +222,7 @@ END SESSION
 
 const endSession = async()=>{
 
-if(!window.confirm("End this session?")) return;
-
 await cleanup();
-
-/* UPDATE SESSION STATUS */
 
 await dispatch(endTutorSession(sessionId));
 
@@ -387,7 +387,7 @@ size="xl"
 radius="xl"
 variant="filled"
 color="red"
-onClick={endSession}
+onClick={()=>setConfirmOpen(true)}
 >
 <IconPhoneOff/>
 </ActionIcon>
@@ -395,7 +395,43 @@ onClick={endSession}
 </Group>
 
 </div>
+<Modal
+  opened={confirmOpen}
+  onClose={()=>setConfirmOpen(false)}
+  title="End Session"
+  centered
+>
 
+<Stack>
+
+<Text size="sm">
+Are you sure you want to end this session?
+</Text>
+
+<Group justify="flex-end" mt="md">
+
+<Button
+variant="default"
+onClick={()=>setConfirmOpen(false)}
+>
+Cancel
+</Button>
+
+<Button
+color="red"
+onClick={async ()=>{
+  setConfirmOpen(false);
+  await endSession();
+}}
+>
+End Session
+</Button>
+
+</Group>
+
+</Stack>
+
+</Modal>
 </div>
 
 );

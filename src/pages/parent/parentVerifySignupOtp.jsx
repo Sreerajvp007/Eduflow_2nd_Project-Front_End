@@ -143,6 +143,7 @@ const ParentVerifySignupOtp = () => {
               }}
             />
           ))}
+          
         </div>
 
         {/* RESEND */}

@@ -64,7 +64,11 @@ dispatch(fetchTutorPayouts(page));
 }
 
 },[dispatch,page,view]);
-
+const resetForm = () => {
+  setAmount("");
+  setMethod("bank");
+  setNotes("");
+};
 if(loading){
 return(
 <div className="flex justify-center p-10">
@@ -263,6 +267,7 @@ return;
 
 }
 
+resetForm();
 setOpened(true);
 
 }}
@@ -499,7 +504,10 @@ total={totalPages}
 
 <Modal
 opened={opened}
-onClose={()=>setOpened(false)}
+onClose={()=>{
+  setOpened(false);
+  resetForm(); 
+}}
 title="Request Payout"
 >
 
@@ -532,6 +540,7 @@ onChange={(e)=>setNotes(e.target.value)}
 <Button
 loading={submitting}
 onClick={submit}
+ disabled={!amount}
 >
 Submit Request
 </Button>

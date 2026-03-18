@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
 fetchTutorSessions,
-startTutorSession
+startTutorSession,
+updateSessionStatus
+
 } from "../../features/tutor/tutorSessionSlice";
 
 import { useNavigate } from "react-router-dom";
@@ -93,6 +95,54 @@ return(
 );
 
 }
+
+const markAsCancelled = async () => {
+  await dispatch(
+    updateSessionStatus({
+      sessionId: selectedSession._id,
+      status: "cancelled"
+    })
+  );
+
+  setDetailsOpen(false);
+
+  dispatch(fetchTutorSessions({ page, search, status }));
+};
+const canCancel = () => {
+  if (!selectedSession) return false;
+
+  if (selectedSession.status !== "completed") return false;
+
+  if (!selectedSession.actualEnd) return false;
+
+  const end = new Date(selectedSession.actualEnd);
+  const now = new Date();
+
+  const diffHours = (now - end) / (1000 * 60 * 60);
+
+  return diffHours <= 2;
+};
+const getDuration = () => {
+  if (!selectedSession?.actualStart || !selectedSession?.actualEnd) {
+    return "—";
+  }
+
+  const start = new Date(selectedSession.actualStart);
+  const end = new Date(selectedSession.actualEnd);
+
+  const diffMs = end - start;
+
+  const mins = Math.floor(diffMs / (1000 * 60));
+  const hrs = Math.floor(mins / 60);
+
+  const remainingMins = mins % 60;
+
+  if (hrs > 0) {
+    return `${hrs}h ${remainingMins}m`;
+  }
+
+  return `${mins} min`;
+};
 
 return(
 
@@ -356,13 +406,15 @@ total={totalPages}
 
 )}
 <Modal
-opened={detailsOpen}
-onClose={()=>setDetailsOpen(false)}
-title="Session Details"
-size="lg"
+  opened={detailsOpen}
+  onClose={()=>setDetailsOpen(false)}
+  title="Session Details"
+  size="lg"
 >
 
 {selectedSession && (
+
+<Stack>
 
 <Card shadow="sm" radius="md" p="lg">
 
@@ -373,7 +425,6 @@ size="lg"
 <div className="flex justify-between items-center">
 
 <div>
-
 <Text fw={700} size="lg">
 {selectedSession.title}
 </Text>
@@ -381,7 +432,6 @@ size="lg"
 <Text size="sm" c="dimmed">
 {selectedSession.courseId?.subject}
 </Text>
-
 </div>
 
 <Badge
@@ -405,10 +455,7 @@ selectedSession.status==="completed"
 {/* DESCRIPTION */}
 
 <div>
-
-<Text fw={600} size="sm">
-Description
-</Text>
+<Text fw={600} size="sm">Description</Text>
 
 <Text
 size="sm"
@@ -416,77 +463,60 @@ dangerouslySetInnerHTML={{
 __html:selectedSession.description || "No description"
 }}
 />
-
 </div>
 
 <Divider/>
 
-{/* SESSION INFO GRID */}
+{/* INFO GRID */}
 
 <div className="grid grid-cols-2 gap-4">
 
 <div>
-
-<Text size="xs" c="dimmed">
-Student
-</Text>
-
+<Text size="xs" c="dimmed">Student</Text>
 <Text fw={500}>
 {selectedSession.studentId?.name}
 </Text>
-
 </div>
 
 <div>
-
-<Text size="xs" c="dimmed">
-Date
-</Text>
-
+<Text size="xs" c="dimmed">Date</Text>
 <Text fw={500}>
 {new Date(selectedSession.sessionDate).toLocaleDateString()}
 </Text>
-
 </div>
 
 <div>
-
-<Text size="xs" c="dimmed">
-Scheduled Time
-</Text>
-
+<Text size="xs" c="dimmed">Scheduled Time</Text>
 <Text fw={500}>
 {selectedSession.startTime || selectedSession.courseId?.timeSlot}
 </Text>
-
 </div>
 
 <div>
-
-<Text size="xs" c="dimmed">
-Actual Start
-</Text>
-
+<Text size="xs" c="dimmed">Actual Start</Text>
 <Text fw={500}>
 {selectedSession.actualStart
 ? new Date(selectedSession.actualStart).toLocaleString()
 : "Not started"}
 </Text>
-
 </div>
 
 <div>
-
-<Text size="xs" c="dimmed">
-Actual End
-</Text>
-
+<Text size="xs" c="dimmed">Actual End</Text>
 <Text fw={500}>
 {selectedSession.actualEnd
 ? new Date(selectedSession.actualEnd).toLocaleString()
 : "Not finished"}
 </Text>
+</div>
 
+{/* ✅ NEW FIELD */}
+
+<div>
+<Text size="xs" c="dimmed">Duration</Text>
+<Text fw={500}>
+{getDuration()}
+</Text>
 </div>
 
 </div>
@@ -494,6 +524,26 @@ Actual End
 </div>
 
 </Card>
+
+{/* ✅ ACTION FOOTER */}
+
+{canCancel() && (
+
+<Group justify="flex-end">
+
+<Button
+color="red"
+variant="light"
+onClick={markAsCancelled}
+>
+Mark as Cancelled
+</Button>
+
+</Group>
+
+)}
+
+</Stack>
 
 )}
 

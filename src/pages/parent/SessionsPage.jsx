@@ -19,7 +19,7 @@ export default function ParentSessionsPage(){
 const dispatch = useDispatch();
 const navigate = useNavigate();
 
-const { sessions, loading } = useSelector(
+const { sessions, loading ,initialLoading} = useSelector(
   (state)=>state.parentSessions
 );
 
@@ -44,7 +44,7 @@ return ()=>clearInterval(interval);
 
 },[status, dispatch]);
 
-if(loading){
+if(initialLoading){
 return(
 <div className="flex justify-center p-10">
 <Loader/>
@@ -107,87 +107,104 @@ Cancelled
 {/* SESSION CARDS */}
 
 <div className="px-4 pb-20 space-y-4">
+{sessions.length === 0 ? (
 
-{sessions.map((session)=>(
+  <div className="flex flex-col items-center justify-center py-16 text-center">
 
-<Card key={session._id} shadow="sm" radius="lg" p="lg">
+    <Text fw={600} size="lg">
+      No {status} sessions
+    </Text>
 
-<Group justify="space-between">
+    <Text size="sm" c="dimmed" mt={4}>
+      {status === "live" && "No live classes right now"}
+      {status === "scheduled" && "No upcoming sessions scheduled"}
+      {status === "completed" && "No completed sessions yet"}
+      {status === "cancelled" && "No cancelled sessions"}
+    </Text>
 
-<Text fw={600}>
-{session.title}
-</Text>
+  </div>
 
-{session.status==="live" && (
-<Badge color="red">LIVE</Badge>
+) : (
+
+  sessions.map((session)=>(
+
+    <Card key={session._id} shadow="sm" radius="lg" p="lg">
+
+      <Group justify="space-between">
+
+        <Text fw={600}>
+          {session.title}
+        </Text>
+
+        {session.status==="live" && (
+          <Badge color="red">LIVE</Badge>
+        )}
+
+      </Group>
+
+      <Group mt="sm">
+
+        <Avatar
+          src={session.tutorId?.profileImage}
+          radius="xl"
+        />
+
+        <div>
+          <Text size="sm">
+            {session.tutorId?.fullName}
+          </Text>
+
+          <Text size="xs" c="dimmed">
+            Math Tutor
+          </Text>
+        </div>
+
+      </Group>
+
+      <Text size="sm" mt="sm" c="dimmed">
+        {session.courseId?.subject}
+      </Text>
+
+      <Text size="xs" c="dimmed">
+        {new Date(session.sessionDate).toLocaleDateString()}
+      </Text>
+
+      {session.status==="live" && (
+
+        <Button
+          fullWidth
+          radius="md"
+          mt="md"
+          color="blue"
+          onClick={() =>
+            navigate(`/parent/live/${session.channelName}/${session._id}`)
+          }
+        >
+          JOIN CLASS
+        </Button>
+
+      )}
+
+      {session.status==="scheduled" && (
+
+        <Button
+          variant="light"
+          fullWidth
+          radius="md"
+          mt="md"
+        >
+          View Details
+        </Button>
+
+      )}
+
+    </Card>
+
+  ))
+
 )}
-
-</Group>
-
-<Group mt="sm">
-
-<Avatar
-src={session.tutorId?.profileImage}
-radius="xl"
-/>
-
-<div>
-
-<Text size="sm">
-{session.tutorId?.fullName}
-</Text>
-
-<Text size="xs" c="dimmed">
-Math Tutor
-</Text>
 
 </div>
-
-</Group>
-
-<Text size="sm" mt="sm" c="dimmed">
-{session.courseId?.subject}
-</Text>
-
-<Text size="xs" c="dimmed">
-{new Date(session.sessionDate).toLocaleDateString()}
-</Text>
-
-{session.status==="live" && (
-
-<Button
-fullWidth
-radius="md"
-mt="md"
-color="blue"
-onClick={() =>
-navigate(`/parent/live/${session.channelName}/${session._id}`)
-}
->
-JOIN CLASS
-</Button>
-
-)}
-
-{session.status==="scheduled" && (
-
-<Button
-variant="light"
-fullWidth
-radius="md"
-mt="md"
->
-View Details
-</Button>
-
-)}
-
-</Card>
-
-))}
-
-</div>
-
 </div>
 
 );

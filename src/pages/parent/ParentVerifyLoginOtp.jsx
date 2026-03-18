@@ -10,6 +10,7 @@ import {
 import MuiButton from "../../components/common/button";
 import MuiOtpInput from "../../components/common/OtpInput";
 
+
 const ParentVerifyLoginOtp = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -91,11 +92,11 @@ const handleResend = async () => {
         </div>
 
         {/* ERROR */}
-        {error && (
-          <p className="text-red-200 text-sm mt-5">
-            {error}
-          </p>
-        )}
+        {error?.message && (
+  <p className="text-red-200 text-sm mb-2">
+    {error.message}
+  </p>
+)}
 
         {/* RESEND */}
         <div className="mt-8">

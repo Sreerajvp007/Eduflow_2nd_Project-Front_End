@@ -8,11 +8,17 @@ export const sendParentSignupOtp = createAsyncThunk(
       const res = await axiosInstance.post("/auth/parent/send-otp", data);
       return res.data;
     } catch (err) {
+      const backendError = err.response?.data;
+
+      if (backendError?.errors?.length > 0) {
+        return thunkAPI.rejectWithValue(backendError.errors[0].message);
+      }
+
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to send OTP",
+        backendError?.message || "Failed to send OTP"
       );
     }
-  },
+  }
 );
 
 export const verifyParentSignupOtp = createAsyncThunk(
@@ -22,11 +28,17 @@ export const verifyParentSignupOtp = createAsyncThunk(
       const res = await axiosInstance.post("/auth/parent/verify-otp", data);
       return res.data;
     } catch (err) {
+      const backendError = err.response?.data;
+
+      if (backendError?.errors?.length > 0) {
+        return thunkAPI.rejectWithValue(backendError.errors[0].message);
+      }
+
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "OTP verification failed",
+        backendError?.message || "OTP verification failed"
       );
     }
-  },
+  }
 );
 
 export const sendParentLoginOtp = createAsyncThunk(
@@ -36,11 +48,17 @@ export const sendParentLoginOtp = createAsyncThunk(
       const res = await axiosInstance.post("/auth/parent/login/send-otp", data);
       return res.data;
     } catch (err) {
+      const backendError = err.response?.data;
+
+      if (backendError?.errors?.length > 0) {
+        return thunkAPI.rejectWithValue(backendError.errors[0].message);
+      }
+
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to send OTP",
+        backendError?.message || "Failed to send OTP"
       );
     }
-  },
+  }
 );
 
 export const verifyParentLoginOtp = createAsyncThunk(
@@ -49,15 +67,21 @@ export const verifyParentLoginOtp = createAsyncThunk(
     try {
       const res = await axiosInstance.post(
         "/auth/parent/login/verify-otp",
-        data,
+        data
       );
       return res.data;
     } catch (err) {
+      const backendError = err.response?.data;
+
+      if (backendError?.errors?.length > 0) {
+        return thunkAPI.rejectWithValue(backendError.errors[0].message);
+      }
+
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "OTP verification failed",
+        backendError?.message || "OTP verification failed"
       );
     }
-  },
+  }
 );
 
 export const parentRefresh = createAsyncThunk(
@@ -89,15 +113,21 @@ export const resendParentLoginOtp = createAsyncThunk(
     try {
       const res = await axiosInstance.post(
         "/auth/parent/login/resend-otp",
-        data,
+        data
       );
       return res.data;
     } catch (err) {
+      const backendError = err.response?.data;
+
+      if (backendError?.errors?.length > 0) {
+        return thunkAPI.rejectWithValue(backendError.errors[0].message);
+      }
+
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to resend OTP",
+        backendError?.message || "Failed to resend OTP"
       );
     }
-  },
+  }
 );
 
 const parentAuthSlice = createSlice({

@@ -113,6 +113,22 @@ export const unblockAvailability = createAsyncThunk(
   },
 );
 
+export const resumeSession = createAsyncThunk(
+  "sessions/resumeSession",
+  async (sessionId, { rejectWithValue }) => {
+    try {
+      await axios.patch(`/tutor/sessions/${sessionId}/resume`);
+      return sessionId;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to resume session"
+      );
+    }
+  }
+);
+
+
+
 const sessionSlice = createSlice({
   name: "sessions",
 
@@ -171,7 +187,16 @@ const sessionSlice = createSlice({
 
     builder.addCase(unblockAvailability.fulfilled, (state, action) => {
       state.availability = action.payload;
-    });
+    })
+    builder.addCase(resumeSession.fulfilled, (state, action) => {
+  const session = state.sessions.find(
+    (s) => s._id === action.payload
+  );
+
+  if (session) {
+    session.status = "scheduled";
+  }
+});
   },
 });
 

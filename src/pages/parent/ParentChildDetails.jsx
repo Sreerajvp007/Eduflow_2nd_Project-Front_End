@@ -23,23 +23,44 @@ const ParentChildDetails = () => {
     grade: "",
     board: "STATE", // ✅ default board
   });
+const validate = () => {
+  const newErrors = {};
 
-  const handleSubmit = async () => {
-    const payload = {
-      fullName,
-      email,
-      mobile,
-      otp,
-      child: child.name ? child : undefined,
-    };
+  if (!child.name.trim()) {
+    newErrors.name = "Child name is required";
+  }
 
-    const res = await dispatch(verifyParentSignupOtp(payload));
+  if (!child.grade) {
+    newErrors.grade = "Grade is required";
+  } else if (isNaN(child.grade)) {
+    newErrors.grade = "Grade must be a number";
+  } else if (child.grade < 1 || child.grade > 12) {
+    newErrors.grade = "Grade must be between 1 and 12";
+  }
 
-    if (res.meta.requestStatus === "fulfilled") {
-      navigate("/parent/dashboard", { replace: true });
-    }
+  setErrors(newErrors);
+
+  return Object.keys(newErrors).length === 0;
+};
+
+const handleSubmit = async () => {
+  // 🔥 validate first
+  if (!validate()) return;
+
+  const payload = {
+    fullName,
+    email,
+    mobile,
+    otp,
+    child: child.name ? child : undefined,
   };
 
+  const res = await dispatch(verifyParentSignupOtp(payload));
+
+  if (res.meta.requestStatus === "fulfilled") {
+    navigate("/parent/dashboard", { replace: true });
+  }
+};
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-500 to-sky-400 flex items-center justify-center px-4">
       <div className="w-full max-w-[360px] text-white">
@@ -72,6 +93,11 @@ const ParentChildDetails = () => {
               }
               sx={glassInputSx}
             />
+            {errors.name && (
+  <p className="text-red-300 text-xs mt-1">
+    {errors.name}
+  </p>
+)}
           </div>
 
           {/* Grade */}
@@ -84,6 +110,11 @@ const ParentChildDetails = () => {
               }
               sx={glassInputSx}
             />
+            {errors.grade && (
+  <p className="text-red-300 text-xs mt-1">
+    {errors.grade}
+  </p>
+)}
           </div>
 
           {/* BOARD (REPLACED MEDIUM) */}

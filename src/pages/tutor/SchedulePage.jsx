@@ -20,7 +20,8 @@ import {
   fetchAvailability,
   blockAvailability,
   unblockAvailability,
-  fetchTutorStudents
+  fetchTutorStudents,
+  resumeSession
 } from "../../features/tutor/sessionSlice";
 
 const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -158,6 +159,19 @@ setPreviewOpen(false);
 
 };
 
+const resumeClass = async () => {
+  if (!selectedSession) return;
+
+  await dispatch(resumeSession(selectedSession._id));
+
+  notifications.show({
+    title: "Resumed",
+    message: "Session resumed successfully",
+    color: "green",
+  });
+
+  setPreviewOpen(false);
+};
 /* DELETE SESSION */
 
 const deleteClass = async()=>{
@@ -203,18 +217,25 @@ return "booked";
 
 /* BLOCK SLOT */
 
-const toggleBlock=(slot)=>{
+const toggleBlock = (slot) => {
+  if (!slot) return;
 
-if(!slot) return;
+  // 🔥 BLOCK PROTECTION
+  if (slot.status === "booked") {
+    notifications.show({
+      title: "Not allowed",
+      message: "This slot is already booked",
+      color: "red",
+    });
+    return;
+  }
 
-if(slot.status==="blocked"){
-dispatch(unblockAvailability(slot.time));
-}else{
-dispatch(blockAvailability(slot.time));
-}
-
+  if (slot.status === "blocked") {
+    dispatch(unblockAvailability(slot.time));
+  } else {
+    dispatch(blockAvailability(slot.time));
+  }
 };
-
 /* SUBJECTS */
 
 const selectedStudent =
@@ -334,14 +355,14 @@ ${status==="available"
 ?"bg-gray-400 text-white cursor-not-allowed"
 
 :status==="cancelled"
-?"bg-red-400 text-white"
+?"bg-red-500 text-white"
 
 :"bg-indigo-500 text-white"}
 
 `}
 >
 
-{status==="available" && "Tap to book"}
+{status==="available" && "Schedule"}
 {status==="booked" && "Class"}
 {status==="cancelled" && "Cancelled"}
 
@@ -414,27 +435,31 @@ onClose={()=>setScheduleOpen(false)}
 title="Schedule Class"
 >
 
-<input
-list="students"
-placeholder="Student"
-value={form.studentName}
-onChange={(e)=>{
+<div className="mb-3">
+  <label className="block text-sm font-medium mb-1">
+    Student
+  </label>
 
-const student = students.find(
-s=>s.name===e.target.value
-);
+  <input
+    list="students"
+    placeholder="Select student"
+    value={form.studentName}
+    onChange={(e)=>{
+      const student = students.find(
+        s => s.name === e.target.value
+      );
 
-setForm({
-...form,
-studentName:e.target.value,
-studentId:student?.studentId,
-subject:"",
-courseId:""
-});
-
-}}
-className="border rounded p-2 w-full mb-3"
-/>
+      setForm({
+        ...form,
+        studentName: e.target.value,
+        studentId: student?.studentId,
+        subject: "",
+        courseId: ""
+      });
+    }}
+    className="border rounded-md p-2 w-full"
+  />
+</div>
 
 <datalist id="students">
 
@@ -444,25 +469,29 @@ className="border rounded p-2 w-full mb-3"
 
 </datalist>
 
-<input
-list="subjects"
-placeholder="Subject"
-value={form.subject}
-onChange={(e)=>{
+<div className="mb-3">
+  <label className="block text-sm font-medium mb-1">
+    Subject
+  </label>
 
-const subject = subjects.find(
-s=>s.subject===e.target.value
-);
+  <input
+    list="subjects"
+    placeholder="Select subject"
+    value={form.subject}
+    onChange={(e)=>{
+      const subject = subjects.find(
+        s => s.subject === e.target.value
+      );
 
-setForm({
-...form,
-subject:e.target.value,
-courseId:subject?.courseId
-});
-
-}}
-className="border rounded p-2 w-full mb-3"
-/>
+      setForm({
+        ...form,
+        subject: e.target.value,
+        courseId: subject?.courseId
+      });
+    }}
+    className="border rounded-md p-2 w-full"
+  />
+</div>
 
 <datalist id="subjects">
 
@@ -505,13 +534,23 @@ title="Class Details"
 
 <div className="flex gap-3 mt-4">
 
-<Button color="orange" onClick={cancelClass}>
-Cancel Session
-</Button>
+  {selectedSession?.status === "cancelled" ? (
 
-<Button color="red" onClick={deleteClass}>
-Delete Permanently
-</Button>
+    <Button color="green" onClick={resumeClass}>
+      Resume Session
+    </Button>
+
+  ) : (
+
+    <Button color="orange" onClick={cancelClass}>
+      Cancel Session
+    </Button>
+
+  )}
+
+  <Button color="red" onClick={deleteClass}>
+    Delete Permanently
+  </Button>
 
 </div>
 
@@ -520,28 +559,46 @@ Delete Permanently
 {/* BLOCK MODAL */}
 
 <Modal
-opened={blockOpen}
-onClose={()=>setBlockOpen(false)}
-title="Manage Slots"
+  opened={blockOpen}
+  onClose={()=>setBlockOpen(false)}
+  title={<span className="font-semibold text-lg">Available Slots</span>}
+  radius="xl"
+  size="md"
 >
 
-<div className="grid grid-cols-2 gap-3">
+<div className="space-y-4">
 
-{availability.map(slot=>(
+  {/* subtitle */}
+  <p className="text-sm text-gray-500">
+    Block or unblock your available time slots
+  </p>
 
-<Button
-key={slot.time}
-color={slot.status==="blocked"?"green":"red"}
-onClick={()=>toggleBlock(slot)}
->
+  {/* slots grid */}
+  <div className="grid grid-cols-2 gap-3">
 
-{slot.status==="blocked"
-?`Unblock ${slot.time}`
-:`Block ${slot.time}`}
+    {availability
+  .filter(slot => slot.status !== "booked") // 🔥 KEY FIX
+  .map(slot => (
 
-</Button>
+    <button
+      key={slot.time}
+      onClick={() => toggleBlock(slot)}
+      className={`p-3 rounded-xl text-sm font-medium transition-all border
+
+      ${slot.status === "blocked"
+        ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+        : "bg-green-50 text-green-600 border-green-200 hover:bg-green-100"}
+      `}
+    >
+
+      {slot.status === "blocked"
+        ? `Unblock ${slot.time}`
+        : `Block ${slot.time}`}
+
+    </button>
 
 ))}
+  </div>
 
 </div>
 

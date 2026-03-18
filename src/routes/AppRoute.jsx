@@ -52,7 +52,7 @@ import TutorBankDetailsPage from "../pages/tutor/TutorBankDetailsPage";
 import TutorSettingsPage from "../pages/tutor/TutorSettingsPage";
 import TutorEditProfilePage from "../pages/tutor/TutorEditProfilePage";
 import ParentLiveSessionPage from "../pages/parent/ParentLiveSessionPage";
-
+import AdminNotificationsPage from "../pages/admin/AdminNotificationsPage";
 
 
 import NotFound from "../pages/errors/NotFound";
@@ -75,6 +75,7 @@ const AppRoutes = () => {
           <Route path="feedback" element={<AdminFeedbackPage />} />
           <Route path="payments" element={<AdminPaymentsPage />} />
           <Route path="/admin/classes" element={<AdminClassesPage />} />
+        <Route path="notifications" element={<AdminNotificationsPage />} />
 
           <Route
 path="/admin/settings"
@@ -101,7 +102,7 @@ element={<AdminReportsPage/>}
             path="new-courses/:courseId/create-plan"
             element={<LearningPlanForm />}
           />
-          <Route path="/tutor/courses" element={<TutorCourses />} />
+          <Route path="courses" element={<TutorCourses />} />
           <Route path="courses/:courseId" element={<CourseOverview />} />
           <Route path="my-students" element={<MyStudents />} />
           <Route path="reviews" element={<TutorReviewsPage />} />
@@ -110,11 +111,11 @@ element={<AdminReportsPage/>}
             path="students/:studentId/courses"
             element={<StudentCourses />}
           />
-          <Route path="/tutor/sessions" element={<TutorSessions />} />
-          <Route path="/tutor/settings" element={<TutorSettingsPage />} />
+          <Route path="sessions" element={<TutorSessions />} />
+          <Route path="settings" element={<TutorSettingsPage />} />
 
-<Route path="/tutor/settings/bank" element={<TutorBankDetailsPage />} />
-<Route path="/tutor/settings/profile" element={<TutorEditProfilePage/>} />
+<Route path="settings/bank" element={<TutorBankDetailsPage />} />
+<Route path="settings/profile" element={<TutorEditProfilePage/>} />
           <Route path="schedule" element={<SchedulePage />} />
 <Route path="live/:sessionId/:channelName" element={<TutorLiveSessionPage/>}/>
         </Route>

@@ -19,23 +19,28 @@ const parentSessionSlice = createSlice({
   initialState: {
     sessions: [],
     loading: false,
+     initialLoading: true
   },
 
   extraReducers: (builder) => {
 
     builder
-      .addCase(fetchParentSessions.pending,(state)=>{
-        state.loading = true;
-      })
+     .addCase(fetchParentSessions.pending,(state)=>{
+  if (state.initialLoading) {
+    state.loading = true; // only first time
+  }
+})
 
-      .addCase(fetchParentSessions.fulfilled,(state,action)=>{
-        state.loading = false;
-        state.sessions = action.payload;
-      })
+.addCase(fetchParentSessions.fulfilled,(state,action)=>{
+  state.loading = false;
+  state.initialLoading = false; // 👈 important
+  state.sessions = action.payload;
+})
 
-      .addCase(fetchParentSessions.rejected,(state)=>{
-        state.loading = false;
-      });
+.addCase(fetchParentSessions.rejected,(state)=>{
+  state.loading = false;
+  state.initialLoading = false;
+});
   }
 });
 

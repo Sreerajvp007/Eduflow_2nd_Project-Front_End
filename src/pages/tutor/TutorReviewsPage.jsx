@@ -191,7 +191,7 @@ setSelectedReview(review);
 setOpened(true);
 }}
 >
-View Overview
+Overview
 </Button>
 
 </Stack>
