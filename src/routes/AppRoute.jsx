@@ -1,15 +1,15 @@
 import { Routes, Route } from "react-router-dom";
-import AdminLogin from "../pages/admin/adminLogin";
+import AdminLogin from "../pages/admin/AdminLogin";
 import AdminProtectedRoute from "./adminProtectedRoute";
 import AdminDashboard from "../pages/admin/adminDashboard";
 import AdminLayout from "../components/layout/admin/Layout";
 import StudentListPage from "../pages/admin/StudentListPage";
 import StudentDetailsPage from "../pages/admin/StudentDetailsPage";
 
-import TutorSignup from "../pages/tutor/tutorSignup";
+import TutorSignup from "../pages/tutor/TutorSignup";
 import TutorProtectedRoute from "./TutorProtectedRoute";
 import TutorDashboard from "../pages/tutor/TutorDashboard";
-import TutorLogin from "../pages/tutor/tutorLogin";
+import TutorLogin from "../pages/tutor/TutorLogin";
 import TutorOnboarding from "../pages/tutor/onborading/TutorOnboarding";
 import TutorLayout from "../components/layout/tutor/Layout";
 import TutorListPage from "../pages/admin/AdminTutorListPage";
