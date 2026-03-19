@@ -21,7 +21,7 @@ import StudentCourses from "../pages/tutor/StudentCourses";
 import SchedulePage from "../pages/tutor/SchedulePage";
 import TutorSessions from "../pages/tutor/sessions";
 
-import ParentSignup from "../pages/parent/parentSignup";
+import ParentSignup from "../pages/parent/ParentSignup";
 import ParentLogin from "../pages/parent/parentLogin";
 import ParentVerifyLoginOtp from "../pages/parent/ParentVerifyLoginOtp";
 import ParentVerifySignupOtp from "../pages/parent/parentVerifySignupOtp";
