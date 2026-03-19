@@ -9,7 +9,7 @@ import {
 
 import MuiInput from "../../../../components/common/input";
 import MuiButton from "../../../../components/common/button";
-import MuiCheckboxGroup from "../../../../components/common/checkboxGroup";
+import MuiCheckboxGroup from "../../../../components/common/CheckboxGroup";
 
 const TeachingInfoStep = () => {
   const dispatch = useDispatch();
