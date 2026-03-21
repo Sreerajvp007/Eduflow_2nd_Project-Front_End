@@ -53,7 +53,7 @@ import TutorSettingsPage from "../pages/tutor/TutorSettingsPage";
 import TutorEditProfilePage from "../pages/tutor/TutorEditProfilePage";
 import ParentLiveSessionPage from "../pages/parent/ParentLiveSessionPage";
 import AdminNotificationsPage from "../pages/admin/AdminNotificationsPage";
-
+import { Navigate } from "react-router-dom";
 
 import NotFound from "../pages/errors/NotFound";
 
