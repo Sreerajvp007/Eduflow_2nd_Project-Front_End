@@ -60,6 +60,7 @@ import NotFound from "../pages/errors/NotFound";
 const AppRoutes = () => {
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/parent/login" replace />} />
       <Route path="/admin/login" element={<AdminLogin />} />
 
       <Route element={<AdminProtectedRoute />}>
