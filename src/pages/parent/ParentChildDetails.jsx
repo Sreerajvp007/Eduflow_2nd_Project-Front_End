@@ -32,9 +32,11 @@ const ParentChildDetails = () => {
   const validate = () => {
     const newErrors = {};
 
-    if (!child.name.trim()) {
-      newErrors.name = "Child name is required";
-    }
+   if (!child.name.trim()) {
+  newErrors.name = "Child name is required";
+} else if (!/^[A-Za-z\s]+$/.test(child.name)) {
+  newErrors.name = "Child name must contain only letters";
+}
 
     if (!child.grade) {
       newErrors.grade = "Grade is required";
