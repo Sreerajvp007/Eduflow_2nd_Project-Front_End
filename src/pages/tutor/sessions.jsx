@@ -86,15 +86,15 @@ const liveSession = sessions.find(
 (s)=>s.status==="live"
 );
 
-if(loading){
+// if(loading){
 
-return(
-<div className="flex justify-center p-10">
-<Loader/>
-</div>
-);
+// return(
+// <div className="flex justify-center p-10">
+// <Loader/>
+// </div>
+// );
 
-}
+// }
 
 const markAsCancelled = async () => {
   await dispatch(
@@ -144,7 +144,7 @@ const getDuration = () => {
   return `${mins} min`;
 };
 
-return(
+return (
 
 <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-4">
 
@@ -163,7 +163,7 @@ Manage your scheduled tutoring sessions
 
 <Card shadow="md" p="md" radius="md">
 
-<Group justify="space-between">
+<Group justify="space-between" className="flex-col sm:flex-row gap-3">
 
 <div>
 
@@ -246,14 +246,14 @@ data={[
 
 </div>
 
-{/* TABLE */}
+{/* ================= DESKTOP TABLE ================= */}
+
+<div className="hidden md:block">
 
 <Table highlightOnHover>
 
 <Table.Thead>
-
 <Table.Tr>
-
 <Table.Th>Student</Table.Th>
 <Table.Th>Session</Table.Th>
 <Table.Th>Subject</Table.Th>
@@ -261,140 +261,202 @@ data={[
 <Table.Th>Date</Table.Th>
 <Table.Th>Time</Table.Th>
 <Table.Th>Action</Table.Th>
-
 </Table.Tr>
-
 </Table.Thead>
 
 <Table.Tbody>
 
-{sessions.map((session)=>(
+{!loading && sessions.length === 0 ? (
+
+<Table.Tr>
+<Table.Td colSpan={7}>
+<div className="text-center py-6">
+<Text size="sm" c="dimmed">
+No sessions found...
+</Text>
+</div>
+</Table.Td>
+</Table.Tr>
+
+) : (
+
+sessions.map((session) => (
 
 <Table.Tr key={session._id}>
 
 <Table.Td>
-
 <Group gap="xs">
-
 <Avatar size="sm">
 {session.studentId?.name?.charAt(0)}
 </Avatar>
-
-<Text size="sm">
-{session.studentId?.name}
-</Text>
-
+<Text size="sm">{session.studentId?.name}</Text>
 </Group>
-
 </Table.Td>
 
 <Table.Td>
-
-<Text size="sm">
-{session.title}
-</Text>
-
+<Text size="sm">{session.title}</Text>
 </Table.Td>
 
 <Table.Td>
-
-<Text size="sm">
-{session.courseId?.subject}
-</Text>
-
+<Text size="sm">{session.courseId?.subject}</Text>
 </Table.Td>
 
 <Table.Td>
-
 <Badge
 color={
-session.status==="scheduled"
+session.status === "scheduled"
 ? "blue"
-: session.status==="completed"
+: session.status === "completed"
 ? "green"
-: session.status==="live"
+: session.status === "live"
 ? "red"
 : "gray"
 }
 >
-
 {session.status}
-
 </Badge>
-
 </Table.Td>
 
 <Table.Td>
-
 {new Date(session.sessionDate).toLocaleDateString()}
-
 </Table.Td>
 
 <Table.Td>
-
 {session.courseId?.timeSlot}
-
 </Table.Td>
 
 <Table.Td>
 
-{/* LIVE */}
-
-{session.status==="live" && (
-
-<Button
-size="xs"
-color="red"
-onClick={()=>navigate(`/tutor/live/${session._id}/${session.channelName}`)}
->
+{session.status === "live" && (
+<Button size="xs" color="red"
+onClick={()=>navigate(`/tutor/live/${session._id}/${session.channelName}`)}>
 Join
 </Button>
-
 )}
 
-{/* SCHEDULED */}
-
-{session.status==="scheduled" && (
-
-<Button
-size="xs"
-color="green"
-onClick={()=>handleStartSession(session)}
->
+{session.status === "scheduled" && (
+<Button size="xs" color="green"
+onClick={()=>handleStartSession(session)}>
 Start
 </Button>
-
 )}
 
-{/* COMPLETED */}
-
-{session.status==="completed" && (
-
-<Button
-variant="light"
-size="xs"
-onClick={()=>openDetails(session)}
->
+{session.status === "completed" && (
+<Button variant="light" size="xs"
+onClick={()=>openDetails(session)}>
 View Details
 </Button>
-
 )}
 
 </Table.Td>
 
 </Table.Tr>
 
-))}
+))
+
+)}
 
 </Table.Tbody>
 
 </Table>
 
+</div>
+
+{/* ================= MOBILE CARDS ================= */}
+
+<div className="md:hidden space-y-3">
+
+{!loading && sessions.length === 0 ? (
+
+<div className="text-center py-10">
+<Text size="sm" c="dimmed">
+No sessions found...
+</Text>
+</div>
+
+) : (
+
+sessions.map((session)=>(
+
+<Card key={session._id} shadow="sm" radius="md" p="md">
+
+<Stack gap="xs">
+
+<Group justify="space-between">
+
+<Group gap="xs">
+<Avatar size="sm">
+{session.studentId?.name?.charAt(0)}
+</Avatar>
+<Text size="sm" fw={500}>
+{session.studentId?.name}
+</Text>
+</Group>
+
+<Badge
+size="sm"
+color={
+session.status === "scheduled"
+? "blue"
+: session.status === "completed"
+? "green"
+: session.status === "live"
+? "red"
+: "gray"
+}
+>
+{session.status}
+</Badge>
+
+</Group>
+
+<div className="text-sm space-y-1">
+<div><b>Session:</b> {session.title}</div>
+<div><b>Subject:</b> {session.courseId?.subject}</div>
+<div><b>Date:</b> {new Date(session.sessionDate).toLocaleDateString()}</div>
+<div><b>Time:</b> {session.courseId?.timeSlot}</div>
+</div>
+
+<div className="pt-2">
+
+{session.status === "live" && (
+<Button fullWidth size="xs" color="red"
+onClick={()=>navigate(`/tutor/live/${session._id}/${session.channelName}`)}>
+Join
+</Button>
+)}
+
+{session.status === "scheduled" && (
+<Button fullWidth size="xs" color="green"
+onClick={()=>handleStartSession(session)}>
+Start
+</Button>
+)}
+
+{session.status === "completed" && (
+<Button fullWidth size="xs" variant="light"
+onClick={()=>openDetails(session)}>
+View Details
+</Button>
+)}
+
+</div>
+
+</Stack>
+
+</Card>
+
+))
+
+)}
+
+</div>
+
 {/* PAGINATION */}
 
 {totalPages > 1 && (
 
-<div className="flex justify-end mt-3">
+<div className="flex justify-center md:justify-end mt-3">
 
 <Pagination
 value={page}
@@ -405,11 +467,14 @@ total={totalPages}
 </div>
 
 )}
+
+{/* ================= MODAL ================= */}
+
 <Modal
-  opened={detailsOpen}
-  onClose={()=>setDetailsOpen(false)}
-  title="Session Details"
-  size="lg"
+opened={detailsOpen}
+onClose={()=>setDetailsOpen(false)}
+title="Session Details"
+size="lg"
 >
 
 {selectedSession && (
@@ -422,7 +487,7 @@ total={totalPages}
 
 {/* HEADER */}
 
-<div className="flex justify-between items-center">
+<div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
 
 <div>
 <Text fw={700} size="lg">
@@ -469,7 +534,7 @@ __html:selectedSession.description || "No description"
 
 {/* INFO GRID */}
 
-<div className="grid grid-cols-2 gap-4">
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
 <div>
 <Text size="xs" c="dimmed">Student</Text>
@@ -493,7 +558,7 @@ __html:selectedSession.description || "No description"
 </div>
 
 <div>
-<Text size="xs" c="dimmed">Actual Start</Text>
+<Text size="xs" c="dimmed">Start time</Text>
 <Text fw={500}>
 {selectedSession.actualStart
 ? new Date(selectedSession.actualStart).toLocaleString()
@@ -502,15 +567,13 @@ __html:selectedSession.description || "No description"
 </div>
 
 <div>
-<Text size="xs" c="dimmed">Actual End</Text>
+<Text size="xs" c="dimmed">End time</Text>
 <Text fw={500}>
 {selectedSession.actualEnd
 ? new Date(selectedSession.actualEnd).toLocaleString()
 : "Not finished"}
 </Text>
 </div>
-
-{/* ✅ NEW FIELD */}
 
 <div>
 <Text size="xs" c="dimmed">Duration</Text>
@@ -524,8 +587,6 @@ __html:selectedSession.description || "No description"
 </div>
 
 </Card>
-
-{/* ✅ ACTION FOOTER */}
 
 {canCancel() && (
 
@@ -552,5 +613,7 @@ Mark as Cancelled
 </div>
 
 );
+
+
 
 }

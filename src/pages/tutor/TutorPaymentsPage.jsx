@@ -69,13 +69,7 @@ const resetForm = () => {
   setMethod("bank");
   setNotes("");
 };
-if(loading){
-return(
-<div className="flex justify-center p-10">
-<Loader/>
-</div>
-);
-}
+
 
 /* -----------------------------
 SUBMIT PAYOUT
@@ -165,23 +159,20 @@ setOverviewType(type);
 setOverviewOpened(true);
 };
 
-return(
+return (
 
 <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
 
 {/* HEADER */}
 
 <div>
-
-<Text fw={700} size="lg">
-Payments
-</Text>
-
+<Text fw={700} size="lg">Payments</Text>
 <Text size="xs" c="dimmed">
 Your earnings and payout requests
 </Text>
-
 </div>
+
+{/* BANK WARNING */}
 
 {!stats?.hasBankDetails && (
 
@@ -195,26 +186,21 @@ borderColor:"#ffd591"
 }}
 >
 
-<Group justify="space-between">
+<Group justify="space-between" className="flex-col sm:flex-row gap-3">
 
 <div>
-
 <Text fw={600}>
 Add your bank details to receive payouts
 </Text>
-
 <Text size="sm" c="dimmed">
 You must add bank details before requesting a withdrawal.
 </Text>
-
 </div>
 
 <Link to="/tutor/settings/bank">
-
 <Button color="orange">
 Add Bank Details
 </Button>
-
 </Link>
 
 </Group>
@@ -222,6 +208,7 @@ Add Bank Details
 </Card>
 
 )}
+
 {/* STATS */}
 
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -244,7 +231,6 @@ Add Bank Details
 </Card>
 
 <Card shadow="sm" p="md">
-
 <Text size="xs" c="dimmed">Wallet Balance</Text>
 <Text fw={700} size="lg">₹{stats?.walletBalance}</Text>
 
@@ -253,23 +239,17 @@ size="xs"
 mt="sm"
 fullWidth
 disabled={!stats?.walletBalance}
-onClick={() => {
-
+onClick={()=>{
 if(!stats?.hasBankDetails){
-
 notifications.show({
 title:"Add Bank Details",
 message:"Please add bank details before requesting payout",
 color:"red"
 });
-
 return;
-
 }
-
 resetForm();
 setOpened(true);
-
 }}
 >
 Request Payout
@@ -279,10 +259,9 @@ Request Payout
 
 </div>
 
-
 {/* SWITCH */}
 
-<Group justify="space-between">
+<Group justify="space-between" className="flex-col sm:flex-row gap-3">
 
 <SegmentedControl
 value={view}
@@ -294,7 +273,6 @@ data={[
 />
 
 {view==="payouts" && (
-
 <Select
 size="xs"
 value={statusFilter}
@@ -306,11 +284,9 @@ data={[
 {value:"rejected",label:"Rejected"},
 ]}
 />
-
 )}
 
 </Group>
-
 
 <Text fw={600}>
 {view==="payments"
@@ -318,15 +294,16 @@ data={[
 : "Payout Requests"}
 </Text>
 
+{/* ================= DESKTOP TABLE ================= */}
 
-{/* TABLE */}
+<div className="hidden md:block">
 
 <Card shadow="sm" p="md">
 
 <Table highlightOnHover>
 
+{/* PAYMENTS */}
 {view==="payments" && (
-
 <>
 <Table.Thead>
 <Table.Tr>
@@ -341,148 +318,186 @@ data={[
 
 <Table.Tbody>
 
-{history.map((p)=>{
-
-const student = p.studentName;
-const parent = p.parentName;
-
-return(
-
+{history.length===0 ? (
+<Table.Tr>
+<Table.Td colSpan={6}>
+<div className="text-center py-10">
+<Text size="sm" c="dimmed">No data found...</Text>
+</div>
+</Table.Td>
+</Table.Tr>
+) : history.map((p)=>(
 <Table.Tr key={p._id}>
-
 <Table.Td>
-
 <Group gap="xs">
-
-<Avatar size="sm">
-{parent?.charAt(0)}
-</Avatar>
-
-<Text size="sm">{parent}</Text>
-
+<Avatar size="sm">{p.parentName?.charAt(0)}</Avatar>
+<Text size="sm">{p.parentName}</Text>
 </Group>
-
 </Table.Td>
-
-<Table.Td>{student}</Table.Td>
-
+<Table.Td>{p.studentName}</Table.Td>
 <Table.Td>{p.subject}</Table.Td>
-
 <Table.Td>
-<Text fw={600} c="green">
-₹{p.tutorEarning}
-</Text>
+<Text fw={600} c="green">₹{p.tutorEarning}</Text>
 </Table.Td>
-
 <Table.Td>
 {new Date(p.createdAt).toLocaleDateString()}
 </Table.Td>
-
 <Table.Td>
-
-<Button
-size="xs"
-variant="light"
-onClick={()=>openOverview(p,"payment")}
->
+<Button size="xs" variant="light"
+onClick={()=>openOverview(p,"payment")}>
 Overview
 </Button>
-
 </Table.Td>
-
 </Table.Tr>
-
-);
-
-})}
-
+))}
 </Table.Tbody>
-
 </>
-
 )}
 
-
+{/* PAYOUTS */}
 {view==="payouts" && (
-
 <>
 <Table.Thead>
-
 <Table.Tr>
-
 <Table.Th>Amount</Table.Th>
 <Table.Th>Method</Table.Th>
 <Table.Th>Status</Table.Th>
 <Table.Th>Date</Table.Th>
 <Table.Th>Action</Table.Th>
-
 </Table.Tr>
-
 </Table.Thead>
 
 <Table.Tbody>
 
-{filteredPayouts.map((p)=>(
-
+{filteredPayouts.length===0 ? (
+<Table.Tr>
+<Table.Td colSpan={5}>
+<div className="text-center py-10">
+<Text size="sm" c="dimmed">No payouts found...</Text>
+</div>
+</Table.Td>
+</Table.Tr>
+) : filteredPayouts.map((p)=>(
 <Table.Tr key={p._id}>
-
 <Table.Td>₹{p.amount}</Table.Td>
-
 <Table.Td>{p.method}</Table.Td>
-
 <Table.Td>
-
 <Badge
 color={
-p.status==="paid"
-?"green"
-:p.status==="pending"
-?"yellow"
-:"red"
+p.status==="paid"?"green":
+p.status==="pending"?"yellow":"red"
 }
 >
 {p.status}
 </Badge>
-
 </Table.Td>
-
 <Table.Td>
 {new Date(p.createdAt).toLocaleDateString()}
 </Table.Td>
-
 <Table.Td>
-
-<Button
-size="xs"
-variant="light"
-onClick={()=>openOverview(p,"payout")}
->
+<Button size="xs" variant="light"
+onClick={()=>openOverview(p,"payout")}>
 Overview
 </Button>
-
 </Table.Td>
-
 </Table.Tr>
-
 ))}
-
 </Table.Tbody>
-
 </>
-
 )}
 
 </Table>
 
 </Card>
 
+</div>
+
+{/* ================= MOBILE CARDS ================= */}
+
+<div className="md:hidden space-y-3">
+
+{/* PAYMENTS */}
+{view==="payments" && (
+history.length===0 ? (
+<div className="text-center py-10">
+<Text size="sm" c="dimmed">No data found...</Text>
+</div>
+) : history.map((p)=>(
+<Card key={p._id} shadow="sm" p="md">
+
+<Stack gap="xs">
+
+<Group justify="space-between">
+<Text fw={500}>{p.studentName}</Text>
+<Text fw={600} c="green">₹{p.tutorEarning}</Text>
+</Group>
+
+<Text size="sm"><b>Parent:</b> {p.parentName}</Text>
+<Text size="sm"><b>Subject:</b> {p.subject}</Text>
+<Text size="sm"><b>Date:</b> {new Date(p.createdAt).toLocaleDateString()}</Text>
+
+<Button
+size="xs"
+variant="light"
+fullWidth
+onClick={()=>openOverview(p,"payment")}
+>
+Overview
+</Button>
+
+</Stack>
+
+</Card>
+))
+)}
+
+{/* PAYOUTS */}
+{view==="payouts" && (
+filteredPayouts.length===0 ? (
+<div className="text-center py-10">
+<Text size="sm" c="dimmed">No payouts found...</Text>
+</div>
+) : filteredPayouts.map((p)=>(
+<Card key={p._id} shadow="sm" p="md">
+
+<Stack gap="xs">
+
+<Group justify="space-between">
+<Text fw={600}>₹{p.amount}</Text>
+<Badge
+color={
+p.status==="paid"?"green":
+p.status==="pending"?"yellow":"red"
+}
+>
+{p.status}
+</Badge>
+</Group>
+
+<Text size="sm"><b>Method:</b> {p.method}</Text>
+<Text size="sm"><b>Date:</b> {new Date(p.createdAt).toLocaleDateString()}</Text>
+
+<Button
+size="xs"
+variant="light"
+fullWidth
+onClick={()=>openOverview(p,"payout")}
+>
+Overview
+</Button>
+
+</Stack>
+
+</Card>
+))
+)}
+
+</div>
 
 {/* PAGINATION */}
 
 {totalPages>1 && (
-
-<div className="flex justify-end">
-
+<div className="flex justify-center md:justify-end">
 <Pagination
 value={page}
 onChange={(p)=>{
@@ -494,12 +509,10 @@ dispatch(fetchTutorPayouts(p));
 }}
 total={totalPages}
 />
-
 </div>
-
 )}
 
-
+{/* ================= KEEP MODALS EXACT ================= */}
 {/* PAYOUT MODAL */}
 
 <Modal

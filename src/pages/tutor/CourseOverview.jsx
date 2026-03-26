@@ -149,14 +149,14 @@ const CourseOverview = () => {
 
   /* ================= LOADING ================= */
 
-  if (loading || !selectedCourse) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader color="teal" />
-      </div>
-    );
-  }
-
+  // if (loading || !selectedCourse) {
+  //   return (
+  //     <div className="flex justify-center py-20">
+  //       <Loader color="teal" />
+  //     </div>
+  //   );
+  // }
+if (!selectedCourse) return null;
   return (
 
     <div className="w-full px-4 sm:px-6 lg:px-10 py-6 space-y-10">
@@ -168,7 +168,7 @@ const CourseOverview = () => {
         <div className="flex justify-between items-start">
 
           <div>
-            <Text fw={600}>{selectedCourse.subject}</Text>
+            <Text fw={600}>{selectedCourse?.subject}</Text>
 
             <Text size="xs" c="dimmed">
               Started on {new Date(selectedCourse.startDate).toLocaleDateString()}

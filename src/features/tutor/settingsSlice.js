@@ -20,15 +20,22 @@ export const fetchProfileEditRequest = createAsyncThunk(
 
 export const updateTutorProfile = createAsyncThunk(
   "settings/updateTutorProfile",
-  async (formData) => {
-    const res = await axios.post("/tutor/profile-edit-request", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+  async (formData, { rejectWithValue }) => {
+    try {
+      const res = await axios.post("/tutor/profile-edit-request", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-    return res.data.result;
-  },
+      return res.data.result;
+
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Something went wrong" }
+      );
+    }
+  }
 );
 
 export const fetchBankDetails = createAsyncThunk(
@@ -42,11 +49,16 @@ export const fetchBankDetails = createAsyncThunk(
 
 export const saveBankDetails = createAsyncThunk(
   "settings/saveBankDetails",
-  async (data) => {
-    const res = await axios.post("/tutor/bank-details", data);
-
-    return res.data.result;
-  },
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await axios.post("/tutor/bank-details", data);
+      return res.data.result;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Something went wrong" }
+      );
+    }
+  }
 );
 
 const settingsSlice = createSlice({

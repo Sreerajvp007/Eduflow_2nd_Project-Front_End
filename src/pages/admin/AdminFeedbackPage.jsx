@@ -7,7 +7,7 @@ import {
   Table,
   Text,
   Rating,
-  Loader,
+
   TextInput,
   Pagination,
   Avatar,
@@ -38,7 +38,7 @@ const {
 reviews,
 reports,
 totalPages,
-loading
+
 } = useSelector((state)=>state.feedback);
 
 const [section,setSection] = useState("reviews");
@@ -93,13 +93,13 @@ setOpened(false);
 
 };
 
-if(loading){
-return(
-<div className="flex justify-center p-10">
-<Loader/>
-</div>
-);
-}
+// if(loading){
+// return(
+// <div className="flex justify-center p-10">
+// <Loader/>
+// </div>
+// );
+// }
 
 return(
 
@@ -296,81 +296,89 @@ Overview
 
 <Table.Tbody>
 
-{reviews.map((review)=>(
+{reviews.length === 0 ? (
 
-<Table.Tr key={review._id}>
+  <Table.Tr>
+    <Table.Td colSpan={8}>
+      <div className="text-center py-10">
+        <Text size="sm" c="dimmed">
+          No reviews found...
+        </Text>
+      </div>
+    </Table.Td>
+  </Table.Tr>
 
-<Table.Td>
+) : (
 
-<Group>
+  reviews.map((review)=>(
 
-<Avatar size="sm">
-{review.parentId?.fullName?.charAt(0)}
-</Avatar>
+    <Table.Tr key={review._id}>
+      <Table.Td>
+        <Group>
+          <Avatar size="sm">
+            {review.parentId?.fullName?.charAt(0)}
+          </Avatar>
+          <Text size="sm">
+            {review.parentId?.fullName}
+          </Text>
+        </Group>
+      </Table.Td>
 
-<Text size="sm">
-{review.parentId?.fullName}
-</Text>
+      <Table.Td>
+        <Text size="sm">
+          {review.courseId?.studentId?.name}
+        </Text>
+      </Table.Td>
 
-</Group>
+      <Table.Td>
+        <Text size="sm">
+          {review.courseId?.subject}
+        </Text>
+      </Table.Td>
 
-</Table.Td>
+      <Table.Td>
+        <Text size="sm">
+          {review.tutorId?.fullName}
+        </Text>
+      </Table.Td>
 
-<Table.Td>
-<Text size="sm">
-{review.courseId?.studentId?.name}
-</Text>
-</Table.Td>
+      <Table.Td>
+        <Rating value={review.rating} readOnly size="xs"/>
+      </Table.Td>
 
-<Table.Td>
-<Text size="sm">
-{review.courseId?.subject}
-</Text>
-</Table.Td>
+      <Table.Td>
+        <Text size="sm">
+          {review.review?.slice(0,40)}...
+        </Text>
+      </Table.Td>
 
-<Table.Td>
-<Text size="sm">
-{review.tutorId?.fullName}
-</Text>
-</Table.Td>
+      <Table.Td>
+        <Text size="sm">
+          {review.createdAt
+            ? new Date(review.createdAt).toLocaleDateString()
+            : "-"
+          }
+        </Text>
+      </Table.Td>
 
-<Table.Td>
-<Rating value={review.rating} readOnly size="xs"/>
-</Table.Td>
+      <Table.Td>
+        <Button
+          variant="subtle"
+          size="xs"
+          onClick={()=>{
+            setSelected(review);
+            setOpened(true);
+          }}
+        >
+          Overview
+        </Button>
+      </Table.Td>
 
-<Table.Td>
-<Text size="sm">
-{review.review?.slice(0,40)}...
-</Text>
-</Table.Td>
+    </Table.Tr>
 
-<Table.Td>
-<Text size="sm">
-{review.createdAt
-? new Date(review.createdAt).toLocaleDateString()
-: "-"
-}
-</Text>
-</Table.Td>
+  ))
 
-<Table.Td>
-
-<Button
-variant="subtle"
-size="xs"
-onClick={()=>{
-setSelected(review);
-setOpened(true);
-}}
->
-Overview
-</Button>
-
-</Table.Td>
-
-</Table.Tr>
-
-))}
+)}
 
 </Table.Tbody>
 
@@ -474,83 +482,88 @@ Overview
 
 <Table.Tbody>
 
-{reports.map((report)=>(
+{reports.length === 0 ? (
 
-<Table.Tr key={report._id}>
+  <Table.Tr>
+    <Table.Td colSpan={6}>
+      <div className="text-center py-10">
+        <Text size="sm" c="dimmed">
+          No reports found...
+        </Text>
+      </div>
+    </Table.Td>
+  </Table.Tr>
 
-<Table.Td>
+) : (
 
-<Group>
+  reports.map((report)=>(
 
-<Avatar size="sm">
-{report.parentId?.fullName?.charAt(0)}
-</Avatar>
+    <Table.Tr key={report._id}>
 
-<Text size="sm">
-{report.parentId?.fullName}
-</Text>
+      <Table.Td>
+        <Group>
+          <Avatar size="sm">
+            {report.parentId?.fullName?.charAt(0)}
+          </Avatar>
+          <Text size="sm">
+            {report.parentId?.fullName}
+          </Text>
+        </Group>
+      </Table.Td>
 
-</Group>
+      <Table.Td>
+        <Text size="sm">
+          {report.tutorId?.fullName}
+        </Text>
+      </Table.Td>
 
-</Table.Td>
+      <Table.Td>
+        <Text size="sm">
+          {report.courseId?.subject}
+        </Text>
+      </Table.Td>
 
-<Table.Td>
-<Text size="sm">
-{report.tutorId?.fullName}
-</Text>
-</Table.Td>
+      <Table.Td>
+        <Badge
+          color={
+            report.status==="pending"
+              ? "yellow"
+              : report.status==="reviewed"
+              ? "blue"
+              : "green"
+          }
+        >
+          {report.status}
+        </Badge>
+      </Table.Td>
 
-<Table.Td>
-<Text size="sm">
-{report.courseId?.subject}
-</Text>
-</Table.Td>
+      <Table.Td>
+        <Text size="sm">
+          {report.createdAt
+            ? new Date(report.createdAt).toLocaleDateString()
+            : "-"
+          }
+        </Text>
+      </Table.Td>
 
-<Table.Td>
+      <Table.Td>
+        <Button
+          variant="subtle"
+          size="xs"
+          onClick={()=>{
+            setSelected(report);
+            setOpened(true);
+          }}
+        >
+          Overview
+        </Button>
+      </Table.Td>
 
-<Badge
-color={
-report.status==="pending"
-?"yellow"
-:report.status==="reviewed"
-?"blue"
-:"green"
-}
->
-{report.status}
-</Badge>
+    </Table.Tr>
 
-</Table.Td>
+  ))
 
-<Table.Td>
-
-<Text size="sm">
-{report.createdAt
-? new Date(report.createdAt).toLocaleDateString()
-: "-"
-}
-</Text>
-
-</Table.Td>
-
-<Table.Td>
-
-<Button
-variant="subtle"
-size="xs"
-onClick={()=>{
-setSelected(report);
-setOpened(true);
-}}
->
-Overview
-</Button>
-
-</Table.Td>
-
-</Table.Tr>
-
-))}
+)}
 
 </Table.Tbody>
 

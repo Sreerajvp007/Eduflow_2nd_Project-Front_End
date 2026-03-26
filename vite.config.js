@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(),tailwindcss()],
   server: {
     host: true, // This makes the server externally accessible
-    port: 4000 // You can specify a port if needed,
+    port: 4000 
     
   }
   

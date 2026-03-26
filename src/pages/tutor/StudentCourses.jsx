@@ -8,11 +8,10 @@ import {
   Paper,
   Pagination,
   Button,
-  Box,
-  LoadingOverlay,
   Stack,
   Card,
 } from "@mantine/core";
+
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchStudentCourses } from "../../features/tutor/tutorStudentSlice";
@@ -23,7 +22,7 @@ const StudentCourses = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { courses, loading, coursesPage, coursesTotalPages } =
+  const { courses, coursesPage, coursesTotalPages } =
     useSelector((state) => state.tutorStudents);
 
   useEffect(() => {
@@ -35,79 +34,134 @@ const StudentCourses = () => {
   };
 
   return (
-    <Paper p="lg" radius="md" withBorder>
+    <Paper p="lg" radius="md">
+
+      {/* HEADER */}
       <Text size="xl" fw={600} mb="lg">
         Student Courses
       </Text>
 
-      <Box pos="relative" style={{ minHeight: 300 }}>
-        <LoadingOverlay visible={loading} overlayProps={{ blur: 2 }} />
+      {/* ================= TABLE ================= */}
 
-        {/* DESKTOP TABLE */}
-        <div className="hidden md:block">
-          <Table highlightOnHover verticalSpacing="md">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Subject</Table.Th>
-                <Table.Th>Class</Table.Th>
-                <Table.Th>Time Slot</Table.Th>
-                <Table.Th>Monthly Fee</Table.Th>
-                <Table.Th>Status</Table.Th>
-                <Table.Th>Payment</Table.Th>
-                <Table.Th>Next Payment</Table.Th>
-                <Table.Th ta="right">Actions</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
+      <Table highlightOnHover>
 
-            <Table.Tbody>
-              {courses.map((course) => (
-                <Table.Tr key={course._id}>
-                  <Table.Td>{course.subject}</Table.Td>
-                  <Table.Td>Grade {course.classLevel}</Table.Td>
-                  <Table.Td>{course.timeSlot}</Table.Td>
-                  <Table.Td>₹ {course.monthlyFee}</Table.Td>
-                  <Table.Td>
-                    <Badge color="green" variant="light">
-                      {course.courseStatus}
-                    </Badge>
-                  </Table.Td>
-                  <Table.Td>
-                    <Badge color="green" variant="light">
-                      {course.paymentStatus}
-                    </Badge>
-                  </Table.Td>
-                  <Table.Td>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Subject</Table.Th>
+            <Table.Th>Class</Table.Th>
+            <Table.Th>Time Slot</Table.Th>
+            <Table.Th>Monthly Fee</Table.Th>
+            <Table.Th>Status</Table.Th>
+            <Table.Th>Payment</Table.Th>
+            <Table.Th>Next Payment</Table.Th>
+            <Table.Th ta="right">Actions</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+
+        <Table.Tbody>
+
+          {courses.length === 0 ? (
+
+            <Table.Tr>
+              <Table.Td colSpan={8}>
+                <div className="text-center py-10">
+                  <Text size="sm" c="dimmed">
+                    No courses found...
+                  </Text>
+                </div>
+              </Table.Td>
+            </Table.Tr>
+
+          ) : (
+
+            courses.map((course) => (
+
+              <Table.Tr key={course._id}>
+
+                <Table.Td>
+                  <Text size="sm">{course.subject}</Text>
+                </Table.Td>
+
+                <Table.Td>
+                  <Text size="sm">Grade {course.classLevel}</Text>
+                </Table.Td>
+
+                <Table.Td>
+                  <Text size="sm">{course.timeSlot}</Text>
+                </Table.Td>
+
+                <Table.Td>
+                  <Text size="sm">₹ {course.monthlyFee}</Text>
+                </Table.Td>
+
+                <Table.Td>
+                  <Badge color="green">
+                    {course.courseStatus}
+                  </Badge>
+                </Table.Td>
+
+                <Table.Td>
+                  <Badge color="green">
+                    {course.paymentStatus}
+                  </Badge>
+                </Table.Td>
+
+                <Table.Td>
+                  <Text size="sm">
                     {new Date(course.nextPaymentDate).toLocaleDateString()}
-                  </Table.Td>
-                  <Table.Td ta="right">
-                    <Button
-                      size="xs"
-                      variant="subtle"
-                      onClick={() =>
-                        navigate(`/tutor/courses/${course._id}`)
-                      }
-                    >
-                      View Overview
-                    </Button>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        </div>
+                  </Text>
+                </Table.Td>
 
-        {/* MOBILE CARDS */}
-        <div className="block md:hidden">
+                <Table.Td ta="right">
+                  <Button
+                    size="xs"
+                    variant="light"
+                    onClick={() =>
+                      navigate(`/tutor/courses/${course._id}`)
+                    }
+                  >
+                    View
+                  </Button>
+                </Table.Td>
+
+              </Table.Tr>
+
+            ))
+
+          )}
+
+        </Table.Tbody>
+
+      </Table>
+
+      {/* ================= MOBILE ================= */}
+
+      <div className="block md:hidden mt-4">
+
+        {courses.length === 0 ? (
+
+          <div className="text-center py-10">
+            <Text size="sm" c="dimmed">
+              No courses found...
+            </Text>
+          </div>
+
+        ) : (
+
           <Stack>
+
             {courses.map((course) => (
+
               <Card key={course._id} withBorder radius="md">
+
                 <Text fw={600}>{course.subject}</Text>
                 <Text size="sm">Grade {course.classLevel}</Text>
                 <Text size="sm">Time: {course.timeSlot}</Text>
                 <Text size="sm">Fee: ₹ {course.monthlyFee}</Text>
 
                 <Group justify="space-between" mt="sm">
-                  <Badge color="green" variant="light">
+
+                  <Badge color="green">
                     {course.courseStatus}
                   </Badge>
 
@@ -118,15 +172,22 @@ const StudentCourses = () => {
                       navigate(`/tutor/courses/${course._id}`)
                     }
                   >
-                    Overview
+                    View
                   </Button>
-                </Group>
-              </Card>
-            ))}
-          </Stack>
-        </div>
-      </Box>
 
+                </Group>
+
+              </Card>
+
+            ))}
+
+          </Stack>
+
+        )}
+
+      </div>
+
+      {/* PAGINATION */}
       {coursesTotalPages > 1 && (
         <Group justify="flex-end" mt="md">
           <Pagination
@@ -136,6 +197,7 @@ const StudentCourses = () => {
           />
         </Group>
       )}
+
     </Paper>
   );
 };

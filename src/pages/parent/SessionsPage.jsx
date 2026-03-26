@@ -11,7 +11,7 @@ import {
   Badge,
   Button,
   Tabs,
-  Loader
+
 } from "@mantine/core";
 
 export default function ParentSessionsPage(){
@@ -19,7 +19,7 @@ export default function ParentSessionsPage(){
 const dispatch = useDispatch();
 const navigate = useNavigate();
 
-const { sessions, loading ,initialLoading} = useSelector(
+const { sessions} = useSelector(
   (state)=>state.parentSessions
 );
 
@@ -44,13 +44,13 @@ return ()=>clearInterval(interval);
 
 },[status, dispatch]);
 
-if(initialLoading){
-return(
-<div className="flex justify-center p-10">
-<Loader/>
-</div>
-);
-}
+// if(initialLoading){
+// return(
+// <div className="flex justify-center p-10">
+// <Loader/>
+// </div>
+// );
+// }
 
 return(
 

@@ -33,6 +33,7 @@ const { settings, loading } = useSelector(
 const [adminCommission,setAdminCommission] = useState(0);
 
 const [modalOpen,setModalOpen] = useState(false);
+const [saving, setSaving] = useState(false);
 
 useEffect(()=>{
 
@@ -53,6 +54,8 @@ const tutorCommission = 100 - adminCommission;
 const handleSave = async () => {
 
 try{
+
+setSaving(true);
 
 await dispatch(updateSettings({
 adminCommission,
@@ -76,6 +79,10 @@ title:"Update Failed",
 message:"Failed to update settings",
 color:"red"
 });
+
+} finally {
+
+setSaving(false);
 
 }
 
@@ -184,7 +191,10 @@ onClick={()=>setModalOpen(false)}
 Cancel
 </Button>
 
-<Button onClick={handleSave}>
+<Button 
+onClick={handleSave}
+loading={saving}
+>
 Save
 </Button>
 

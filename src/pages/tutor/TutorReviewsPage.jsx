@@ -52,13 +52,13 @@ sort
 }));
 },[page,search,sort]);
 
-if(loading){
-return(
-<div className="flex justify-center p-10">
-<Loader/>
-</div>
-);
-}
+// if(loading){
+// return(
+// <div className="flex justify-center p-10">
+// <Loader/>
+// </div>
+// );
+// }
 
 return(
 
@@ -227,89 +227,86 @@ Overview
 
 <Table.Tbody>
 
-{reviews.map((review)=>(
+{reviews.length === 0 ? (
 
-<Table.Tr key={review._id}>
+  <Table.Tr>
+    <Table.Td colSpan={7}>
+      <div className="text-center py-10">
+        <Text size="sm" c="dimmed">
+          No reviews found...
+        </Text>
+      </div>
+    </Table.Td>
+  </Table.Tr>
 
-<Table.Td>
+) : (
 
-<Group gap="xs">
+  reviews.map((review)=>(
 
-<Avatar size="sm">
-{review.parentId?.fullName?.charAt(0)}
-</Avatar>
+    <Table.Tr key={review._id}>
 
-<Text size="sm">
-{review.parentId?.fullName}
-</Text>
+      <Table.Td>
+        <Group gap="xs">
+          <Avatar size="sm">
+            {review.parentId?.fullName?.charAt(0)}
+          </Avatar>
 
-</Group>
+          <Text size="sm">
+            {review.parentId?.fullName}
+          </Text>
+        </Group>
+      </Table.Td>
 
-</Table.Td>
+      <Table.Td>
+        <Text size="sm">
+          {review.courseId?.studentId?.name}
+        </Text>
+      </Table.Td>
 
-<Table.Td>
+      <Table.Td>
+        <Link to={`/tutor/courses/${review.courseId?._id}`}>
+          <Text size="sm" c="blue">
+            {review.courseId?.subject}
+          </Text>
+        </Link>
+      </Table.Td>
 
-<Text size="sm">
-{review.courseId?.studentId?.name}
-</Text>
+      <Table.Td>
+        <Rating value={review.rating} readOnly size="xs"/>
+      </Table.Td>
 
-</Table.Td>
+      <Table.Td>
+        <Text size="sm">
+          {review.review?.slice(0,40)}...
+        </Text>
+      </Table.Td>
 
-<Table.Td>
+      <Table.Td>
+        <Text size="sm">
+          {new Date(review.createdAt).toLocaleDateString()}
+        </Text>
+      </Table.Td>
 
-<Link to={`/tutor/courses/${review.courseId?._id}`}>
+      <Table.Td style={{textAlign:"right"}}>
+        <Button
+          variant="subtle"
+          size="xs"
+          onClick={()=>{
+            setSelectedReview(review);
+            setOpened(true);
+          }}
+        >
+          View Overview
+        </Button>
+      </Table.Td>
 
-<Text size="sm" c="blue">
-{review.courseId?.subject}
-</Text>
+    </Table.Tr>
 
-</Link>
+  ))
 
-</Table.Td>
-
-<Table.Td>
-
-<Rating value={review.rating} readOnly size="xs"/>
-
-</Table.Td>
-
-<Table.Td>
-
-<Text size="sm">
-{review.review?.slice(0,40)}...
-</Text>
-
-</Table.Td>
-
-<Table.Td>
-
-<Text size="sm">
-{new Date(review.createdAt).toLocaleDateString()}
-</Text>
-
-</Table.Td>
-
-<Table.Td style={{textAlign:"right"}}>
-
-<Button
-variant="subtle"
-size="xs"
-onClick={()=>{
-setSelectedReview(review);
-setOpened(true);
-}}
->
-View Overview
-</Button>
-
-</Table.Td>
-
-</Table.Tr>
-
-))}
+)}
 
 </Table.Tbody>
-
 </Table>
 
 </div>

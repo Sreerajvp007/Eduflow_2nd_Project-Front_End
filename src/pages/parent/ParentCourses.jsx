@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchParentCourses } from "../../features/parent/parentCourseListSlice";
 import {
-  Loader,
   Avatar,
   Card,
   Text,
@@ -58,13 +57,9 @@ const ParentCourses = () => {
 
       {/* ===== Course List ===== */}
       <div className="mt-6 space-y-5">
-        {loading && (
-          <div className="flex justify-center">
-            <Loader color="indigo" />
-          </div>
-        )}
+       
 
-        {!loading && courses.length === 0 && (
+        {courses.length === 0 && (
           <div className="bg-white rounded-2xl p-6 shadow-sm text-center text-gray-500">
             No courses available
           </div>

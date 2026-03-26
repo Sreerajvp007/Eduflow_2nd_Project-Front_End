@@ -11,11 +11,10 @@ import {
   TextInput,
   Select,
   Grid,
-  Box,
-  LoadingOverlay,
   Stack,
   Card,
 } from "@mantine/core";
+
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMyStudents } from "../../features/tutor/tutorStudentSlice";
@@ -25,7 +24,7 @@ const MyStudents = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { students, loading, studentsTotalPages } =
+  const { students, studentsTotalPages } =
     useSelector((state) => state.tutorStudents);
 
   const [searchInput, setSearchInput] = useState("");
@@ -44,6 +43,7 @@ const MyStudents = () => {
         page: 1,
       }));
     }, 400);
+
     return () => clearTimeout(delay);
   }, [searchInput]);
 
@@ -56,144 +56,127 @@ const MyStudents = () => {
   };
 
   return (
-    <Paper p="lg" radius="md" withBorder>
-      <Text size="xl" fw={600} mb="lg">
-        My Students
-      </Text>
+  <Paper p="lg" radius="md" className="space-y-4">
 
-      {/* Filters */}
-      <Grid mb="md">
-        <Grid.Col span={{ base: 12, md: 4 }}>
-          <TextInput
-            placeholder="Search student or parent"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.currentTarget.value)}
-          />
-        </Grid.Col>
+    {/* HEADER */}
+    <Text size="xl" fw={600}>
+      My Students
+    </Text>
 
-        <Grid.Col span={{ base: 6, md: 3 }}>
-          <Select
-            placeholder="All Grades"
-            data={[...Array(12)].map((_, i) => ({
-              value: String(i + 1),
-              label: `Grade ${i + 1}`,
-            }))}
-            value={filters.grade}
-            onChange={(value) =>
-              setFilters((prev) => ({
-                ...prev,
-                grade: value || "",
-                page: 1,
-              }))
-            }
-            clearable
-          />
-        </Grid.Col>
+    {/* FILTERS */}
+    <Grid>
 
-        <Grid.Col span={{ base: 6, md: 3 }}>
-          <Select
-            placeholder="All Status"
-            data={[
-              { value: "active", label: "Active" },
-              { value: "blocked", label: "Blocked" },
-            ]}
-            value={filters.status}
-            onChange={(value) =>
-              setFilters((prev) => ({
-                ...prev,
-                status: value || "",
-                page: 1,
-              }))
-            }
-            clearable
-          />
-        </Grid.Col>
-      </Grid>
+      <Grid.Col span={{ base: 12, md: 4 }}>
+        <TextInput
+          placeholder="Search by student name"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.currentTarget.value)}
+        />
+      </Grid.Col>
 
-      <Box pos="relative" style={{ minHeight: 300 }}>
-        <LoadingOverlay visible={loading} overlayProps={{ blur: 2 }} />
+      <Grid.Col span={{ base: 6, md: 3 }}>
+        <Select
+          placeholder="All Grades"
+          data={[...Array(12)].map((_, i) => ({
+            value: String(i + 1),
+            label: `Grade ${i + 1}`,
+          }))}
+          value={filters.grade}
+          onChange={(value) =>
+            setFilters((prev) => ({
+              ...prev,
+              grade: value || "",
+              page: 1,
+            }))
+          }
+          clearable
+        />
+      </Grid.Col>
 
-        {/* DESKTOP TABLE */}
-        <div className="hidden md:block">
-          <Table highlightOnHover verticalSpacing="md">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Student</Table.Th>
-                <Table.Th>Parent</Table.Th>
-                <Table.Th>Mobile</Table.Th>
-                <Table.Th>Grade</Table.Th>
-                <Table.Th>Status</Table.Th>
-                <Table.Th>Actions</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
+      <Grid.Col span={{ base: 6, md: 3 }}>
+        <Select
+          placeholder="All Status"
+          data={[
+            { value: "active", label: "Active" },
+            { value: "blocked", label: "Blocked" },
+          ]}
+          value={filters.status}
+          onChange={(value) =>
+            setFilters((prev) => ({
+              ...prev,
+              status: value || "",
+              page: 1,
+            }))
+          }
+          clearable
+        />
+      </Grid.Col>
 
-            <Table.Tbody>
-              {students.map((student) => (
-                <Table.Tr key={student._id}>
-                  <Table.Td>
-                    <Group>
-                      <Avatar radius="xl">
-                        {student.studentName?.[0]}
-                      </Avatar>
-                      <Text fw={500}>{student.studentName}</Text>
-                    </Group>
-                  </Table.Td>
+    </Grid>
 
-                  <Table.Td>{student.parentName}</Table.Td>
-                  <Table.Td>{student.mobile}</Table.Td>
-                  <Table.Td>Grade {student.grade}</Table.Td>
+    {/* ================= DESKTOP TABLE ================= */}
 
-                  <Table.Td>
-                    <Badge
-                      color={student.status === "active" ? "green" : "red"}
-                      variant="light"
-                    >
-                      {student.status}
-                    </Badge>
-                  </Table.Td>
+    <div className="hidden md:block">
 
-                  <Table.Td>
-                    <Text
-                      c="blue"
-                      style={{ cursor: "pointer" }}
-                      onClick={() =>
-                        navigate(`/tutor/students/${student._id}/courses`)
-                      }
-                    >
-                      View Courses
+      <Table highlightOnHover>
+
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Student</Table.Th>
+            <Table.Th>Parent</Table.Th>
+            <Table.Th>Mobile</Table.Th>
+            <Table.Th>Grade</Table.Th>
+            <Table.Th>Status</Table.Th>
+            <Table.Th>Actions</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+
+        <Table.Tbody>
+
+          {students.length === 0 ? (
+
+            <Table.Tr>
+              <Table.Td colSpan={6}>
+                <div className="text-center py-10">
+                  <Text size="sm" c="dimmed">
+                    No students found...
+                  </Text>
+                </div>
+              </Table.Td>
+            </Table.Tr>
+
+          ) : (
+
+            students.map((student) => (
+
+              <Table.Tr key={student._id}>
+
+                <Table.Td>
+                  <Group gap="xs">
+                    <Avatar size="sm">
+                      {student.studentName?.[0]}
+                    </Avatar>
+                    <Text size="sm">
+                      {student.studentName}
                     </Text>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        </div>
+                  </Group>
+                </Table.Td>
 
-        {/* MOBILE CARDS */}
-        <div className="block md:hidden">
-          <Stack>
-            {students.map((student) => (
-              <Card key={student._id} withBorder radius="md">
-                <Group mb="xs">
-                  <Avatar radius="xl">
-                    {student.studentName?.[0]}
-                  </Avatar>
-                  <Text fw={600}>{student.studentName}</Text>
-                </Group>
+                <Table.Td>{student.parentName}</Table.Td>
+                <Table.Td>{student.mobile}</Table.Td>
+                <Table.Td>Grade {student.grade}</Table.Td>
 
-                <Text size="sm"><b>Parent:</b> {student.parentName}</Text>
-                <Text size="sm"><b>Mobile:</b> {student.mobile}</Text>
-                <Text size="sm"><b>Grade:</b> {student.grade}</Text>
-
-                <Group justify="space-between" mt="sm">
+                <Table.Td>
                   <Badge
                     color={student.status === "active" ? "green" : "red"}
-                    variant="light"
                   >
                     {student.status}
                   </Badge>
+                </Table.Td>
 
+                <Table.Td>
                   <Text
+                    size="sm"
                     c="blue"
                     style={{ cursor: "pointer" }}
                     onClick={() =>
@@ -202,24 +185,106 @@ const MyStudents = () => {
                   >
                     View Courses
                   </Text>
-                </Group>
-              </Card>
-            ))}
-          </Stack>
-        </div>
-      </Box>
+                </Table.Td>
 
-      {studentsTotalPages > 1 && (
-        <Group justify="flex-end" mt="md">
-          <Pagination
-            total={studentsTotalPages}
-            value={filters.page}
-            onChange={handlePageChange}
-          />
-        </Group>
+              </Table.Tr>
+
+            ))
+
+          )}
+
+        </Table.Tbody>
+
+      </Table>
+
+    </div>
+
+    {/* ================= MOBILE CARDS ================= */}
+
+    <div className="md:hidden space-y-3">
+
+      {students.length === 0 ? (
+
+        <div className="text-center py-10">
+          <Text size="sm" c="dimmed">
+            No students found...
+          </Text>
+        </div>
+
+      ) : (
+
+        students.map((student) => (
+
+          <Card key={student._id} withBorder radius="md" p="md">
+
+            <Stack gap="xs">
+
+              {/* TOP */}
+              <Group justify="space-between">
+
+                <Group gap="xs">
+                  <Avatar size="sm">
+                    {student.studentName?.[0]}
+                  </Avatar>
+                  <Text fw={600} size="sm">
+                    {student.studentName}
+                  </Text>
+                </Group>
+
+                <Badge
+                  size="sm"
+                  color={student.status === "active" ? "green" : "red"}
+                >
+                  {student.status}
+                </Badge>
+
+              </Group>
+
+              {/* DETAILS */}
+              <div className="text-sm space-y-1">
+                <div><b>Parent:</b> {student.parentName}</div>
+                <div><b>Mobile:</b> {student.mobile}</div>
+                <div><b>Grade:</b> {student.grade}</div>
+              </div>
+
+              {/* ACTION */}
+              <div className="pt-2">
+                <Text
+                  size="sm"
+                  c="blue"
+                  className="cursor-pointer text-center"
+                  onClick={() =>
+                    navigate(`/tutor/students/${student._id}/courses`)
+                  }
+                >
+                  View Courses
+                </Text>
+              </div>
+
+            </Stack>
+
+          </Card>
+
+        ))
+
       )}
-    </Paper>
-  );
+
+    </div>
+
+    {/* PAGINATION */}
+
+    {studentsTotalPages > 1 && (
+      <div className="flex justify-center md:justify-end mt-3">
+        <Pagination
+          total={studentsTotalPages}
+          value={filters.page}
+          onChange={handlePageChange}
+        />
+      </div>
+    )}
+
+  </Paper>
+);
 };
 
 export default MyStudents;

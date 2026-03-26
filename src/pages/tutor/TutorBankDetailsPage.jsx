@@ -82,12 +82,17 @@ color: "green"
 // redirect immediately
 navigate("/tutor/settings", { replace: true });
 
-} catch (err) {
+}catch (err) {
+
+const errorMsg =
+  err?.errors?.length
+    ? err.errors.map(e => e.message).join(", ") // Joi multiple errors
+    : err?.message || "Failed to save bank details";
 
 notifications.show({
-title: "Error",
-message: "Failed to save bank details",
-color: "red"
+  title: "Error",
+  message: errorMsg,
+  color: "red"
 });
 
 } finally {
@@ -98,13 +103,13 @@ setSaving(false);
 
 
 
-if(loadingFetch){
-return (
-<div className="flex justify-center mt-10">
-<Loader/>
-</div>
-);
-}
+// if(loadingFetch){
+// return (
+// <div className="flex justify-center mt-10">
+// <Loader/>
+// </div>
+// );
+// }
 
 
 return(

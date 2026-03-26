@@ -45,6 +45,7 @@ const [blockOpen,setBlockOpen] = useState(false);
 const [selectedSlot,setSelectedSlot] = useState(null);
 const [selectedSession,setSelectedSession] = useState(null);
 
+
 const [form,setForm] = useState({
 studentName:"",
 studentId:"",
@@ -191,30 +192,30 @@ setPreviewOpen(false);
 };
 
 /* SLOT STATUS */
+const getStatus = (date, time) => {
 
-const getStatus=(date,time)=>{
+  const blocked = availability?.find(
+    a => a.time === time && a.status === "blocked"
+  );
 
-const blocked = availability?.find(
-a=>a.time===time && a.status==="blocked"
-);
+  if (blocked) return "blocked";
 
-if(blocked) return "blocked";
+  const s = sessions?.find(
+    x =>
+      dayjs(x.sessionDate).format("YYYY-MM-DD") === date.format("YYYY-MM-DD")
+      && x.startTime === time
+  );
 
-const s = sessions?.find(
-x =>
-dayjs(x.sessionDate).format("YYYY-MM-DD")
-=== date.format("YYYY-MM-DD")
-&& x.startTime===time
-);
+  if (!s) return "available";
 
-if(!s) return "available";
+  // ✅ FIX: return actual status
+  if (s.status === "scheduled") return "scheduled";
+  if (s.status === "completed") return "completed";
+  if (s.status === "cancelled") return "cancelled";
+  if (s.status === "live") return "live";
 
-if(s.status==="cancelled") return "cancelled";
-
-return "booked";
-
+  return "available";
 };
-
 /* BLOCK SLOT */
 
 const toggleBlock = (slot) => {
@@ -341,30 +342,45 @@ if(status==="available"){
 openSchedule(i,time);
 }
 
-if(status==="booked" || status==="cancelled"){
-openPreview(date,time);
+if(
+  status==="scheduled" ||
+  status==="completed" ||
+  status==="cancelled" ||
+  status==="live"
+){
+  openPreview(date,time);
 }
 
 }}
 className={`h-16 rounded-xl flex items-center justify-center text-xs cursor-pointer transition-all
 
 ${status==="available"
-?"bg-gray-50 hover:bg-gray-100 border border-gray-200"
+? "bg-gray-50 hover:bg-gray-100 border border-gray-200"
 
 :status==="blocked"
-?"bg-gray-400 text-white cursor-not-allowed"
+? "bg-gray-400 text-white cursor-not-allowed"
 
 :status==="cancelled"
-?"bg-red-500 text-white"
+? "bg-red-500 text-white"
 
-:"bg-indigo-500 text-white"}
+:status==="completed"
+? "bg-green-500 text-white"
 
+:status==="scheduled"
+? "bg-blue-500 text-white"
+
+:status==="live"
+? "bg-yellow-500 text-black"
+
+: "bg-indigo-500 text-white"}
 `}
 >
 
 {status==="available" && "Schedule"}
-{status==="booked" && "Class"}
+{status==="scheduled" && "Scheduled"}
+{status==="completed" && "Completed"}
 {status==="cancelled" && "Cancelled"}
+{status==="live" && "Live"}
 
 </div>
 
@@ -390,25 +406,35 @@ Legend
 
 <div className="space-y-3 text-sm">
 
-<div className="flex items-center gap-2">
-<div className="w-4 h-4 border rounded"></div>
-Available
-</div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 border rounded"></div>
+    Available
+  </div>
 
-<div className="flex items-center gap-2">
-<div className="w-4 h-4 bg-indigo-500 rounded"></div>
-Booked
-</div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 bg-blue-500 rounded"></div>
+    Scheduled
+  </div>
 
-<div className="flex items-center gap-2">
-<div className="w-4 h-4 bg-gray-400 rounded"></div>
-Blocked
-</div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 bg-green-500 rounded"></div>
+    Completed
+  </div>
 
-<div className="flex items-center gap-2">
-<div className="w-4 h-4 bg-red-500 rounded"></div>
-Cancelled
-</div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 bg-yellow-500 rounded"></div>
+    Live
+  </div>
+
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 bg-gray-400 rounded"></div>
+    Blocked
+  </div>
+
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 bg-red-500 rounded"></div>
+    Cancelled
+  </div>
 
 </div>
 

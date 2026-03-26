@@ -3,7 +3,7 @@
 import {
 Table,
 Text,
-Loader,
+
 Pagination,
 Avatar,
 Group,
@@ -43,7 +43,7 @@ paymentsTotalPages,
 payoutPage,
 payoutTotalPages,
 
-loading
+
 } = useSelector((state)=>state.payments);
 
 const[view,setView] = useState("payments");
@@ -101,96 +101,55 @@ setPayingId(null);
 
 };
 
-if(loading){
+// if(loading){
 
-return(
-<div className="flex justify-center p-10">
-<Loader/>
-</div>
-);
+// return(
+// <div className="flex justify-center p-10">
+// <Loader/>
+// </div>
+// );
 
-}
+// }
 
-return(
+return (
 
 <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
 
 {/* HEADER */}
-
 <div>
-
-<Text fw={700} size="lg">
-Payments
-</Text>
-
+<Text fw={700} size="lg">Payments</Text>
 <Text size="xs" c="dimmed">
 Platform revenue and tutor payouts
 </Text>
-
 </div>
 
-
 {/* STATS */}
-
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
 <Card shadow="sm" p="md">
-
-<Text size="xs" c="dimmed">
-Total Revenue
-</Text>
-
-<Text fw={700} size="lg">
-₹{adminStats?.totalRevenue}
-</Text>
-
+<Text size="xs" c="dimmed">Total Revenue</Text>
+<Text fw={700} size="lg">₹{adminStats?.totalRevenue}</Text>
 </Card>
 
-
 <Card shadow="sm" p="md">
-
-<Text size="xs" c="dimmed">
-Tutor Earnings
-</Text>
-
-<Text fw={700} size="lg">
-₹{adminStats?.totalTutorEarnings}
-</Text>
-
+<Text size="xs" c="dimmed">Tutor Earnings</Text>
+<Text fw={700} size="lg">₹{adminStats?.totalTutorEarnings}</Text>
 </Card>
 
-
 <Card shadow="sm" p="md">
-
-<Text size="xs" c="dimmed">
-Pending Payout
-</Text>
-
-<Text fw={700} size="lg">
-₹{adminStats?.pendingPayout}
-</Text>
-
+<Text size="xs" c="dimmed">Pending Payout</Text>
+<Text fw={700} size="lg">₹{adminStats?.pendingPayout}</Text>
 </Card>
 
-
 <Card shadow="sm" p="md">
-
-<Text size="xs" c="dimmed">
-Platform Profit
-</Text>
-
-<Text fw={700} size="lg">
-₹{adminStats?.platformProfit}
-</Text>
-
+<Text size="xs" c="dimmed">Platform Profit</Text>
+<Text fw={700} size="lg">₹{adminStats?.platformProfit}</Text>
 </Card>
 
 </div>
 
-
 {/* SWITCH */}
-
-<Group justify="space-between">
+<Group justify="space-between" className="flex flex-col sm:flex-row gap-3">
 
 <SegmentedControl
 value={view}
@@ -201,9 +160,7 @@ data={[
 ]}
 />
 
-
-{view==="payouts" &&(
-
+{view==="payouts" && (
 <Select
 size="xs"
 value={statusFilter}
@@ -216,30 +173,23 @@ data={[
 {value:"failed",label:"Failed"}
 ]}
 />
-
 )}
 
 </Group>
 
+{/* ================= DESKTOP TABLE ================= */}
 
-{/* TABLE */}
+<div className="hidden md:block">
 
 <Card shadow="sm" p="md">
 
 <Table highlightOnHover>
 
-{/* -------------------------
-PAYMENTS TABLE
-------------------------- */}
-
-{view==="payments" &&(
-
+{/* PAYMENTS */}
+{view==="payments" && (
 <>
-
 <Table.Thead>
-
 <Table.Tr>
-
 <Table.Th>Parent</Table.Th>
 <Table.Th>Student</Table.Th>
 <Table.Th>Course</Table.Th>
@@ -248,253 +198,224 @@ PAYMENTS TABLE
 <Table.Th>Admin Fee</Table.Th>
 <Table.Th>Date</Table.Th>
 <Table.Th>Action</Table.Th>
-
 </Table.Tr>
-
-
 </Table.Thead>
 
 <Table.Tbody>
 
-{adminPayments.map((p)=>(
-
+{adminPayments.length===0 ? (
+<Table.Tr>
+<Table.Td colSpan={8}>
+<Text ta="center" c="dimmed" py="lg">
+No payments found...
+</Text>
+</Table.Td>
+</Table.Tr>
+) : adminPayments.map((p)=>(
 <Table.Tr key={p._id}>
-
 <Table.Td>
-
 <Group gap="xs">
-
-<Avatar size="sm">
-{p.parentName?.charAt(0)}
-</Avatar>
-
-<Text size="sm">
-{p.parentName}
-</Text>
-
+<Avatar size="sm">{p.parentName?.charAt(0)}</Avatar>
+<Text size="sm">{p.parentName}</Text>
 </Group>
-
 </Table.Td>
 
-<Table.Td>
-{p.studentName}
-</Table.Td>
+<Table.Td>{p.studentName}</Table.Td>
+<Table.Td>{p.subject}</Table.Td>
+<Table.Td>₹{p.amount}</Table.Td>
+<Table.Td><Text c="green" fw={600}>₹{p.tutorEarning}</Text></Table.Td>
+<Table.Td><Text c="blue" fw={600}>₹{p.adminCommission}</Text></Table.Td>
+<Table.Td>{new Date(p.createdAt).toLocaleDateString()}</Table.Td>
 
 <Table.Td>
-{p.subject}
-</Table.Td>
-
-<Table.Td>
-₹{p.amount}
-</Table.Td>
-
-<Table.Td>
-
-<Text c="green" fw={600}>
-₹{p.tutorEarning}
-</Text>
-
-</Table.Td>
-
-<Table.Td>
-
-<Text c="blue" fw={600}>
-₹{p.adminCommission}
-</Text>
-
-</Table.Td>
-
-<Table.Td>
-{new Date(p.createdAt).toLocaleDateString()}
-</Table.Td>
-<Table.Td>
-
-<Button
-size="xs"
-variant="light"
-onClick={()=>openOverview(p,"payment")}
->
-
+<Button size="xs" variant="light"
+onClick={()=>openOverview(p,"payment")}>
 Overview
-
 </Button>
-
 </Table.Td>
-
 
 </Table.Tr>
-
 ))}
-
 </Table.Tbody>
-
 </>
-
 )}
 
-
-
-{/* -------------------------
-PAYOUT TABLE
-------------------------- */}
-
-{view==="payouts" &&(
-
+{/* PAYOUTS */}
+{view==="payouts" && (
 <>
-
 <Table.Thead>
-
 <Table.Tr>
-
 <Table.Th>Tutor</Table.Th>
 <Table.Th>Email</Table.Th>
 <Table.Th>Amount</Table.Th>
 <Table.Th>Method</Table.Th>
 <Table.Th>Status</Table.Th>
 <Table.Th>Action</Table.Th>
-
 </Table.Tr>
-
 </Table.Thead>
-
 
 <Table.Tbody>
 
-{payouts.map((p)=>(
-
+{payouts.length===0 ? (
+<Table.Tr>
+<Table.Td colSpan={6}>
+<Text ta="center" c="dimmed" py="lg">
+No payout requests found...
+</Text>
+</Table.Td>
+</Table.Tr>
+) : payouts.map((p)=>(
 <Table.Tr key={p._id}>
+<Table.Td>{p.tutorId?.fullName}</Table.Td>
+<Table.Td>{p.tutorId?.email}</Table.Td>
+<Table.Td>₹{p.amount}</Table.Td>
+<Table.Td>{p.method}</Table.Td>
 
 <Table.Td>
-{p.tutorId?.fullName}
-</Table.Td>
-
-<Table.Td>
-{p.tutorId?.email}
-</Table.Td>
-
-<Table.Td>
-₹{p.amount}
-</Table.Td>
-
-<Table.Td>
-{p.method}
-</Table.Td>
-
-<Table.Td>
-
-<Badge
-color={
-p.status==="paid"
-? "green"
-: p.status==="processing"
-? "blue"
-: p.status==="failed"
-? "red"
-: "yellow"
-}
->
-
+<Badge color={
+p.status==="paid"?"green":
+p.status==="processing"?"blue":
+p.status==="failed"?"red":"yellow"
+}>
 {p.status}
-
 </Badge>
-
 </Table.Td>
-
 
 <Table.Td>
-
 <Group gap="xs">
-
-<Button
-size="xs"
-variant="light"
-onClick={()=>openOverview(p,"payout")}
->
-
+<Button size="xs" variant="light"
+onClick={()=>openOverview(p,"payout")}>
 Overview
-
 </Button>
 
-<Button
-size="xs"
-color="blue" // 👈 main fix
+<Button size="xs" color="blue"
 loading={payingId===p._id}
-disabled={
-p.status==="paid" ||
-p.status==="processing"
-}
-onClick={()=>handlePayNow(p._id)}
->
-
-{p.status==="paid"
-? "Paid"
-: p.status==="processing"
-? "Processing"
-: "Pay Now"}
-
+disabled={p.status==="paid"||p.status==="processing"}
+onClick={()=>handlePayNow(p._id)}>
+{p.status==="paid"?"Paid":
+p.status==="processing"?"Processing":"Pay Now"}
 </Button>
-
 </Group>
-
 </Table.Td>
-
 
 </Table.Tr>
-
 ))}
-
 </Table.Tbody>
-
 </>
-
 )}
 
 </Table>
 
 </Card>
 
+</div>
+
+{/* ================= MOBILE CARDS ================= */}
+
+<div className="md:hidden space-y-3">
+
+{/* PAYMENTS */}
+{view==="payments" && (
+adminPayments.length===0 ? (
+<Text ta="center" c="dimmed">No payments found...</Text>
+) : adminPayments.map((p)=>(
+<Card key={p._id} p="md">
+<Stack gap="xs">
+
+<Group justify="space-between">
+<Text fw={500}>{p.studentName}</Text>
+<Text fw={600}>₹{p.amount}</Text>
+</Group>
+
+<Text size="sm"><b>Parent:</b> {p.parentName}</Text>
+<Text size="sm"><b>Course:</b> {p.subject}</Text>
+
+<Text size="sm">
+Tutor: <Text span c="green">₹{p.tutorEarning}</Text> |
+ Admin: <Text span c="blue">₹{p.adminCommission}</Text>
+</Text>
+
+<Button fullWidth size="xs" variant="light"
+onClick={()=>openOverview(p,"payment")}>
+Overview
+</Button>
+
+</Stack>
+</Card>
+))
+)}
+
+{/* PAYOUTS */}
+{view==="payouts" && (
+payouts.length===0 ? (
+<Text ta="center" c="dimmed">No payouts found...</Text>
+) : payouts.map((p)=>(
+<Card key={p._id} p="md">
+<Stack gap="xs">
+
+<Group justify="space-between">
+<Text fw={500}>{p.tutorId?.fullName}</Text>
+<Badge color={
+p.status==="paid"?"green":
+p.status==="processing"?"blue":
+p.status==="failed"?"red":"yellow"
+}>
+{p.status}
+</Badge>
+</Group>
+
+<Text size="sm">{p.tutorId?.email}</Text>
+<Text size="sm">₹{p.amount}</Text>
+
+<Button fullWidth size="xs" variant="light"
+onClick={()=>openOverview(p,"payout")}>
+Overview
+</Button>
+
+<Button fullWidth size="xs" color="blue"
+loading={payingId===p._id}
+disabled={p.status==="paid"||p.status==="processing"}
+onClick={()=>handlePayNow(p._id)}>
+Pay Now
+</Button>
+
+</Stack>
+</Card>
+))
+)}
+
+</div>
 
 {/* PAGINATION */}
-
-{view==="payments" && paymentsTotalPages>1 &&(
-
-<div className="flex justify-end">
-
+{view==="payments" && paymentsTotalPages>1 && (
+<div className="flex justify-center md:justify-end">
 <Pagination
 value={paymentsPage}
 onChange={(page)=>dispatch(fetchAdminPayments(page))}
 total={paymentsTotalPages}
 />
-
 </div>
-
 )}
 
-
-{view==="payouts" && payoutTotalPages>1 &&(
-
-<div className="flex justify-end">
-
+{view==="payouts" && payoutTotalPages>1 && (
+<div className="flex justify-center md:justify-end">
 <Pagination
 value={payoutPage}
-onChange={(page)=>dispatch(fetchAdminPayouts({
-page,
-status:statusFilter
-}))}
+onChange={(page)=>dispatch(fetchAdminPayouts({page,status:statusFilter}))}
 total={payoutTotalPages}
 />
-
 </div>
-
 )}
+
+{/* MODAL (only grid fix) */}
 <Modal
-opened={overviewOpened}
-onClose={()=>setOverviewOpened(false)}
-title="Overview"
-size="lg"
+  opened={overviewOpened}
+  onClose={()=>setOverviewOpened(false)}
+  title="Overview"
+  size="lg"
 >
 
-{/* PAYMENT OVERVIEW */}
+{/* ================= PAYMENT OVERVIEW ================= */}
 
 {selectedItem && overviewType==="payment" && (
 
@@ -526,117 +447,58 @@ Parent
 
 <Grid>
 
-<Grid.Col span={6}>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder>
-
-<Text fw={600}>
-Student
-</Text>
-
+<Text fw={600}>Student</Text>
 <Divider my="xs"/>
-
-<Text>
-{selectedItem.studentName}
-</Text>
-
+<Text>{selectedItem.studentName}</Text>
 </Card>
-
 </Grid.Col>
 
-
-<Grid.Col span={6}>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder>
-
-<Text fw={600}>
-Course
-</Text>
-
+<Text fw={600}>Course</Text>
 <Divider my="xs"/>
-
-<Text>
-{selectedItem.subject}
-</Text>
-
+<Text>{selectedItem.subject}</Text>
 </Card>
-
 </Grid.Col>
 
-
-<Grid.Col span={6}>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder>
-
-<Text fw={600}>
-Amount Paid
-</Text>
-
+<Text fw={600}>Amount Paid</Text>
 <Divider my="xs"/>
-
-<Text fw={600}>
-₹{selectedItem.amount}
-</Text>
-
+<Text fw={600}>₹{selectedItem.amount}</Text>
 </Card>
-
 </Grid.Col>
 
-
-<Grid.Col span={6}>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder>
-
-<Text fw={600}>
-Tutor Earnings
-</Text>
-
+<Text fw={600}>Tutor Earnings</Text>
 <Divider my="xs"/>
-
 <Text c="green" fw={600}>
 ₹{selectedItem.tutorEarning}
 </Text>
-
 </Card>
-
 </Grid.Col>
 
-
-<Grid.Col span={6}>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder>
-
-<Text fw={600}>
-Admin Commission
-</Text>
-
+<Text fw={600}>Admin Commission</Text>
 <Divider my="xs"/>
-
 <Text c="blue" fw={600}>
 ₹{selectedItem.adminCommission}
 </Text>
-
 </Card>
-
 </Grid.Col>
 
-
-<Grid.Col span={6}>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder>
-
-<Text fw={600}>
-Payment Date
-</Text>
-
+<Text fw={600}>Payment Date</Text>
 <Divider my="xs"/>
-
 <Text>
 {new Date(selectedItem.createdAt).toLocaleString()}
 </Text>
-
 </Card>
-
 </Grid.Col>
 
 </Grid>
@@ -645,8 +507,7 @@ Payment Date
 
 )}
 
-
-{/* PAYOUT OVERVIEW */}
+{/* ================= PAYOUT OVERVIEW ================= */}
 
 {selectedItem && overviewType==="payout" && (
 
@@ -654,106 +515,58 @@ Payment Date
 
 <Card withBorder>
 
-<Text fw={600}>
-Tutor
-</Text>
-
+<Text fw={600}>Tutor</Text>
 <Divider my="xs"/>
-
 <Text>
 {selectedItem.tutorId?.fullName}
 </Text>
 
 </Card>
 
-
 <Grid>
 
-<Grid.Col span={6}>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder>
-
-<Text fw={600}>
-Amount
-</Text>
-
+<Text fw={600}>Amount</Text>
 <Divider my="xs"/>
-
 <Text fw={600}>
 ₹{selectedItem.amount}
 </Text>
-
 </Card>
-
 </Grid.Col>
 
-
-<Grid.Col span={6}>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder>
-
-<Text fw={600}>
-Method
-</Text>
-
+<Text fw={600}>Method</Text>
 <Divider my="xs"/>
-
-<Text>
-{selectedItem.method}
-</Text>
-
+<Text>{selectedItem.method}</Text>
 </Card>
-
 </Grid.Col>
 
-
-<Grid.Col span={6}>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder>
-
-<Text fw={600}>
-Status
-</Text>
-
+<Text fw={600}>Status</Text>
 <Divider my="xs"/>
-
 <Badge
 color={
-selectedItem.status==="paid"
-? "green"
-: selectedItem.status==="processing"
-? "blue"
-: selectedItem.status==="failed"
-? "red"
-: "yellow"
+selectedItem.status==="paid"?"green":
+selectedItem.status==="processing"?"blue":
+selectedItem.status==="failed"?"red":"yellow"
 }
 >
-
 {selectedItem.status}
-
 </Badge>
-
 </Card>
-
 </Grid.Col>
 
-
-<Grid.Col span={6}>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder>
-
-<Text fw={600}>
-Requested Date
-</Text>
-
+<Text fw={600}>Requested Date</Text>
 <Divider my="xs"/>
-
 <Text>
 {new Date(selectedItem.createdAt).toLocaleString()}
 </Text>
-
 </Card>
-
 </Grid.Col>
 
 </Grid>

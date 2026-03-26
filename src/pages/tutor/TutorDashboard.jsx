@@ -35,13 +35,13 @@ const TutorDashboard = () => {
 
   }, [dispatch]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader color="teal" />
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center py-20">
+  //       <Loader color="teal" />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-10 py-6 bg-white min-h-screen">

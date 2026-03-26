@@ -1,7 +1,7 @@
 
 
 import {
-  Loader,
+ 
   Avatar,
   Button,
   TextInput,
@@ -10,7 +10,7 @@ import {
   Group,
   Pagination,
   Box,
-  LoadingOverlay,
+  
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
@@ -100,7 +100,7 @@ const TutorCourses = () => {
       {/* ================= DESKTOP TABLE ================= */}
       <div className="hidden md:block mt-6">
         <Box pos="relative" style={{ minHeight: 300 }}>
-          <LoadingOverlay visible={loading} />
+        
 
           <Table striped highlightOnHover>
             <Table.Thead>

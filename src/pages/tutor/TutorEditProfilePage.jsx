@@ -102,7 +102,7 @@ await dispatch(updateTutorProfile(formData)).unwrap();
 
 notifications.show({
 title:"Success",
-message:"Profile updated successfully",
+message:"Profile updation submitted successfully",
 color:"green"
 });
 
@@ -110,10 +110,15 @@ navigate("/tutor/settings",{replace:true});
 
 }catch(err){
 
+const errorMsg =
+  err?.errors?.length
+    ? err.errors.map(e => e.message).join(", ")
+    : err?.message || "Failed to update profile";
+
 notifications.show({
-title:"Error",
-message:"Failed to update profile",
-color:"red"
+  title:"Error",
+  message:errorMsg,
+  color:"red"
 });
 
 }
@@ -122,15 +127,15 @@ color:"red"
 
 
 
-if(loadingProfile){
+// if(loadingProfile){
 
-return(
-<div className="flex justify-center mt-20">
-<Loader size="lg"/>
-</div>
-);
+// return(
+// <div className="flex justify-center mt-20">
+// <Loader size="lg"/>
+// </div>
+// );
 
-}
+// }
 
 
 

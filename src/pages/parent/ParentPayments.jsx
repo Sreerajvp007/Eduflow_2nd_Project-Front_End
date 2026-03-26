@@ -3,7 +3,6 @@ import {
   Card,
   Text,
   Avatar,
-  Loader,
   Pagination,
   Badge,
   TextInput,
@@ -22,7 +21,7 @@ const ParentPayments = () => {
 
   const dispatch = useDispatch();
 
-  const { payments, loading, page, totalPages } =
+  const { payments, page, totalPages } =
     useSelector((state) => state.parentPayments);
 
   const { activeStudent } =
@@ -117,19 +116,15 @@ const ParentPayments = () => {
 
 <div className="mt-6 space-y-4">
 
-  {!loading && (
+  {(
     <Text size="sm" c="dimmed" mb="sm">
       {payments.length} payment{payments.length !== 1 && "s"} found
     </Text>
   )}
 
-        {loading && (
-          <div className="flex justify-center">
-            <Loader color="indigo" />
-          </div>
-        )}
+        
 
-        {!loading && payments.length === 0 && (
+        {payments.length === 0 && (
 
           <Card radius="xl" shadow="sm" p="lg" withBorder>
 

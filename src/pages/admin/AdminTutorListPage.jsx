@@ -11,7 +11,7 @@ import {
   TextInput,
   Card,
   Pagination,
-  LoadingOverlay,
+ 
   Box,
   SegmentedControl,
   Modal,
@@ -96,170 +96,92 @@ setFilters(prev=>({
 page:value
 }));
 };
-
-return(
+return (
 
 <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
 
 {/* HEADER */}
-
 <div>
-
-<Text fw={700} size="lg">
-Tutor Management
-</Text>
-
+<Text fw={700} size="lg">Tutor Management</Text>
 <Text size="xs" c="dimmed">
 Manage tutors, view profiles and review profile edit requests
 </Text>
-
 </div>
 
-
-{/* SWITCH BUTTONS */}
+{/* SWITCH */}
 <div className="flex justify-start">
-
 <SegmentedControl
-  value={activeTab}
-  onChange={(value) => {
-    setActiveTab(value);
-    setFilters((prev) => ({
-      ...prev,
-      page: 1,
-    }));
-  }}
-  data={[
-    { label: "Tutors", value: "tutors" },
-    { label: "Profile Requests", value: "requests" },
-  ]}
-  radius="md" // 👈 same feel as your Students page
-  size="sm"   // 👈 balanced (NOT xs, NOT lg)
-  className="bg-gray-100 p-1 rounded-md"
-  styles={{
-    indicator: {
-      backgroundColor: "#ffffff",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-      borderRadius: "6px"
-    },
-    label: {
-      fontWeight: 500
-      // ❌ no custom padding → keeps natural Mantine spacing
-    }
-  }}
+value={activeTab}
+onChange={(value)=>{
+setActiveTab(value);
+setFilters(prev=>({...prev,page:1}));
+}}
+data={[
+{label:"Tutors",value:"tutors"},
+{label:"Profile Requests",value:"requests"},
+]}
 />
-
 </div>
 
-
-{/* ================= PROFILE EDIT REQUEST TABLE ================= */}
+{/* ================= REQUESTS ================= */}
 
 {activeTab==="requests" && (
 
 <>
 
-<Box pos="relative" style={{minHeight:300}}>
+{/* DESKTOP */}
+<div className="hidden md:block">
 
-<LoadingOverlay visible={loading} overlayProps={{blur:2}}/>
+<Box pos="relative" style={{minHeight:300}}>
 
 <Table highlightOnHover>
 
 <Table.Thead>
-
 <Table.Tr>
-
 <Table.Th>Tutor</Table.Th>
 <Table.Th>Requested Name</Table.Th>
 <Table.Th>Experience</Table.Th>
 <Table.Th>Monthly Fee</Table.Th>
 <Table.Th ta="right">Actions</Table.Th>
-
 </Table.Tr>
-
 </Table.Thead>
 
 <Table.Tbody>
 
 {!loading && editRequests.length===0 &&(
-
 <Table.Tr>
-
 <Table.Td colSpan={5}>
-
 <Text ta="center" c="dimmed" py="lg">
 No profile edit requests
 </Text>
-
 </Table.Td>
-
 </Table.Tr>
-
 )}
 
 {editRequests.map((req)=>(
-
 <Table.Tr key={req._id}>
-
 <Table.Td>
-
 <Group>
-
 <Avatar src={req.tutorId?.profileImage}>
 {req.tutorId?.fullName?.charAt(0)}
 </Avatar>
-
-<Text size="sm">
-{req.tutorId?.fullName}
-</Text>
-
+<Text size="sm">{req.tutorId?.fullName}</Text>
 </Group>
-
 </Table.Td>
 
-<Table.Td>
-{req.fullName}
-</Table.Td>
-
-<Table.Td>
-{req.teachingExperience} yrs
-</Table.Td>
-
-<Table.Td>
-₹{req.monthlyFee}
-</Table.Td>
+<Table.Td>{req.fullName}</Table.Td>
+<Table.Td>{req.teachingExperience} yrs</Table.Td>
+<Table.Td>₹{req.monthlyFee}</Table.Td>
 
 <Table.Td ta="right">
-
 <Group justify="flex-end">
-<Button
-size="xs"
-variant="light"
-onClick={()=>openRequestModal(req)}
->
-View
-</Button>
-<Button
-size="xs"
-color="green"
-onClick={()=>dispatch(approveProfileEdit(req._id))}
->
-Approve
-</Button>
-
-<Button
-size="xs"
-color="red"
-variant="light"
-onClick={()=>dispatch(rejectProfileEdit(req._id))}
->
-Reject
-</Button>
-
+<Button size="xs" variant="light" onClick={()=>openRequestModal(req)}>View</Button>
+<Button size="xs" color="green" onClick={()=>dispatch(approveProfileEdit(req._id))}>Approve</Button>
+<Button size="xs" color="red" variant="light" onClick={()=>dispatch(rejectProfileEdit(req._id))}>Reject</Button>
 </Group>
-
 </Table.Td>
 
 </Table.Tr>
-
 ))}
 
 </Table.Tbody>
@@ -268,39 +190,61 @@ Reject
 
 </Box>
 
+</div>
 
-{/* REQUEST PAGINATION */}
+{/* MOBILE */}
+<div className="md:hidden space-y-3">
 
-{requestPagination?.pages>1 &&(
+{editRequests.length===0 ? (
+<Text ta="center" c="dimmed">No profile edit requests</Text>
+) : editRequests.map((req)=>(
+<Card key={req._id} p="md">
 
-<div className="flex justify-end mt-4">
+<Stack gap="xs">
 
-<Pagination
-value={requestsPage}
-onChange={setRequestsPage}
-total={requestPagination.pages}
-/>
+<Group>
+<Avatar size="sm" src={req.tutorId?.profileImage}>
+{req.tutorId?.fullName?.charAt(0)}
+</Avatar>
+<Text fw={500}>{req.tutorId?.fullName}</Text>
+</Group>
+
+<Text size="sm"><b>Requested:</b> {req.fullName}</Text>
+<Text size="sm"><b>Experience:</b> {req.teachingExperience} yrs</Text>
+<Text size="sm"><b>Fee:</b> ₹{req.monthlyFee}</Text>
+
+<Group grow>
+<Button size="xs" variant="light" onClick={()=>openRequestModal(req)}>View</Button>
+<Button size="xs" color="green" onClick={()=>dispatch(approveProfileEdit(req._id))}>Approve</Button>
+<Button size="xs" color="red" variant="light" onClick={()=>dispatch(rejectProfileEdit(req._id))}>Reject</Button>
+</Group>
+
+</Stack>
+
+</Card>
+))}
 
 </div>
 
+{/* PAGINATION */}
+{requestPagination?.pages>1 &&(
+<div className="flex justify-center md:justify-end mt-4">
+<Pagination value={requestsPage} onChange={setRequestsPage} total={requestPagination.pages}/>
+</div>
 )}
 
 </>
 
 )}
 
-
-
-{/* ================= TUTOR LIST ================= */}
+{/* ================= TUTORS ================= */}
 
 {activeTab==="tutors" && (
 
 <>
 
 {/* FILTERS */}
-
 <div className="flex flex-col sm:flex-row gap-3">
-
 <TextInput
 placeholder="Search by Tutor name"
 leftSection={<IconSearch size={14}/>}
@@ -320,134 +264,75 @@ data={[
 onChange={handleStatusChange}
 className="w-full sm:w-48"
 />
-
 </div>
 
-
-{/* ================= DESKTOP TABLE ================= */}
-
+{/* DESKTOP TABLE */}
 <div className="hidden md:block">
-
 <Box pos="relative" style={{minHeight:350}}>
-
-<LoadingOverlay visible={loading} overlayProps={{blur:2}}/>
 
 <Table highlightOnHover>
 
 <Table.Thead>
-
 <Table.Tr>
-
 <Table.Th>Tutor</Table.Th>
 <Table.Th>mobile</Table.Th>
 <Table.Th>Subjects</Table.Th>
 <Table.Th>Monthly Fee</Table.Th>
 <Table.Th>Status</Table.Th>
 <Table.Th ta="right">Actions</Table.Th>
-
 </Table.Tr>
-
 </Table.Thead>
 
 <Table.Tbody>
 
 {!loading && list.length===0 &&(
-
 <Table.Tr>
-
 <Table.Td colSpan={6}>
-
-<Text ta="center" c="dimmed" py="lg">
-No tutors found
-</Text>
-
+<Text ta="center" c="dimmed" py="lg">No tutors found</Text>
 </Table.Td>
-
 </Table.Tr>
-
 )}
 
 {list.map((tutor)=>(
-
 <Table.Tr key={tutor._id}>
-
 <Table.Td>
-
 <Group>
-
 <Avatar radius="xl" src={tutor.profileImage}>
 {tutor.fullName?.charAt(0)}
 </Avatar>
-
-<Text size="sm">
-{tutor.fullName}
-</Text>
-
+<Text size="sm">{tutor.fullName}</Text>
 </Group>
-
 </Table.Td>
 
-<Table.Td>
-<Text size="sm">
-{tutor.mobile || "-"}
-</Text>
-</Table.Td>
+<Table.Td>{tutor.mobile || "-"}</Table.Td>
 
 <Table.Td>
-
 <Group gap={6} wrap="wrap">
-
-{tutor.subjects?.slice(0,3).map((subject)=>(
-<Badge key={subject} size="sm" variant="light">
-{subject}
-</Badge>
+{tutor.subjects?.slice(0,3).map((s)=>(
+<Badge key={s} size="sm" variant="light">{s}</Badge>
 ))}
-
 </Group>
-
 </Table.Td>
 
-<Table.Td>
-
-<Text size="sm">
-₹{tutor.monthlyFee || 0}
-</Text>
-
-</Table.Td>
+<Table.Td>₹{tutor.monthlyFee || 0}</Table.Td>
 
 <Table.Td>
-
-<Badge
-size="sm"
-color={
-tutor.status==="active"
-?"green"
-:tutor.status==="pending"
-?"yellow"
-:"red"
-}
->
-
+<Badge color={
+tutor.status==="active"?"green":
+tutor.status==="pending"?"yellow":"red"
+}>
 {tutor.status}
-
 </Badge>
-
 </Table.Td>
 
 <Table.Td ta="right">
-
-<Button
-variant="subtle"
-size="xs"
-onClick={()=>navigate(`/admin/tutors/${tutor._id}`)}
->
+<Button size="xs" variant="subtle"
+onClick={()=>navigate(`/admin/tutors/${tutor._id}`)}>
 View
 </Button>
-
 </Table.Td>
 
 </Table.Tr>
-
 ))}
 
 </Table.Tbody>
@@ -455,195 +340,98 @@ View
 </Table>
 
 </Box>
-
 </div>
 
-
-{/* ================= MOBILE VIEW ================= */}
-
+{/* MOBILE */}
 <div className="md:hidden space-y-3">
 
 {list.map((tutor)=>(
+<Card key={tutor._id} p="md">
 
-<Card key={tutor._id} shadow="sm" radius="md" p="md">
-
-<Stack gap={6}>
+<Stack gap="xs">
 
 <Group>
-
-<Avatar radius="xl" src={tutor.profileImage}>
+<Avatar size="sm" src={tutor.profileImage}>
 {tutor.fullName?.charAt(0)}
 </Avatar>
-
-<Text fw={500} size="sm">
-{tutor.fullName}
-</Text>
-
+<Text fw={500}>{tutor.fullName}</Text>
 </Group>
 
 <Group gap={6} wrap="wrap">
-
-{tutor.subjects?.slice(0,3).map((subject)=>(
-<Badge key={subject} size="sm" variant="light">
-{subject}
-</Badge>
+{tutor.subjects?.slice(0,3).map((s)=>(
+<Badge key={s} size="sm" variant="light">{s}</Badge>
 ))}
-
 </Group>
 
 <Group justify="space-between">
-
-<Badge
-size="sm"
-color={
-tutor.status==="active"
-?"green"
-:tutor.status==="pending"
-?"yellow"
-:"red"
-}
->
-
+<Badge color={
+tutor.status==="active"?"green":
+tutor.status==="pending"?"yellow":"red"
+}>
 {tutor.status}
-
 </Badge>
 
-<Button
-variant="light"
-size="xs"
-onClick={()=>navigate(`/admin/tutors/${tutor._id}`)}
->
+<Button size="xs" variant="light"
+onClick={()=>navigate(`/admin/tutors/${tutor._id}`)}>
 View
 </Button>
-
 </Group>
 
 </Stack>
 
 </Card>
-
 ))}
 
 </div>
 
-
-{/* TUTOR PAGINATION */}
-
+{/* PAGINATION */}
 {!loading && pagination?.pages>1 &&(
-
-<div className="flex justify-end mt-4">
-
-<Pagination
-value={filters.page}
-onChange={handlePageChange}
-total={pagination.pages}
-/>
-
+<div className="flex justify-center md:justify-end mt-4">
+<Pagination value={filters.page} onChange={handlePageChange} total={pagination.pages}/>
 </div>
-
 )}
 
 </>
 
 )}
-<Modal
-opened={modalOpen}
-onClose={()=>setModalOpen(false)}
-title="Profile Update Request"
-size="lg"
-centered
->
+
+{/* ================= MODAL ================= */}
+
+<Modal opened={modalOpen} onClose={()=>setModalOpen(false)} size="lg">
 
 {selectedRequest && (
 
 <Stack>
 
-<Text fw={600}>Profile Changes</Text>
-
 <Grid>
 
-<Grid.Col span={6}>
-
-<Text size="sm" c="dimmed">
-Current Profile
-</Text>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder p="sm">
-
-<Text size="sm">
-Name: {selectedRequest.tutorId?.fullName}
-</Text>
-
-<Text size="sm">
-Mobile: {selectedRequest.tutorId?.mobile}
-</Text>
-
-<Text size="sm">
-Experience: {selectedRequest.tutorId?.teachingExperience} yrs
-</Text>
-
-<Text size="sm">
-Fee: ₹{selectedRequest.tutorId?.monthlyFee}
-</Text>
-
+<Text size="sm" fw={600}>Current</Text>
+<Text size="sm">Name: {selectedRequest.tutorId?.fullName}</Text>
+<Text size="sm">Mobile: {selectedRequest.tutorId?.mobile}</Text>
 </Card>
-
 </Grid.Col>
 
-
-<Grid.Col span={6}>
-
-<Text size="sm" c="dimmed">
-Requested Changes
-</Text>
-
+<Grid.Col span={{ base:12, sm:6 }}>
 <Card withBorder p="sm">
-
-<Text size="sm">
-Name: {selectedRequest.fullName}
-</Text>
-
-<Text size="sm">
-Mobile: {selectedRequest.mobile}
-</Text>
-
-<Text size="sm">
-Experience: {selectedRequest.teachingExperience} yrs
-</Text>
-
-<Text size="sm">
-Fee: ₹{selectedRequest.monthlyFee}
-</Text>
-
+<Text size="sm" fw={600}>Requested</Text>
+<Text size="sm">Name: {selectedRequest.fullName}</Text>
+<Text size="sm">Mobile: {selectedRequest.mobile}</Text>
 </Card>
-
 </Grid.Col>
 
 </Grid>
 
-<Group justify="flex-end" mt="md">
-
-<Button
-color="red"
-variant="light"
-onClick={()=>{
-dispatch(rejectProfileEdit(selectedRequest._id));
-setModalOpen(false);
-}}
->
+<Group justify="flex-end">
+<Button color="red" variant="light"
+onClick={()=>dispatch(rejectProfileEdit(selectedRequest._id))}>
 Reject
 </Button>
-
-<Button
-color="green"
-onClick={()=>{
-dispatch(approveProfileEdit(selectedRequest._id));
-setModalOpen(false);
-}}
->
+<Button color="green"
+onClick={()=>dispatch(approveProfileEdit(selectedRequest._id))}>
 Approve
 </Button>
-
 </Group>
 
 </Stack>
@@ -651,6 +439,7 @@ Approve
 )}
 
 </Modal>
+
 </div>
 
 );
